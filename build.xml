@@ -1,0 +1,238 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="org.dynalang.mop" basedir=".">
+<!--
+   Copyright 2009 Attila Szegedi
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<!-- $Id: build.xml 74 2007-04-02 09:34:33Z szegedia $ -->
+	<property name="project.name" value="JVM Dynamic Languages Invocation Resolver"/>
+	<property name="artifact.name" value="dynalang-invoke"/>
+	<property name="revision" value="0.1"/>
+	<property name="build.dir" location="build"/>
+
+        <property name="ivy.settings.dir" value="../ivy" />
+        <property file="${ivy.settings.dir}/ivysettings.properties" />
+        <property file="build.properties" />
+        <ivy:settings file="${ivy.settings.dir}/ivysettings.xml" />
+                                        
+        <property name="openjdk.dir" location="${user.home}/Documents/projects/openjdk/bsd-port/build/bsd-i586/j2sdk-image"/>
+        <property name="backport.dir" location="${user.home}/Documents/workspace/invokedynamic-backport"/>
+        <property file="build.properties" />
+        <property name="openjdk.rt.jar" location="${openjdk.dir}/jre/lib/rt.jar"/>
+        <property name="backport.agent.jar" location="${backport.dir}/lib/jsr292-backport.jar"/>
+        <available property="openjdk.available" file="${openjdk.rt.jar}"/>
+        <available property="backport.available" file="${backport.agent.jar}"/>
+
+	<target name="clean">
+		<mkdir dir="${build.dir}"/>
+		<delete dir="${build.dir}"/>
+	</target>
+
+        <target name="resolve">
+            <ivy:retrieve pattern="build/lib/[conf]/[artifact].[ext]"/>
+        </target>
+
+	<path id="compile.classpath">
+        <fileset dir="build/lib/default"/>
+	</path>
+                                                            
+    <target name="checkOpenJDK" unless="openjdk.available">
+        <fail message="Open JDK is not available under ${openjdk.dir}. Make sure you set the openjdk.dir variable correctly in build.properties"/>
+    </target>
+        
+	<target name="compile" depends="resolve,checkOpenJDK">
+        <mkdir dir="build/lib/default"/>
+		<property name="classes.dir" location="${build.dir}/classes"/>
+		<mkdir dir="${classes.dir}"/>
+		<javac srcdir="src" destdir="${classes.dir}" deprecation="off" 
+	               debug="on" optimize="off" target="1.5" source="1.5"
+	               classpathref="compile.classpath" bootclasspath="${openjdk.rt.jar}"/>
+		<copy toDir="${classes.dir}">
+			<fileset dir="src"
+	            excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html,overview.html"/>
+		</copy>
+	</target>
+	
+	<target name="jar" depends="compile">
+		<property name="jarfile" location="build/${artifact.name}-${revision}.jar"/>
+		<jar destfile="${jarfile}" basedir="${classes.dir}">
+	        	<manifest>
+	        		<attribute name="Implementation-Vendor" value="Attila Szegedi"/>
+	        		<attribute name="Implementation-Version" value="${revision}"/>
+	        		<attribute name="Implementation-Title" value="${project.name}"/>
+	        		<attribute name="Implementation-URL" value="http://sourceforge.net/projects/dynalang"/>
+	            </manifest>
+		</jar>
+	</target>
+
+        <target name="publish" depends="jar">
+                <property name="revision" value="${revision}"/>
+                <delete file="${build.dir}/ivy-${revision}.xml"/>
+                <ivy:publish artifactspattern="${build.dir}/[artifact]-[revision].[ext]" 
+                        resolver="projects"
+                        pubrevision="${revision}" 
+                        status="release"
+                        overwrite="true"
+                />
+        </target>
+	
+	<target depends="" name="doc">
+		<mkdir dir="${build.dir}/doc/javadoc"/>
+		<delete includeEmptyDirs="yes">
+			<fileset dir="${build.dir}/doc/javadoc" includes="**/*" />
+		</delete>
+		<javadoc author="true"
+	                destdir="${build.dir}/doc/javadoc"
+	                doctitle="${project.name} ${revision}"
+	                packagenames="org.dynalang.*"
+	                sourcepath="src"
+	                version="true"
+	                windowtitle="${project.name} ${revision} API"
+			overview="src/overview.html"
+	                use="true">
+		</javadoc>
+		<copy todir="${build.dir}/doc">
+			<fileset dir="src/doc" includes="**/*"/>
+		</copy>
+	</target>
+
+	<target name="coverage-instrument" depends="compile">
+		<property name="coverage.dir" location="${build.dir}/coverage"/>
+		<property name="coverage.classes.dir" location="${build.dir}/coverage/classes"/>
+		<mkdir dir="${coverage.classes.dir}"/>
+		<path id="emma.lib">
+			<pathelement location="build/lib/test/emma.jar" />
+			<pathelement location="build/lib/test/emma_ant.jar" />
+		</path>
+		<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+		<property name="coverage.instrumentationfile" location="${coverage.dir}/instrumentation"/>
+		<emma enabled="true">
+			<instr 
+	        instrpath="${classes.dir}" outdir="${coverage.classes.dir}" 
+	        outfile="${coverage.instrumentationfile}" mode="copy"/>
+		</emma>
+		<copy todir="${coverage.classes.dir}">
+			<fileset dir="src" excludes="**/*.java"/>
+		</copy>
+		<copy todir="${coverage.classes.dir}">
+			<fileset dir="${classes.dir}"/>
+		</copy>
+		<property name="coverage.outfile" location="${coverage.dir}/coverage"/>
+	</target>
+
+	<target name="test-compile" depends="compile">
+		<property name="test.classes.dir" location="${build.dir}/test/classes"/>
+		<mkdir dir="${test.classes.dir}"/>
+		<javac srcdir="testsrc" destdir="${test.classes.dir}" deprecation="off" 
+	               debug="on" optimize="off" target="1.5" source="1.5" bootclasspath="${openjdk.rt.jar}">
+			<classpath>
+				<pathelement path="${classes.dir}" />
+				<pathelement path="build/lib/test/junit.jar" />
+                <pathelement path="build/lib/test/asm-all.jar" />
+			</classpath>
+		</javac>
+		<copy toDir="${test.classes.dir}">
+			<fileset dir="testsrc"
+	            excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html"/>
+		</copy>
+	</target>
+
+    <target name="test-run-openjdk" depends="test-compile, coverage-instrument">
+        <junit printsummary="on" fork="true" forkmode="once" 
+            showoutput="true" haltonerror="false" haltonfailure="false"
+            jvm="${openjdk.dir}/jre/bin/java">
+            <bootclasspath>
+                <pathelement path="openjdk.rt.jar"/>
+            </bootclasspath>
+            <jvmarg value="-XX:+EnableInvokeDynamic"/>
+            <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
+            <classpath>
+                <pathelement path="${coverage.classes.dir}" />
+                <pathelement path="${test.classes.dir}" />
+                <pathelement path="build/lib/test/emma.jar"/>
+                <pathelement path="build/lib/test/junit.jar"/>
+                <pathelement path="build/lib/test/asm-all.jar" />
+            </classpath>
+            <batchtest todir="build/test">
+                <fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class"/>
+            </batchtest>
+            <formatter type="plain" usefile="false" />
+            <formatter type="xml" extension=".openjdk.xml"/>
+        </junit>
+    </target>
+    
+    <target name="test-run-backport" if="backport.available" depends="test-compile, coverage-instrument">
+        <junit printsummary="on" fork="true" forkmode="once" 
+            showoutput="true" haltonerror="false" haltonfailure="false">
+            <jvmarg value="-javaagent:${backport.agent.jar}"/>
+            <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
+            <classpath>
+                <pathelement path="${coverage.classes.dir}" />
+                <pathelement path="${test.classes.dir}" />
+                <pathelement path="build/lib/test/emma.jar"/>
+                <pathelement path="build/lib/test/junit.jar"/>
+                <pathelement path="build/lib/test/asm-all.jar" />
+            </classpath>
+            <batchtest todir="build/test">
+                <fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class"/>
+            </batchtest>
+            <formatter type="plain" usefile="false" />
+            <formatter type="xml" extension=".backport.xml"/>
+        </junit>
+	</target>
+
+    <target name="test-run" depends="test-run-openjdk, test-run-backport"/>
+    
+	<target name="test" depends="test-run">
+        <mkdir dir="build/test/report"/>
+        <junitreport todir="build/test">
+            <fileset dir="build/test" includes="TEST-*.xml"/>
+            <report todir="build/test/report"/>
+        </junitreport>
+		<property name="coverage.report.dir" location="${build.dir}/coverage/report"/>
+		<mkdir dir="${coverage.report.dir}"/>
+		<delete dir="${coverage.report.dir}"/>
+		<mkdir dir="${coverage.report.dir}"/>
+		<emma enabled="true">
+			<report>
+				<fileset dir="${basedir}">
+					<include name="build/coverage/instrumentation"/>
+					<include name="build/coverage/coverage"/>
+				</fileset>
+				<sourcepath>
+					<dirset dir="${basedir}">
+						<include name="src"/>
+					</dirset>
+				</sourcepath>
+				<html outfile="${coverage.report.dir}/index.html"/>
+			</report>
+		</emma>
+	</target>
+	
+	<target name="dist" depends="clean,test-run,jar,doc">
+		<mkdir dir="build/${artifact.name}-${revision}"/>
+		<copy todir="build/${artifact.name}-${revision}">
+			<fileset dir="." excludes="build/**/*"/>
+		</copy>
+		<copy todir="build/${artifact.name}-${revision}">
+			<fileset dir="." 
+				includes="
+					build/doc/**/* 
+					build/${artifact.name}-${revision}.jar"
+			/>
+		</copy>
+		<tar destfile="build/${artifact.name}-${revision}.tgz" 
+			compression="gzip" basedir="build" 
+			includes="${artifact.name}-${revision}/**/*"/>
+	</target>
+</project>

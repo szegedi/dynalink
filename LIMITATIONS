@@ -1,0 +1,16 @@
+Here I'm documenting current limitations of JSR-292 implementations that I had
+to work around:
+
+MLVM:
+=====
+- MethodHandles.arrayElementGetter()/arrayElementSetter() not implemented
+- MethodHandles.collectArguments() does not work for primitive types
+- Receiver types on MethodHandles.unreflect/findSpecial/findVirtual are 
+  java.lang.Object when class is not on boot class path.
+- MethodHandles.catchException() doesn't work when exception class is not on 
+  the boot class path.
+  
+Backport:
+=========
+- MethodHandles.findSpecial() not implemented
+- MethodHandles.collectArguments() not implemented for primitive types
