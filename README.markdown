@@ -115,10 +115,11 @@ its own object model, you need to create an implementation of this interface
 yourself to provide MOP functionality for your own language. The 
 `DynamicLinkerFactory` uses the JAR service mechanism, and will look into a 
 file named `META-INF/services/org.dynalang.dynalink.GuardingDynamicLinker` in 
-every JAR file of the actual class loader[^1]. Therefore, if you wish for your 
-language linker to be discovered by other language runtimes, you should have 
-this file in the JAR file of your language runtime distribution, and declare 
-its class name in it.
+every JAR file of the actual class loader. (By default, this is the thread 
+context class loader. The factory has a method for setting a different class 
+loader.) Therefore, if you wish for your language linker to be discovered by 
+other language runtimes, you should have this file in the JAR file of your 
+language runtime distribution, and declare its class name in it.
 
 However, when you are creating a linker for your own use, you might want to
 explicitly create an instance of your guarding linker and make sure that the
@@ -358,6 +359,3 @@ every method name will start with `dyn:`. The operations are:
 
     Returns the length of a container object. Expected to work on Java arrays, 
     collections, and maps, as well as any other languages' container types.
-
-[^1]: By default, thread context class loader. The factory has a method for 
-setting a different class loader.
