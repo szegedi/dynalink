@@ -16,6 +16,7 @@
 package org.dynalang.dynalink.greeter;
 
 import java.dyn.CallSite;
+import java.dyn.MethodHandles;
 import java.dyn.MethodType;
 
 import org.dynalang.dynalink.DynamicLinker;
@@ -25,6 +26,7 @@ import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.RelinkableCallSite;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.MHandle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -35,7 +37,7 @@ public class GreeterDriverLoader extends ClassLoader implements Opcodes {
     
     static int linkCount = 0;
     
-    public static CallSite bootstrap(Class<?> caller, String name, MethodType type) {
+    public static CallSite bootstrap(MethodHandles.Lookup lookup, String name, MethodType type) {
         final RelinkableCallSite callSite = new MonomorphicCallSite(name, type) {
             @Override
             public void setGuardedInvocation(GuardedInvocation guardedInvocation) {
@@ -61,11 +63,11 @@ public class GreeterDriverLoader extends ClassLoader implements Opcodes {
         return super.findClass(name);
     }
     
-    public static byte[] dump () {
+    public byte[] dump () {
         ClassWriter cw = new ClassWriter(0);
         MethodVisitor mv;
 
-        cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, "org/dynalang/dynalink/greeter/GreeterDriverImpl", null, "java/lang/Object", new String[] { "org/dynalang/dynalink/greeter/GreeterDriver" });
+        cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, "org/dynalang/dynalink/greeter/GreeterDriverImpl", null, "java/lang/Object", new String[] { "org/dynalang/dynalink/greeter/GreeterDriver" });
 
         cw.visitSource("GreeterDriverImpl.java", null);
 
@@ -91,29 +93,18 @@ public class GreeterDriverLoader extends ClassLoader implements Opcodes {
         mv.visitLabel(l0);
         mv.visitLineNumber(20, l0);
         mv.visitVarInsn(ALOAD, 1);
-        mv.visitMethodInsn(INVOKEDYNAMIC, "java/dyn/InvokeDynamic", "dyn:getProp:helloText", "(Ljava/lang/Object;)Ljava/lang/String;");
+        mv.visitIndyMethodInsn("dyn:getProp:helloText", "(Ljava/lang/Object;)Ljava/lang/String;", 
+            new MHandle(MHandle.REF_invokeStatic,
+                getClass().getName().replace('.', '/'),
+                "bootstrap",
+                MethodType.methodType(CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class).toMethodDescriptorString()),
+                new Object[0]);
         mv.visitInsn(ARETURN);
         Label l1 = new Label();
         mv.visitLabel(l1);
         mv.visitLocalVariable("this", "Lorg/dynalang/dynalink/greeter/GreeterDriverImpl;", null, l0, l1, 0);
         mv.visitLocalVariable("greeter", "Ljava/lang/Object;", null, l0, l1, 1);
         mv.visitMaxs(1, 2);
-        mv.visitEnd();
-        }
-        {
-        mv = cw.visitMethod(ACC_STATIC, "<clinit>", "()V", null, null);
-        mv.visitCode();
-        Label l0 = new Label();
-        mv.visitLabel(l0);
-        mv.visitLineNumber(16, l0);
-        mv.visitLdcInsn(Type.getType("Lorg/dynalang/dynalink/greeter/GreeterDriverLoader;"));
-        mv.visitLdcInsn("bootstrap");
-        mv.visitMethodInsn(INVOKESTATIC, "java/dyn/Linkage", "registerBootstrapMethod", "(Ljava/lang/Class;Ljava/lang/String;)V");
-        Label l1 = new Label();
-        mv.visitLabel(l1);
-        mv.visitLineNumber(17, l1);
-        mv.visitInsn(RETURN);
-        mv.visitMaxs(2, 0);
         mv.visitEnd();
         }
         cw.visitEnd();

@@ -48,8 +48,6 @@ import org.dynalang.dynalink.support.Lookup;
  */
 public class BeanLinker implements GuardingDynamicLinker
 {
-    private static final MethodHandles.Lookup lookup = MethodHandles.publicLookup();
-    
     private final Class<?> clazz;
     
     private final Map<String, PropertyGetterDescriptor> properties = 
@@ -118,7 +116,7 @@ public class BeanLinker implements GuardingDynamicLinker
     private static DynamicMethod addMember(Method method, 
             DynamicMethod existing)
     {
-        final MethodHandle mh = lookup.unreflect(method);
+        final MethodHandle mh = Lookup.PUBLIC.unreflect(method);
         final boolean varArgs = method.isVarArgs();
         if(existing == null) {
             return new SimpleDynamicMethod(mh, varArgs);
@@ -178,13 +176,13 @@ public class BeanLinker implements GuardingDynamicLinker
         return null;
     }
 
-    private static MethodHandle GET_ARRAY_ELEMENT = MethodHandles.lookup().findStatic(
+    private static MethodHandle GET_ARRAY_ELEMENT = Lookup.PUBLIC.findStatic(
             Array.class, "get", MethodType.methodType(Object.class, Object.class, int.class));
 
-    private static MethodHandle GET_LIST_ELEMENT = MethodHandles.lookup().findVirtual(
+    private static MethodHandle GET_LIST_ELEMENT = Lookup.PUBLIC.findVirtual(
             List.class, "get", MethodType.methodType(Object.class, int.class));
 
-    private static MethodHandle GET_MAP_ELEMENT = MethodHandles.lookup().findVirtual(
+    private static MethodHandle GET_MAP_ELEMENT = Lookup.PUBLIC.findVirtual(
             Map.class, "get", MethodType.methodType(Object.class, Object.class));
 
     private GuardedInvocation getElementGetter(
@@ -236,15 +234,15 @@ public class BeanLinker implements GuardingDynamicLinker
     }
     
     private static MethodHandle SET_ARRAY_ELEMENT = 
-        MethodHandles.lookup().findStatic(Array.class, "set", MethodType.methodType(
+        Lookup.PUBLIC.findStatic(Array.class, "set", MethodType.methodType(
                 void.class, Object.class, int.class, Object.class));
 
     private static MethodHandle SET_LIST_ELEMENT = 
-        MethodHandles.lookup().findVirtual(List.class, "set", MethodType.methodType(
+        Lookup.PUBLIC.findVirtual(List.class, "set", MethodType.methodType(
                 Object.class, int.class, Object.class));
 
     private static MethodHandle PUT_MAP_ELEMENT = 
-        MethodHandles.lookup().findVirtual(Map.class, "put", MethodType.methodType(
+        Lookup.PUBLIC.findVirtual(Map.class, "put", MethodType.methodType(
                 Object.class, Object.class, Object.class));
 
     private GuardedInvocation getElementSetter(
@@ -293,13 +291,13 @@ public class BeanLinker implements GuardingDynamicLinker
         return null;
     }
 
-    private static MethodHandle GET_ARRAY_LENGTH = MethodHandles.lookup().findStatic(
+    private static MethodHandle GET_ARRAY_LENGTH = Lookup.PUBLIC.findStatic(
             Array.class, "getLength", MethodType.methodType(int.class, Object.class));
     
-    private static MethodHandle GET_COLLECTION_LENGTH = MethodHandles.lookup().findVirtual(
+    private static MethodHandle GET_COLLECTION_LENGTH = Lookup.PUBLIC.findVirtual(
             Collection.class, "size", MethodType.methodType(int.class));
 
-    private static MethodHandle GET_MAP_LENGTH = MethodHandles.lookup().findVirtual(
+    private static MethodHandle GET_MAP_LENGTH = Lookup.PUBLIC.findVirtual(
             Map.class, "size", MethodType.methodType(int.class));
 
     private GuardedInvocation getLengthGetter(
@@ -507,7 +505,7 @@ public class BeanLinker implements GuardingDynamicLinker
        if(getter == null) {
            return Results.notReadable;
        }
-       return getter.invokeVarargs(obj);
+       return getter.invokeWithArguments(obj);
    }
 
    private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID =
@@ -538,7 +536,7 @@ public class BeanLinker implements GuardingDynamicLinker
        final MethodHandle invocation = getMethodInvocation(callSiteDescriptor, 
                linkerServices, getSetterMethodId(String.valueOf(id)));
        if(invocation != null) {
-           invocation.invokeVarargs(obj, value);
+           invocation.invokeWithArguments(obj, value);
            return Results.ok;
        }
        return Results.notWritable;
@@ -557,7 +555,7 @@ public class BeanLinker implements GuardingDynamicLinker
        PropertyGetterDescriptor(Method getter) {
            getter = getMostGenericGetter(getter.getName(), 
                    getter.getReturnType(), getter.getDeclaringClass());
-           this.getter = lookup.unreflect(getter);
+           this.getter = Lookup.PUBLIC.unreflect(getter);
            this.mostGenericClassForGetter = getter.getDeclaringClass();
        }
 

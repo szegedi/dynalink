@@ -16,17 +16,17 @@ public class TestPropertySetter extends TestCase
                 "dyn:setProp:foo", MethodType.methodType(Void.TYPE, Object.class, 
                         Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
-        final MethodHandle invoker = MethodHandles.dynamicInvoker(callSite);
+        final MethodHandle invoker = callSite.dynamicInvoker();
         final T1 t1 = new T1();
-        invoker.invokeVarargs(t1, "abc");
+        invoker.invokeWithArguments(t1, "abc");
         assertSame("abc", t1.foo);
         assertEquals(1, callSite.getRelinkCount());
-        invoker.invokeVarargs(t1, "def");
+        invoker.invokeWithArguments(t1, "def");
         assertSame("def", t1.foo);
         assertEquals(1, callSite.getRelinkCount());
         final T2 t2 = new T2();
         final Object val = new Object();
-        invoker.invokeVarargs(t2, val);
+        invoker.invokeWithArguments(t2, val);
         assertSame(val, t2.foo);
         assertEquals(2, callSite.getRelinkCount());
     }
@@ -37,21 +37,21 @@ public class TestPropertySetter extends TestCase
                 "dyn:setProp", MethodType.methodType(Void.TYPE, Object.class, 
                         String.class, Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
-        final MethodHandle invoker = MethodHandles.dynamicInvoker(callSite);
+        final MethodHandle invoker = callSite.dynamicInvoker();
         final T1 t1 = new T1();
-        invoker.invokeVarargs(t1, "foo", "abc");
+        invoker.invokeWithArguments(t1, "foo", "abc");
         assertSame("abc", t1.foo);
         assertEquals(1, callSite.getRelinkCount());
-        invoker.invokeVarargs(t1, "foo", "def");
+        invoker.invokeWithArguments(t1, "foo", "def");
         assertSame("def", t1.foo);
         assertEquals(1, callSite.getRelinkCount());
         final T2 t2 = new T2();
         final Object val1 = new Object();
-        invoker.invokeVarargs(t2, "foo", val1);
+        invoker.invokeWithArguments(t2, "foo", val1);
         assertSame(val1, t2.foo);
         assertEquals(2, callSite.getRelinkCount());
         final Object val2 = new Object();
-        invoker.invokeVarargs(t2, "bar", val2);
+        invoker.invokeWithArguments(t2, "bar", val2);
         assertSame(val2, t2.bar);
         assertEquals(2, callSite.getRelinkCount());
     }

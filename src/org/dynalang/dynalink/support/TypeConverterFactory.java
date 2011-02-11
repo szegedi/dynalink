@@ -102,24 +102,46 @@ public class TypeConverterFactory {
      * with {@link GuardingTypeConverterFactory} produced type converters as 
      * filters.
      */
-    public MethodHandle convertArguments(final MethodHandle handle, 
+    public MethodHandle convertArguments(MethodHandle handle,
             final MethodType fromType) {
         final MethodType toType = handle.type();
         final int l = toType.parameterCount();
         if(l != fromType.parameterCount()) {
             throw new WrongMethodTypeException("Parameter counts differ");
         }
-        final MethodHandle[] converters = new MethodHandle[l];
+        int pos = 0;
+        List<MethodHandle> converters = new LinkedList<MethodHandle>();
         for(int i = 0; i < l; ++i) {
             final Class<?> fromParamType = fromType.parameterType(i);
             final Class<?> toParamType = toType.parameterType(i);
-            if(!canAutoConvert(fromParamType, toParamType)) {
-                converters[i] = getTypeConverter(fromParamType, toParamType);
+            if(canAutoConvert(fromParamType, toParamType)) {
+                handle = applyConverters(handle, pos, converters);
+            }
+            else {
+                final MethodHandle converter = getTypeConverter(fromParamType, 
+                    toParamType);
+                if(converter != null) {
+                    if(converters.isEmpty()) {
+                        pos = i;
+                    }
+                    converters.add(converter);
+                } else {
+                    handle = applyConverters(handle, pos, converters);
+                }
             }
         }
-        
-        return MethodHandles.convertArguments(MethodHandles.filterArguments(
-                handle, converters), fromType);
+        return MethodHandles.convertArguments(applyConverters(handle, pos, 
+            converters), fromType);
+    }
+
+    private static MethodHandle applyConverters(MethodHandle handle, int pos, 
+        List<MethodHandle> converters) {
+      if(!converters.isEmpty()) {
+          handle = MethodHandles.filterArguments(handle, pos,
+              converters.toArray(new MethodHandle[converters.size()]));
+          converters.clear();
+      }
+      return handle;
     }
 
     /**
@@ -217,12 +239,12 @@ public class TypeConverterFactory {
         }
         return last == identity ? IDENTITY_CONVERSION : last;
     }
- 
+
     private static final MethodHandle IDENTITY_CONVERSION = 
-        MethodHandles.lookup().findStatic(TypeConverterFactory.class, 
+        new Lookup(MethodHandles.lookup()).findStatic(TypeConverterFactory.class, 
                 "_identityConversion", MethodType.methodType(Object.class, 
                         Object.class));
-    
+
     /**
      * This method is public for implementation reasons. Do not invoke it 
      * directly. Returns the object passed in. 

@@ -9,7 +9,7 @@ import java.dyn.MethodHandles;
 public class Backport
 {
     /**
-     * True if Rémi's JSR-292 backport agent is active; false if we're using
+     * True if Remi's JSR-292 backport agent is active; false if we're using
      * native OpenJDK JSR-292 support.
      */
     public static final boolean inUse = 

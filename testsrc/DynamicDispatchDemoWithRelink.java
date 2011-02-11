@@ -1,10 +1,10 @@
+import java.dyn.MutableCallSite;
 import java.dyn.CallSite;
-import java.dyn.InvokeDynamic;
-import java.dyn.Linkage;
 import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
 import java.dyn.MethodType;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 
@@ -28,34 +28,45 @@ public class DynamicDispatchDemoWithRelink
     
     public static void main(String[] args) throws Throwable
     {
-        //final Object[] greeters = new Object[] { new English(), new Spanish() };
         final Object[] greeters = new Object[] { new English(), new Spanish(), new English(), new Spanish(), new Spanish(), new English(), new English() };
+
+        final MethodHandle sayHelloInvoker = new DynamicIndy().invokeDynamic("sayHello", MethodType.methodType(Void.TYPE), 
+            DynamicDispatchDemoWithRelink.class, "bootstrap", MethodType.methodType(CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class));
+        
         for(Object greeter: greeters)
         {
-            InvokeDynamic.sayHello(greeter);
+          sayHelloInvoker.invokeGeneric(greeter);
         }
     }
     
-    static
+    public static CallSite bootstrap(MethodHandles.Lookup lookup, String name, MethodType callSiteType)
     {
-        Linkage.registerBootstrapMethod("bootstrap");
-    }
-    
-    public static CallSite bootstrap(Class<?> callerClass, String name, MethodType callSiteType)
-    {
-        final RelinkableCallSite cs = new RelinkableCallSite();
+        final RelinkableCallSite cs = new RelinkableCallSite(name, callSiteType);
         MethodHandle boundRelink = MethodHandles.insertArguments(RELINK_AND_INVOKE, 0, cs);
-        MethodHandle collectedArgsRelink = MethodHandles.collectArguments(boundRelink, callSiteType.generic());
+        MethodHandle collectedArgsRelink = boundRelink.asCollector(Object.class, callSiteType.parameterCount() - boundRelink.type().parameterCount() + 1);
         MethodHandle convertedArgsRelink = MethodHandles.convertArguments(collectedArgsRelink, callSiteType);
         cs.setTarget(convertedArgsRelink);
         cs.relink = convertedArgsRelink;
         return cs;
     }
 
-    private static MethodHandle RELINK_AND_INVOKE = 
-        MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class, 
-                "relinkAndInvoke", MethodType.methodType(Object.class, RelinkableCallSite.class, Object[].class));
-    
+    private static MethodHandle RELINK_AND_INVOKE;
+    private static MethodHandle IS_OF_CLASS;
+
+    static {
+        try {
+            RELINK_AND_INVOKE = 
+                MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class, 
+                      "relinkAndInvoke", MethodType.methodType(Object.class, RelinkableCallSite.class, Object[].class));
+              IS_OF_CLASS = 
+                  MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class, 
+                      "isOfClass", MethodType.methodType(boolean.class, Class.class, Object.class));
+        }
+        catch(IllegalAccessException|NoSuchMethodException e) {
+          throw new UndeclaredThrowableException(e);
+        }
+    }
+
     private static Object relinkAndInvoke(RelinkableCallSite callSite, Object[] args) throws Throwable
     {
         final Class<?> receiverClass = args[0].getClass();
@@ -71,24 +82,26 @@ public class DynamicDispatchDemoWithRelink
         final MethodHandle convertedTest = MethodHandles.convertArguments(projected, callSite.type().changeReturnType(boolean.class));
         callSite.setTarget(MethodHandles.guardWithTest(convertedTest, convertedTarget, callSite.relink));
         System.out.println("Relinked call site for " + receiverClass.getName());
-        return convertedTarget.invokeVarargs(args);
+        return convertedTarget.invokeWithArguments(args);
     }
-
-    private static MethodHandle IS_OF_CLASS = 
-        MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class, 
-                "isOfClass", MethodType.methodType(boolean.class, Class.class, Object.class));
 
     private static boolean isOfClass(Class<?> c, Object o)
     {
         return o != null && o.getClass() == c;
     }
     
-    static class RelinkableCallSite extends CallSite
+    static class RelinkableCallSite extends MutableCallSite
     {
         private MethodHandle relink;
+        private final String name;
 
-        protected RelinkableCallSite() {
-            super();
+        protected RelinkableCallSite(String name, MethodType type) {
+            super(type);
+            this.name = name;
+        }
+        
+        String name() {
+            return name;
         }
     }
 }

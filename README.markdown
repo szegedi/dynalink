@@ -16,25 +16,19 @@ Building
 ========
 Here's how to build the JAR file:
 
-Mandatory prerequisites
------------------------
-* You will need a recent OpenJDK binary. You can grab one from Sun for Windows,
-Linux, and Solaris at [here](http://java.sun.com/javase/downloads/ea.jsp). For 
-Mac OS X on Intel CPUs, you can grab one from [here](http://www.concord.org/~sbannasch/mlvm/).
-* You will need Apache Ant 1.7 or later.
-* You will need Apache Ivy 2.0 or later set up with your Ant for dependency 
-management. Just [download Ivy](http://ant.apache.org/ivy/) and drop 
-`ivy-${versionNumber}.jar` into your `$ANT_HOME/lib`. Note, the library 
-actually has no external dependencies whatsoever for normal operation; all 
-dependencies are for testing.
+    ant jar
 
-Optional prerequisites
-----------------------
-* If you wish, you can use Rémi Forax's 
-[JSR-292 backport](http://code.google.com/p/jvm-language-runtime/downloads/list) 
-for Java 5 and 6. It is not used by the library as such, but if present, 
-tests will be run with both the OpenJDK as well as with the backport on 
-whatever is the default JRE used by Ant.
+Note that this will download a private copy of OpenJDK into the build directory
+(about 60MB).
+Here's how to test the JAR file:
+
+    ant test
+
+Known issues
+============
+
+* It doesn't currently work with Rémi Forax's JSR-292 backport, as the backport
+was not updated to reflect newest JSR-292
 
 Setting up
 ----------

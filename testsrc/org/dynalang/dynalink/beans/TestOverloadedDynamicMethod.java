@@ -55,9 +55,10 @@ public class TestOverloadedDynamicMethod extends TestCase
                 MethodType.methodType(int.class, Object.class)), null));
 
         // No single-arg String add
-        assertNull(dm.getInvocation(new CallSiteDescriptor("add", 
-                MethodType.methodType(String.class, Object.class, String.class)), 
-                linkerServices));
+        MethodHandle inv = dm.getInvocation(new CallSiteDescriptor("add", 
+            MethodType.methodType(String.class, Object.class, String.class)), 
+            linkerServices);
+        assertNull(String.valueOf(inv), inv);
     }
     
     public void testExactMatchSignature() throws Throwable
@@ -70,11 +71,11 @@ public class TestOverloadedDynamicMethod extends TestCase
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two strings
-        assertEquals("x", mh.invokeVarargs(new Test1(), "a", "b"));
+        assertEquals("x", mh.invokeWithArguments(new Test1(), "a", "b"));
         // Must not be able to invoke it with two ints
         try
         {
-            mh.invokeVarargs(new Test1(), 1, 2);
+            mh.invokeWithArguments(new Test1(), 1, 2);
         }
         catch(ClassCastException e)
         {
@@ -92,11 +93,11 @@ public class TestOverloadedDynamicMethod extends TestCase
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two Strings
-        assertEquals("x", mh.invokeVarargs(new Test1(), "a", "b"));
+        assertEquals("x", mh.invokeWithArguments(new Test1(), "a", "b"));
         // Must be able to invoke it with two ints
-        assertEquals(1, mh.invokeVarargs(new Test1(), 1, 2));
+        assertEquals(1, mh.invokeWithArguments(new Test1(), 1, 2));
         // Must be able to invoke it with explicitly packed varargs
-        assertEquals(4, mh.invokeVarargs(new Test1(), 1, new int[] { 2 }));
+        assertEquals(4, mh.invokeWithArguments(new Test1(), 1, new int[] { 2 }));
     }
 
     public class Test1

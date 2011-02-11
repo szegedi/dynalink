@@ -18,7 +18,7 @@ package org.dynalang.dynalink.beans;
 import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
 import java.dyn.MethodType;
-import java.dyn.NoAccessException;
+import java.dyn.InvokeDynamicBootstrapError;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,7 +99,7 @@ public class OverloadedDynamicMethod implements DynamicMethod
         // than one maximally specific method based on call site signature, 
         // that is a link-time ambiguity.
         if(invokables.isEmpty() && maximallySpecifics.size() > 1) {
-            throw new NoAccessException("Can't choose among " + 
+            throw new InvokeDynamicBootstrapError("Can't choose among " + 
                     maximallySpecifics + " for argument types " + callSiteType);
         }
         

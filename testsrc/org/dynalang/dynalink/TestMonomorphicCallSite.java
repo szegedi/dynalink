@@ -15,8 +15,8 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.JavaMethodHandle;
 import java.dyn.MethodHandle;
+import java.dyn.MethodHandles;
 import java.dyn.MethodType;
 
 import junit.framework.TestCase;
@@ -31,6 +31,10 @@ import org.dynalang.dynalink.MonomorphicCallSite;
  */
 public class TestMonomorphicCallSite extends TestCase
 {
+    static
+    {
+        MethodHandles.lookup();
+    }
     /**
      * Tests prohibition of setting null target.
      */
@@ -52,9 +56,8 @@ public class TestMonomorphicCallSite extends TestCase
      */
     public void testSetGuardless()
     {
-        final MethodHandle mh = new JavaMethodHandle("x") { public void x() { } };
-        final MonomorphicCallSite mcs = new MonomorphicCallSite("", 
-                MethodType.methodType(Void.TYPE));
+        final MethodHandle mh = MethodHandles.identity(Object.class);
+        final MonomorphicCallSite mcs = new MonomorphicCallSite("", mh.type());
         mcs.setGuardedInvocation(new GuardedInvocation(mh, null));
         assertSame(mh, mcs.getTarget());
     }

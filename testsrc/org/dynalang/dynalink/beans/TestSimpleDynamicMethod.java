@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.support.Backport;
+import org.dynalang.dynalink.support.Lookup;
 
 /**
  * Tests for the {@link SimpleDynamicMethod}.
@@ -53,8 +54,8 @@ public class TestSimpleDynamicMethod extends TestCase
 
     private static MethodHandle getTest1XMethod()
     {
-        return MethodHandles.publicLookup().findVirtual(
-                Test1.class, "x", MethodType.methodType(int.class, int.class, int.class));
+        return Lookup.PUBLIC.findVirtual(Test1.class, "x", 
+            MethodType.methodType(int.class, int.class, int.class));
     }
 
     public class Test1
@@ -147,13 +148,13 @@ public class TestSimpleDynamicMethod extends TestCase
 
     private static MethodHandle getTest1XvMethod()
     {
-        return MethodHandles.publicLookup().findVirtual(
+        return Lookup.PUBLIC.findVirtual(
                 Test1.class, "xv", MethodType.methodType(int.class, int.class, int[].class));
     }
 
     private static MethodHandle getTest1SvMethod()
     {
-        return MethodHandles.publicLookup().findVirtual(
+        return Lookup.PUBLIC.findVirtual(
                 Test1.class, "sv", MethodType.methodType(String.class, String.class, String[].class));
     }
 
@@ -188,7 +189,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
-        assertEquals(1, newHandle.invokeVarargs(new Test1(), 1));
+        assertEquals(1, newHandle.invokeWithArguments(new Test1(), 1));
     }
 
     public void testVarArgsWithPrimitiveConversion() throws Throwable
@@ -223,7 +224,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
-        assertEquals(6, newHandle.invokeVarargs(new Test1(), 1, 2, 3));
+        assertEquals(6, newHandle.invokeWithArguments(new Test1(), 1, 2, 3));
     }
 
     public void testVarArgsWithSinglePrimitiveArgConversion() throws Throwable
@@ -259,7 +260,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
-        assertEquals(3, newHandle.invokeVarargs(new Test1(), 1, 2));
+        assertEquals(3, newHandle.invokeWithArguments(new Test1(), 1, 2));
     }
 
     public void testVarArgsWithSingleStringArgConversion() throws Throwable
@@ -294,7 +295,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
-        assertEquals("ab", newHandle.invokeVarargs(new Test1(), "a", "b"));
+        assertEquals("ab", newHandle.invokeWithArguments(new Test1(), "a", "b"));
     }
 
     public void testVarArgsWithStringConversion() throws Throwable
@@ -328,7 +329,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
-        assertEquals("abc", newHandle.invokeVarargs(new Test1(), "a", "b", "c"));
+        assertEquals("abc", newHandle.invokeWithArguments(new Test1(), "a", "b", "c"));
         
     }
 
@@ -384,8 +385,8 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertEquals(2, converterInvoked[0]);
-        assertEquals(3, newHandle.invokeVarargs(new Test1(), 1, 2));
-        assertEquals(6, newHandle.invokeVarargs(new Test1(), 1, new int[] { 2, 3 }));
+        assertEquals(3, newHandle.invokeWithArguments(new Test1(), 1, 2));
+        assertEquals(6, newHandle.invokeWithArguments(new Test1(), 1, new int[] { 2, 3 }));
     }
 
     public void testVarArgsWithSingleStringArgRuntimeConversion() throws Throwable
@@ -440,7 +441,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertEquals(2, converterInvoked[0]);
-        assertEquals("ab", newHandle.invokeVarargs(new Test1(), "a", "b"));
-        assertEquals("abc", newHandle.invokeVarargs(new Test1(), "a", new String[] { "b", "c" }));
+        assertEquals("ab", newHandle.invokeWithArguments(new Test1(), "a", "b"));
+        assertEquals("abc", newHandle.invokeWithArguments(new Test1(), "a", new String[] { "b", "c" }));
     }
 }

@@ -69,7 +69,7 @@ public class SimpleDynamicMethod implements DynamicMethod
         final int paramsLen = methodType.parameterCount();
         final int fixParamsLen = varArgs ? paramsLen - 1 : paramsLen;
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
-        int argsLen = callSiteType.parameterCount();
+        final int argsLen = callSiteType.parameterCount();
         if(argsLen < fixParamsLen) {
             // Less actual arguments than number of fixed declared arguments;
             // can't invoke.
@@ -120,8 +120,8 @@ public class SimpleDynamicMethod implements DynamicMethod
                 // Call site signature guarantees the argument can definitely
                 // not be an array (i.e. it is primitive); link immediately to 
                 // a vararg-packing method handle.
-                return createConvertingInvocation(createVarArgMethod(
-                        callSiteType), linkerServices, callSiteType);
+                return createConvertingInvocation(collectArguments(
+                        argsLen), linkerServices, callSiteType);
             }
             else {
                 // Call site signature makes no guarantees that the single
@@ -132,15 +132,36 @@ public class SimpleDynamicMethod implements DynamicMethod
                         varArgType, fixParamsLen, callSiteType), 
                         createConvertingInvocation(target, linkerServices, 
                                 callSiteType), createConvertingInvocation(
-                                        createVarArgMethod(callSiteType), 
-                                        linkerServices, callSiteType));
+                                    collectArguments(argsLen), 
+                                    linkerServices, callSiteType));
             }
         }
         else {
             // Remaining case: more than one vararg. 
-            return createConvertingInvocation(createVarArgMethod(callSiteType), 
+            return createConvertingInvocation(collectArguments(argsLen), 
                     linkerServices, callSiteType); 
         }
+    }
+
+
+    /**
+     * Creates a method handle out of the original target that will collect
+     * the varargs for the exact component type of the varArg array. Note that 
+     * this will nicely trigger language-specific type converters for exactly 
+     * those varargs for which it is necessary when later passed to 
+     * linkerServices.convertArguments().
+     * @param target the original method handle
+     * @param parameterCount the total number of arguments in the new method handle
+     * @return a collecting method handle
+     */
+    static MethodHandle collectArguments(MethodHandle target, final int parameterCount)
+    {
+        final MethodType methodType = target.type();
+        final int fixParamsLen = methodType.parameterCount() - 1;
+        final Class<?> arrayType = methodType.parameterType(
+            fixParamsLen);
+        return target.asCollector(arrayType, parameterCount - 
+            fixParamsLen);
     }
 
     /**
@@ -149,23 +170,12 @@ public class SimpleDynamicMethod implements DynamicMethod
      * this will nicely trigger language-specific type converters for exactly 
      * those varargs for which it is necessary when later passed to 
      * linkerServices.convertArguments().
-     * @param callSiteType the call site's method type
+     * @param parameterCount the total number of arguments in the new method handle
      * @return a collecting method handle
      */
-    private MethodHandle createVarArgMethod(final MethodType callSiteType)
+    private MethodHandle collectArguments(final int parameterCount)
     {
-        final MethodType methodType = target.type();
-        final int fixParamsLen = methodType.parameterCount() - 1;
-        MethodType varArgMethodType = methodType.dropParameterTypes(
-                fixParamsLen, fixParamsLen+1);
-        final int varArgCount = callSiteType.parameterCount() - fixParamsLen;
-        final Class<?> componentType = methodType.parameterType(
-                fixParamsLen).getComponentType();
-        for(int i = 0; i < varArgCount; ++i) {
-            varArgMethodType = varArgMethodType.insertParameterTypes(
-                    fixParamsLen, componentType);
-        }
-        return MethodHandles.collectArguments(target, varArgMethodType);
+        return collectArguments(target, parameterCount);
     }
 
     private static MethodHandle createConvertingInvocation(

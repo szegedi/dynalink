@@ -71,8 +71,8 @@ public class DynamicLinkerImpl implements DynamicLinker {
         // Make a MH that gathers all arguments to the invocation into an 
         // Object[]
         final MethodType type = descriptor.getMethodType();
-        final MethodHandle collectingInvoker = MethodHandles.collectArguments(
-                boundInvoker, type.generic());
+        final MethodHandle collectingInvoker = boundInvoker.asCollector(
+            Object[].class, type.parameterCount());
         // Make a MH that converts all args to Object
         final MethodHandle convertingInvoker = MethodHandles.convertArguments(
                 collectingInvoker, type);
@@ -108,6 +108,6 @@ public class DynamicLinkerImpl implements DynamicLinker {
         // Invoke the method. Note we bypass the guard, as the assumption is 
         // that the current arguments will pass the guard (and there actually
         // might be no guard at all).
-        return guardedInvocation.getInvocation().invokeVarargs(arguments);
+        return guardedInvocation.getInvocation().invokeWithArguments(arguments);
     }
 }

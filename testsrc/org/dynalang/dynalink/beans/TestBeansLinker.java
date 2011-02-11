@@ -17,7 +17,7 @@ package org.dynalang.dynalink.beans;
 
 import java.dyn.MethodHandle;
 import java.dyn.MethodType;
-import java.dyn.NoAccessException;
+import java.dyn.InvokeDynamicBootstrapError;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -88,7 +88,7 @@ public class TestBeansLinker extends TestCase
                     "dyn", MethodType.methodType(int.class)), null, new Object[1]);
             fail();
         }
-        catch(NoAccessException e)
+        catch(InvokeDynamicBootstrapError e)
         {
             // ignored - it is supposed to fail
         }

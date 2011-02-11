@@ -1,6 +1,6 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="org.dynalang.mop" basedir=".">
 <!--
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,111 +15,126 @@
    limitations under the License.
 -->
 <!-- $Id: build.xml 74 2007-04-02 09:34:33Z szegedia $ -->
-	<property name="project.name" value="JVM Dynamic Languages Invocation Resolver"/>
-	<property name="artifact.name" value="dynalang-invoke"/>
+
+	<property name="project.name" value="JVM Dynamic Languages Linker Framework"/>
+	<property name="artifact.name" value="dynalink"/>
 	<property name="revision" value="0.1"/>
 	<property name="build.dir" location="build"/>
 
-        <property name="ivy.settings.dir" value="../ivy" />
-        <property file="${ivy.settings.dir}/ivysettings.properties" />
-        <property file="build.properties" />
-        <ivy:settings file="${ivy.settings.dir}/ivysettings.xml" />
-                                        
-        <property name="openjdk.dir" location="${user.home}/Documents/projects/openjdk/bsd-port/build/bsd-i586/j2sdk-image"/>
-        <property name="backport.dir" location="${user.home}/Documents/workspace/invokedynamic-backport"/>
-        <property file="build.properties" />
-        <property name="openjdk.rt.jar" location="${openjdk.dir}/jre/lib/rt.jar"/>
-        <property name="backport.agent.jar" location="${backport.dir}/lib/jsr292-backport.jar"/>
-        <available property="openjdk.available" file="${openjdk.rt.jar}"/>
-        <available property="backport.available" file="${backport.agent.jar}"/>
+	<property file="build.properties" />
+	<property name="openjdk.base.dir" location="build/openjdk"/>
+	<property name="openjdk.dir" location="${openjdk.base.dir}/java-1.7.0-internal-mlvm-2011_01_31"/>
+	<property name="backport.dir" location="build/jsr292-backport"/>
+	<property file="build.properties" />
+	<property name="openjdk.rt.jar" location="${openjdk.dir}/jre/lib/rt.jar"/>
+	<property name="backport.agent.jar" location="${backport.dir}/lib/jsr292-backport.jar"/>
 
-	<target name="clean">
-		<mkdir dir="${build.dir}"/>
-		<delete dir="${build.dir}"/>
+	<target name="clean-all" description="Cleans everything, including downloaded 3rd party software.">
+		<delete dir="${build.dir}" quiet="true"/>
 	</target>
 
-        <target name="resolve">
-            <ivy:retrieve pattern="build/lib/[conf]/[artifact].[ext]"/>
-        </target>
+	<target name="clean" description="Cleans all artifacts built by the project; doesn't clean downloaded 3rd party software.">
+		<delete includeemptydirs="true">
+			<fileset dir="build" excludes="openjdk/**,jsr292-backport/**,test/lib/**"/>
+		</delete>
+	</target>
 
-	<path id="compile.classpath">
-        <fileset dir="build/lib/default"/>
-	</path>
-                                                            
-    <target name="checkOpenJDK" unless="openjdk.available">
-        <fail message="Open JDK is not available under ${openjdk.dir}. Make sure you set the openjdk.dir variable correctly in build.properties"/>
-    </target>
-        
-	<target name="compile" depends="resolve,checkOpenJDK">
-        <mkdir dir="build/lib/default"/>
+	<target name="checkOpenJdkAvailable">
+		<condition property="openjdk.available">
+			<available file="${openjdk.dir}/jre/bin/java"/>
+		</condition>
+	</target>
+
+	<target name="downloadOpenJdk" unless="openjdk.available" depends="checkOpenJdkAvailable">
+		<mkdir dir="${openjdk.base.dir}"/>
+		<get src="http://www.concord.org/~sbannasch/mlvm/java-1.7.0-internal-mlvm-2011_01_31.tar.gz" dest="${openjdk.base.dir}/openjdk.tgz" usetimestamp="true"/>
+		<!-- Not using <untar> task as it doesn't preserve UNIX permissions -->
+		<exec executable="tar" dir="${openjdk.base.dir}">
+			<arg value="xzf"/>
+			<arg value="${openjdk.base.dir}/openjdk.tgz"/>
+		</exec>
+		<!-- <delete file="${openjdk.base.dir}/openjdk.tgz"/> -->
+	</target>
+
+	<target name="compile" depends="downloadOpenJdk">
 		<property name="classes.dir" location="${build.dir}/classes"/>
 		<mkdir dir="${classes.dir}"/>
-		<javac srcdir="src" destdir="${classes.dir}" deprecation="off" 
-	               debug="on" optimize="off" target="1.5" source="1.5"
-	               classpathref="compile.classpath" bootclasspath="${openjdk.rt.jar}"/>
+		<javac compiler="extJavac" executable="${openjdk.dir}/bin/javac" srcdir="src" destdir="${classes.dir}" deprecation="off" 
+			debug="on" optimize="off" target="1.7" source="1.7"
+			bootclasspath="${openjdk.rt.jar}"/>
 		<copy toDir="${classes.dir}">
 			<fileset dir="src"
-	            excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html,overview.html"/>
+			excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html,overview.html"/>
 		</copy>
 	</target>
-	
+
 	<target name="jar" depends="compile">
 		<property name="jarfile" location="build/${artifact.name}-${revision}.jar"/>
 		<jar destfile="${jarfile}" basedir="${classes.dir}">
-	        	<manifest>
-	        		<attribute name="Implementation-Vendor" value="Attila Szegedi"/>
-	        		<attribute name="Implementation-Version" value="${revision}"/>
-	        		<attribute name="Implementation-Title" value="${project.name}"/>
-	        		<attribute name="Implementation-URL" value="http://sourceforge.net/projects/dynalang"/>
-	            </manifest>
+			<manifest>
+				<attribute name="Implementation-Vendor" value="Attila Szegedi"/>
+				<attribute name="Implementation-Version" value="${revision}"/>
+				<attribute name="Implementation-Title" value="${project.name}"/>
+				<attribute name="Implementation-URL" value="http://github.com/szegedi/dynalink"/>
+			</manifest>
 		</jar>
 	</target>
 
-        <target name="publish" depends="jar">
-                <property name="revision" value="${revision}"/>
-                <delete file="${build.dir}/ivy-${revision}.xml"/>
-                <ivy:publish artifactspattern="${build.dir}/[artifact]-[revision].[ext]" 
-                        resolver="projects"
-                        pubrevision="${revision}" 
-                        status="release"
-                        overwrite="true"
-                />
-        </target>
-	
-	<target depends="" name="doc">
+	<target name="doc">
 		<mkdir dir="${build.dir}/doc/javadoc"/>
 		<delete includeEmptyDirs="yes">
 			<fileset dir="${build.dir}/doc/javadoc" includes="**/*" />
 		</delete>
 		<javadoc author="true"
-	                destdir="${build.dir}/doc/javadoc"
-	                doctitle="${project.name} ${revision}"
-	                packagenames="org.dynalang.*"
-	                sourcepath="src"
-	                version="true"
-	                windowtitle="${project.name} ${revision} API"
+			destdir="${build.dir}/doc/javadoc"
+			doctitle="${project.name} ${revision}"
+			packagenames="org.dynalang.*"
+			sourcepath="src"
+			version="true"
+			windowtitle="${project.name} ${revision} API"
 			overview="src/overview.html"
-	                use="true">
+			use="true">
 		</javadoc>
 		<copy todir="${build.dir}/doc">
 			<fileset dir="src/doc" includes="**/*"/>
 		</copy>
 	</target>
 
-	<target name="coverage-instrument" depends="compile">
+	<property name="test.lib.dir" location="${build.dir}/test/lib"/>
+
+	<target name="checkTestLibsAvailable">
+		<condition property="testlibs.available">
+			<and>
+				<available file="${test.lib.dir}/emma.jar"/>
+				<available file="${test.lib.dir}/emma_ant.jar"/>
+				<available file="${test.lib.dir}/junit.jar"/>
+				<available file="${test.lib.dir}/asm-all.jar"/>
+			</and>
+		</condition>
+	</target>
+	
+	<target name="downloadTestLibs" unless="testlibs.available" depends="checkTestLibsAvailable">
+		<mkdir dir="${test.lib.dir}"/>
+		<get src="http://repo1.maven.org/maven2/emma/emma/2.1.5320/emma-2.1.5320.jar" dest="${test.lib.dir}/emma.jar" usetimestamp="true"/>
+		<get src="http://repo1.maven.org/maven2/emma/emma_ant/2.1.5320/emma_ant-2.1.5320.jar" dest="${test.lib.dir}/emma_ant.jar" usetimestamp="true"/>
+		<get src="http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar" dest="${test.lib.dir}/junit.jar" usetimestamp="true"/>
+		<get src="http://dl.dropbox.com/u/362958/mlvm/asm-all-4.0-beta1.jar" dest="${test.lib.dir}/asm-all.jar" usetimestamp="true"/>
+	</target>
+
+	<target name="coverage-instrument" depends="compile, downloadTestLibs">
 		<property name="coverage.dir" location="${build.dir}/coverage"/>
 		<property name="coverage.classes.dir" location="${build.dir}/coverage/classes"/>
 		<mkdir dir="${coverage.classes.dir}"/>
 		<path id="emma.lib">
-			<pathelement location="build/lib/test/emma.jar" />
-			<pathelement location="build/lib/test/emma_ant.jar" />
+			<pathelement location="${test.lib.dir}/emma.jar" />
+			<pathelement location="${test.lib.dir}/emma_ant.jar" />
 		</path>
-		<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+		<taskdef resource="emma_ant.properties" classpathref="emma.lib"/>
 		<property name="coverage.instrumentationfile" location="${coverage.dir}/instrumentation"/>
 		<emma enabled="true">
 			<instr 
-	        instrpath="${classes.dir}" outdir="${coverage.classes.dir}" 
-	        outfile="${coverage.instrumentationfile}" mode="copy"/>
+		instrpath="${classes.dir}" outdir="${coverage.classes.dir}" 
+		outfile="${coverage.instrumentationfile}" mode="copy"/>
 		</emma>
 		<copy todir="${coverage.classes.dir}">
 			<fileset dir="src" excludes="**/*.java"/>
@@ -130,75 +145,90 @@
 		<property name="coverage.outfile" location="${coverage.dir}/coverage"/>
 	</target>
 
-	<target name="test-compile" depends="compile">
+	<target name="test-compile" depends="compile, downloadTestLibs">
 		<property name="test.classes.dir" location="${build.dir}/test/classes"/>
 		<mkdir dir="${test.classes.dir}"/>
-		<javac srcdir="testsrc" destdir="${test.classes.dir}" deprecation="off" 
-	               debug="on" optimize="off" target="1.5" source="1.5" bootclasspath="${openjdk.rt.jar}">
+		<mkdir dir="${test.lib.dir}"/>
+		<javac compiler="extJavac" executable="${openjdk.dir}/bin/javac" srcdir="testsrc" destdir="${test.classes.dir}" deprecation="off" 
+			debug="on" optimize="off" target="1.7" source="1.7" bootclasspath="${openjdk.rt.jar}">
 			<classpath>
-				<pathelement path="${classes.dir}" />
-				<pathelement path="build/lib/test/junit.jar" />
-                <pathelement path="build/lib/test/asm-all.jar" />
+				<pathelement path="${classes.dir}"/>
+				<pathelement path="${test.lib.dir}/junit.jar" />
+				<pathelement path="${test.lib.dir}/asm-all.jar" />
 			</classpath>
 		</javac>
 		<copy toDir="${test.classes.dir}">
 			<fileset dir="testsrc"
-	            excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html"/>
+				excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html"/>
 		</copy>
 	</target>
 
-    <target name="test-run-openjdk" depends="test-compile, coverage-instrument">
-        <junit printsummary="on" fork="true" forkmode="once" 
-            showoutput="true" haltonerror="false" haltonfailure="false"
-            jvm="${openjdk.dir}/jre/bin/java">
-            <bootclasspath>
-                <pathelement path="openjdk.rt.jar"/>
-            </bootclasspath>
-            <jvmarg value="-XX:+EnableInvokeDynamic"/>
-            <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
-            <classpath>
-                <pathelement path="${coverage.classes.dir}" />
-                <pathelement path="${test.classes.dir}" />
-                <pathelement path="build/lib/test/emma.jar"/>
-                <pathelement path="build/lib/test/junit.jar"/>
-                <pathelement path="build/lib/test/asm-all.jar" />
-            </classpath>
-            <batchtest todir="build/test">
-                <fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class"/>
-            </batchtest>
-            <formatter type="plain" usefile="false" />
-            <formatter type="xml" extension=".openjdk.xml"/>
-        </junit>
-    </target>
-    
-    <target name="test-run-backport" if="backport.available" depends="test-compile, coverage-instrument">
-        <junit printsummary="on" fork="true" forkmode="once" 
-            showoutput="true" haltonerror="false" haltonfailure="false">
-            <jvmarg value="-javaagent:${backport.agent.jar}"/>
-            <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
-            <classpath>
-                <pathelement path="${coverage.classes.dir}" />
-                <pathelement path="${test.classes.dir}" />
-                <pathelement path="build/lib/test/emma.jar"/>
-                <pathelement path="build/lib/test/junit.jar"/>
-                <pathelement path="build/lib/test/asm-all.jar" />
-            </classpath>
-            <batchtest todir="build/test">
-                <fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class"/>
-            </batchtest>
-            <formatter type="plain" usefile="false" />
-            <formatter type="xml" extension=".backport.xml"/>
-        </junit>
+	<target name="test-run-openjdk" depends="test-compile, coverage-instrument">
+		<junit printsummary="on" fork="true" forkmode="once" 
+			showoutput="true" haltonerror="false" haltonfailure="false"
+			jvm="${openjdk.dir}/jre/bin/java">
+			<bootclasspath>
+				<pathelement path="openjdk.rt.jar"/>
+			</bootclasspath>
+			<jvmarg value="-XX:+UnlockExperimentalVMOptions"/>
+			<jvmarg value="-XX:+EnableInvokeDynamic"/>
+			<sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
+			<classpath>
+				<pathelement path="${classes.dir}" />
+				<pathelement path="${test.classes.dir}" />
+				<pathelement path="${test.lib.dir}/emma.jar"/>
+				<pathelement path="${test.lib.dir}/junit.jar"/>
+				<pathelement path="${test.lib.dir}/asm-all.jar" />
+			</classpath>
+			<batchtest todir="build/test">
+				<fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class, Test*.class"/>
+			</batchtest>
+			<formatter type="plain" usefile="false" />
+			<formatter type="xml" extension=".openjdk.xml"/>
+		</junit>
 	</target>
 
-    <target name="test-run" depends="test-run-openjdk, test-run-backport"/>
-    
+	<target name="checkBackportAvailable">
+		<condition property="backport.available">
+			<available file="${backport.dir}/lib/jsr292-backport.jar"/>
+		</condition>
+	</target>
+
+	<target name="downloadBackport" unless="backport.available" depends="checkBackportAvailable">
+		<get src="http://jvm-language-runtime.googlecode.com/files/jsr292-backport-1.5a" dest="build/jsr292-backport.zip"/>
+		<mkdir dir="${backport.dir}"/>
+		<unzip src= "build/jsr292-backport.zip" dest="${backport.dir}"/>
+		<delete file="build/jsr292-backport.zip"/>
+		<ant dir="${backport.dir}"/>
+	</target>
+
+	<target name="test-run-backport" depends="test-compile, coverage-instrument, downloadBackport">
+		<junit printsummary="on" fork="true" forkmode="once" 
+			showoutput="true" haltonerror="false" haltonfailure="false">
+			<jvmarg value="-javaagent:${backport.agent.jar}"/>
+			<sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
+			<classpath>
+				<pathelement path="${classes.dir}" />
+				<pathelement path="${test.classes.dir}" />
+				<pathelement path="${test.lib.dir}/emma.jar"/>
+				<pathelement path="${test.lib.dir}/junit.jar"/>
+			</classpath>
+			<batchtest todir="build/test">
+				<fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class, Test*.class"/>
+			</batchtest>
+			<formatter type="plain" usefile="false" />
+			<formatter type="xml" extension=".backport.xml"/>
+		</junit>
+	</target>
+
+	<target name="test-run" depends="test-run-openjdk"/>
+
 	<target name="test" depends="test-run">
-        <mkdir dir="build/test/report"/>
-        <junitreport todir="build/test">
-            <fileset dir="build/test" includes="TEST-*.xml"/>
-            <report todir="build/test/report"/>
-        </junitreport>
+		<mkdir dir="build/test/report"/>
+		<junitreport todir="build/test">
+			<fileset dir="build/test" includes="TEST-*.xml"/>
+			<report todir="build/test/report"/>
+		</junitreport>
 		<property name="coverage.report.dir" location="${build.dir}/coverage/report"/>
 		<mkdir dir="${coverage.report.dir}"/>
 		<delete dir="${coverage.report.dir}"/>

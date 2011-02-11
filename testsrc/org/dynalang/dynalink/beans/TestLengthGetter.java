@@ -43,7 +43,7 @@ public class TestLengthGetter extends TestCase
         final MethodHandle mh = inv.getInvocation();
         assertNotNull(mh);
         assertEquals(csd.getMethodType(), mh.type());
-        assertEquals(2, mh.invokeVarargs(array));
+        assertEquals(2, mh.invokeWithArguments(array));
     }
 
     public void testEarlyBoundCollectionLengthGetter() throws Throwable {
@@ -55,8 +55,8 @@ public class TestLengthGetter extends TestCase
         final MethodHandle mh = inv.getInvocation();
         assertNotNull(mh);
         assertEquals(csd.getMethodType(), mh.type());
-        assertEquals(0, mh.invokeVarargs(new Object[] { Collections.EMPTY_LIST }));
-        assertEquals(2, mh.invokeVarargs(new Object[] { Arrays.asList(new Object[] { "a", "b" })}));
+        assertEquals(0, mh.invokeWithArguments(new Object[] { Collections.EMPTY_LIST }));
+        assertEquals(2, mh.invokeWithArguments(new Object[] { Arrays.asList(new Object[] { "a", "b" })}));
     }
 
     public void testEarlyBoundMapLengthGetter() throws Throwable {
@@ -68,8 +68,8 @@ public class TestLengthGetter extends TestCase
         final MethodHandle mh = inv.getInvocation();
         assertNotNull(mh);
         assertEquals(csd.getMethodType(), mh.type());
-        assertEquals(0, mh.invokeVarargs(Collections.EMPTY_MAP));
-        assertEquals(1, mh.invokeVarargs(Collections.singletonMap("a", "b")));
+        assertEquals(0, mh.invokeWithArguments(Collections.EMPTY_MAP));
+        assertEquals(1, mh.invokeWithArguments(Collections.singletonMap("a", "b")));
     }
     
     public void testLateBoundLengthGetter() throws Throwable {
@@ -79,31 +79,31 @@ public class TestLengthGetter extends TestCase
         
         linker.link(callSite);
         assertEquals(0, callSite.getRelinkCount());
-        MethodHandle callSiteInvoker = MethodHandles.dynamicInvoker(callSite);
-        assertEquals(2, callSiteInvoker.invokeVarargs(new int[2]));
+        MethodHandle callSiteInvoker = callSite.dynamicInvoker();
+        assertEquals(2, callSiteInvoker.invokeWithArguments(new int[2]));
         assertEquals(1, callSite.getRelinkCount());
-        assertEquals(3, callSiteInvoker.invokeVarargs(new Object[] { new Object[3] }));
+        assertEquals(3, callSiteInvoker.invokeWithArguments(new Object[] { new Object[3] }));
         // No relink - length getter applies to all array classes
         assertEquals(1, callSite.getRelinkCount());
-        assertEquals(4, callSiteInvoker.invokeVarargs(new long[4]));
+        assertEquals(4, callSiteInvoker.invokeWithArguments(new long[4]));
         // Still no relink
         assertEquals(1, callSite.getRelinkCount());
         
-        assertEquals(5, callSiteInvoker.invokeVarargs(new Object[] { Arrays.asList(new Object[5])}));
+        assertEquals(5, callSiteInvoker.invokeWithArguments(new Object[] { Arrays.asList(new Object[5])}));
         // Relinked for collections
         assertEquals(2, callSite.getRelinkCount());
-        assertEquals(0, callSiteInvoker.invokeVarargs(new HashSet()));
+        assertEquals(0, callSiteInvoker.invokeWithArguments(new HashSet()));
         // No relink for various collection types
         assertEquals(2, callSite.getRelinkCount());
         
-        assertEquals(1, callSiteInvoker.invokeVarargs(Collections.singletonMap("1", "2")));
+        assertEquals(1, callSiteInvoker.invokeWithArguments(Collections.singletonMap("1", "2")));
         // Relinked for maps
         assertEquals(3, callSite.getRelinkCount());
-        assertEquals(0, callSiteInvoker.invokeVarargs(new HashMap()));
+        assertEquals(0, callSiteInvoker.invokeWithArguments(new HashMap()));
         // No relink for various map types
         assertEquals(3, callSite.getRelinkCount());
         
-        assertEquals(6, callSiteInvoker.invokeVarargs(new long[6]));
+        assertEquals(6, callSiteInvoker.invokeWithArguments(new long[6]));
         // Relinked again for arrays
         assertEquals(4, callSite.getRelinkCount());
     }

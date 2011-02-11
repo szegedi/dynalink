@@ -130,16 +130,16 @@ public class Guards
     }
 
     private static final MethodHandle IS_OF_CLASS = 
-        MethodHandles.lookup().findStatic(Guards.class, "_isOfClass", 
-                MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
+        Lookup.PUBLIC.findStatic(Guards.class, "_isOfClass", 
+            MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
     
     private static final MethodHandle IS_INSTANCE = 
-        MethodHandles.lookup().findVirtual(Class.class, "isInstance", 
-                MethodType.methodType(Boolean.TYPE, Object.class));
+        Lookup.PUBLIC.findVirtual(Class.class, "isInstance", 
+            MethodType.methodType(Boolean.TYPE, Object.class));
 
     private static final MethodHandle IS_ARRAY = 
-        MethodHandles.lookup().findStatic(Guards.class, "_isArray", 
-                MethodType.methodType(Boolean.TYPE, Object.class));
+        Lookup.PUBLIC.findStatic(Guards.class, "_isArray", 
+            MethodType.methodType(Boolean.TYPE, Object.class));
 
     /**
      * This method is public for implementation reasons. Do not invoke it 

@@ -2,6 +2,8 @@ import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
 import java.dyn.MethodType;
 
+import org.dynalang.dynalink.support.Lookup;
+
 public class TestCatchException
 {
     public static void main(String[] args) throws Throwable
@@ -19,7 +21,7 @@ public class TestCatchException
     
     private static MethodHandle findStatic(String name)
     {
-        return MethodHandles.publicLookup().findStatic(
+        return Lookup.PUBLIC.findStatic(
                 TestCatchException.class, name, MethodType.methodType(int.class, 
                         Object.class));
     }

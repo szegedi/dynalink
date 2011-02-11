@@ -16,7 +16,7 @@
 package org.dynalang.dynalink.beans;
 
 import java.beans.IntrospectionException;
-import java.dyn.NoAccessException;
+import java.dyn.InvokeDynamicBootstrapError;
 import java.util.List;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
@@ -73,7 +73,7 @@ public class BeansLinker implements GuardingDynamicLinker {
         
         // Every name should be in at least the "dyn:<op>" form
         if(l < 2) {
-            throw new NoAccessException("Invalid name " + name);
+            throw new InvokeDynamicBootstrapError("Invalid name " + name);
         }
         
         final Object receiver = arguments[0];

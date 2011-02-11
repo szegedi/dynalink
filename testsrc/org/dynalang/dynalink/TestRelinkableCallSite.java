@@ -15,7 +15,7 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.JavaMethodHandle;
+import java.dyn.MethodHandles;
 import java.dyn.MethodType;
 
 import junit.framework.TestCase;
@@ -53,11 +53,11 @@ public class TestRelinkableCallSite extends TestCase
     public void testRelinkSetTwice()
     {
         RelinkableCallSite cs = new MonomorphicCallSite("", MethodType.methodType(
-                Void.TYPE));
-        cs.setRelink(new JavaMethodHandle("x") { public void x() { } });
+                Object.class));
+        cs.setRelink(MethodHandles.constant(Object.class, new Object()));
         try
         {
-            cs.setRelink(new JavaMethodHandle("x") { public void x() { } });
+            cs.setRelink(MethodHandles.constant(Object.class, new Object()));
             fail();
         }
         catch(IllegalStateException e)

@@ -15,7 +15,7 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.CallSite;
+import java.dyn.MutableCallSite;
 import java.dyn.MethodHandle;
 import java.dyn.MethodType;
 
@@ -27,7 +27,7 @@ import java.dyn.MethodType;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public abstract class RelinkableCallSite extends CallSite
+public abstract class RelinkableCallSite extends MutableCallSite
 {
     private MethodHandle relink;
     private final CallSiteDescriptor callSiteDescriptor;
@@ -38,6 +38,7 @@ public abstract class RelinkableCallSite extends CallSite
      * @param type the method type of the call site
      */
     protected RelinkableCallSite(String name, MethodType type) {
+        super(type);
         callSiteDescriptor = new CallSiteDescriptor(name, type);
     }
     
