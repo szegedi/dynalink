@@ -12,6 +12,11 @@ single "master" linker, and
 * a set of method naming and argument passing conventions, used through 
 invokedynamic that make up the commonly understood metaobject protocol.
 
+As an added bonus, it also contains a POJO linker that allows your language to
+link with plain Java objects. It manages conformance to JavaBeans 
+specification, and provides full support for vararg methods and optimized 
+overloaded method resolution. 
+
 Building
 ========
 Here's how to build the JAR file:
