@@ -29,32 +29,7 @@ Known issues
 
 * It doesn't currently work with Rémi Forax's JSR-292 backport, as the backport
 was not updated to reflect newest JSR-292
-
-Setting up
-----------
-* Set up the project in a directory. Preferrably create a `dynalang` directory
-to hold the `dynalink` module, i.e. `dynalang/dynalink`. Ivy will create 
-another directory, `dynalang/ivy` as part of the build process. That's 
-facilitated so that local Ivy repo is shared across different `dynalang` 
-modules (in case you're using others; you needn't for this module, it is 
-self-contained). 
-* You need to point out where's the OpenJDK. By default, the build script 
-expects it in `${user.home}/Documents/projects/openjdk/bsd-port/build/bsd-i586/j2sdk-image`
-(which is actually a resonable default for people working on Mac OS X who
-build their own OpenJDK). If yours is elsewhere, create a file named 
-`build.properties` in the `invoke` directory, and specify
-    openjdk.dir=path/to/my/openjdk
-in it.
-* If you downloaded the JSR-292 backport, make sure you built it and then also
-set up
-    backport.dir=path/to/my/backport
-in `build.properties` file. If you don't set it, it is by default looked up in
-`${user.home}/Documents/workspace/invokedynamic-backport` (because that's 
-where Eclipse would put it by default when you check it out through SVN).
-* Issue `ant jar`. That's it. The JAR file is in the `build` subdirectory. You 
-can also try `ant test`, and `ant doc` that creates JavaDoc. You might worry 
-that many of the tests fail. Unfortunately, both implementations of JSR-292 
-(in OpenJDK and in the backport) have a fair share of bugs at the moment...   
+* Some tests still fail as MethodHandle.asCollector still doesn't work.
 
 Using the library
 =================
@@ -69,6 +44,8 @@ Using the linker facility
 -------------------------
 Have one class that creates a DynamicLinker and has a bootstrap method:
 
+    package org.mycompany.mylanguage;
+
     import java.dyn.*;
     import org.dynalang.dynalink.*;
     
@@ -76,7 +53,7 @@ Have one class that creates a DynamicLinker and has a bootstrap method:
         private static final DynamicLinker linker = 
             new DynamicLinkerFactory().createLinker();
     
-        public static CallSite bootstrap(Class<?> caller, String name, 
+        public static CallSite bootstrap(MethodHandles.Lookup lookup, String name,
             MethodType type)
         {
             final RelinkableCallSite callSite = new MonomorphicCallSite(caller, 
@@ -86,12 +63,17 @@ Have one class that creates a DynamicLinker and has a bootstrap method:
         }
     }
 
-Now, from every class you emit that uses invokedynamic, you need to do this:
+Now, from every class you emit that uses invokedynamic, you would need to emit
+an invokedynamic instruction that specifies this method as its bootstrap 
+method. I.e. if you used the ASM 4 library and wanted to emit an invokedynamic
+call to a property getter "color" that you'd expect to return a string, you'd 
+do:
 
-    static {
-        java.dyn.Linkage.registerBootstrapMethod(MyLanguageRuntime.class, 
-            "bootstrap");
-    } 
+    mv.visitIndyMethodInsn("dyn:getProp:color", "(Ljava/lang/Object;)Ljava/lang/String;", 
+        new MHandle(MHandle.REF_invokeStatic, "org/mycompany/mylanguage/MyLanguageRuntime",
+        "bootstrap", MethodType.methodType(CallSite.class, 
+	        MethodHandles.Lookup.class, String.class, MethodType.class).toMethodDescriptorString()),
+        new Object[0]);
 
 Note how you'll need to use a special subclass of CallSite named 
 `RelinkableCallSite`. It's actually an abstract class that allows its 
@@ -187,7 +169,11 @@ Finally, what kind of invocations to provide? What method names and signatures
 to expect and react to? Also, what method names and signatures to emit in your
 own `invokedynamic` instructions? For purposes of interoperability, we'll 
 reserve the method namespace `dyn` for the commonly-understood MOP, meaning 
-every method name will start with `dyn:`. The operations are:
+every method name will start with `dyn:`. Also note that when we use the
+`INVOKEDYNAMIC` instruction, for sake of brevity we omit the business of 
+specifying a bootstrap method that we already explained how to do previously.
+
+The operations are:
 
 1. Get property of an object with a constant name
 
