@@ -42,7 +42,16 @@ public class OverloadedDynamicMethod implements DynamicMethod
      */
     private final LinkedList<MethodHandleEx> methods = 
         new LinkedList<MethodHandleEx>();
-    
+    private final ClassLoader classLoader;
+
+    /**
+     * Creates a new overloaded dynamic method.
+     * @param clazz the class this method belongs to
+     */
+    public OverloadedDynamicMethod(Class<?> clazz) {
+        this.classLoader = clazz.getClassLoader();
+    }
+
     public MethodHandle getInvocation(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices)
@@ -138,9 +147,9 @@ public class OverloadedDynamicMethod implements DynamicMethod
         }
         final int paramCount = callSiteType.parameterCount();
         final OverloadedMethod fixArgsMethod = new OverloadedMethod(
-                fixArgMethods, paramCount, false);
+                fixArgMethods, paramCount, false, classLoader);
         final OverloadedMethod varArgsMethod = varArgMethods.isEmpty() ? null : 
-            new OverloadedMethod(varArgMethods, paramCount, true);
+            new OverloadedMethod(varArgMethods, paramCount, true, classLoader);
         if(varArgsMethod == null) {
             return fixArgsMethod.getFixArgsInvocation(linkerServices, callSiteType);
         }

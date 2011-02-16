@@ -16,7 +16,9 @@
 package org.dynalang.dynalink.beans;
 
 import java.beans.IntrospectionException;
+import java.dyn.ClassValue;
 import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
@@ -24,7 +26,6 @@ import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.GuardingDynamicLinker;
 import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.support.ClassMap;
 
 /**
  * A linker for POJOs. Normally used as the ultimate fallback linker by the
@@ -33,25 +34,22 @@ import org.dynalang.dynalink.support.ClassMap;
  * @version $Id: $
  */
 public class BeansLinker implements GuardingDynamicLinker {
-    private final ClassMap<BeanLinker> linkers;
+    private static final ClassValue<BeanLinker> linkers = new ClassValue<BeanLinker>() {
+        @Override
+        protected BeanLinker computeValue(Class<?> clazz) {
+            try {
+                return new BeanLinker(clazz);
+            }
+            catch(IntrospectionException e) {
+                throw new UndeclaredThrowableException(e);
+            }
+        }
+    };
     
     /**
-     * Creates a new POJO linker associated with a class loader.
-     * @param classLoader the class loader associated with the linker. The 
-     * linker will not strongly reference cached introspection data for classes
-     * that aren't visible through the class loader, see {@link ClassMap} for
-     * details.
-     */
-    public BeansLinker(ClassLoader classLoader) {
-        linkers = new ClassMap<BeanLinker>(classLoader);
-    }
-    
-    /**
-     * Creates a new POJO linker associated with the current thread context 
-     * class loader.
+     * Creates a new POJO linker.
      */
     public BeansLinker() {
-        this(Thread.currentThread().getContextClassLoader());
     }
 
     public GuardedInvocation getGuardedInvocation(
@@ -82,16 +80,7 @@ public class BeansLinker implements GuardingDynamicLinker {
             return null;
         }
         
-        return getLinker(receiver.getClass()).getGuardedInvocation(
+        return linkers.get(receiver.getClass()).getGuardedInvocation(
                 callSiteDescriptor, linkerServices, arguments);
-    }
-    
-    private BeanLinker getLinker(Class<?> clazz) throws IntrospectionException {
-        BeanLinker linker = linkers.get(clazz);
-        if(linker == null) {
-            linker = new BeanLinker(clazz);
-            linkers.put(clazz, linker);
-        }
-        return linker;
     }
 }

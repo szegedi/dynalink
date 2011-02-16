@@ -15,6 +15,7 @@
 */
 package org.dynalang.dynalink.support;
 
+import java.dyn.ClassValue;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +31,7 @@ import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
  * seen class is encountered, all linkers are invoked sequentially until one 
  * returns a value other than null. This linker is then bound to the class, and
  * next time a receiver of same type is encountered, the linking is delegated 
- * to that linker first, speeding up dispatch. Note that an instance of this 
- * class is also bound to a class loader, and will only cache lookup 
- * information for classes visible to the class loader, in order to not create 
- * strong references to classes in foreign class loaders. (NOTE: might explore 
- * <a href="http://dow.ngra.de/2009/06/15/classloaderlocal-how-to-avoid-classloader-leaks-on-application-redeploy">
- * Jevgeni Kabanov's ClassLoaderLocal</a> in future to lift the limitation.
+ * to that linker first, speeding up dispatch.
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -44,24 +40,33 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
     private static final long serialVersionUID = 1L;
 
     private final TypeBasedGuardingDynamicLinker[] linkers;
-    private final ClassMap<TypeBasedGuardingDynamicLinker> classToLinker;
+    private final ClassValue<TypeBasedGuardingDynamicLinker> classToLinker = new ClassValue<TypeBasedGuardingDynamicLinker>() {
+        protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
+            for(TypeBasedGuardingDynamicLinker linker: linkers) {
+                if(linker.canLinkType(clazz)) {
+                    return linker;
+                }
+            }
+            return BottomGuardingDynamicLinker.INSTANCE;
+        }
+    };
 
     /**
      * Creates a new composite type-based linker.
      * @param linkers the component linkers
-     * @param classLoader the class loader determining which classes are safe
-     * to cache information for
      */
     public CompositeTypeBasedGuardingDynamicLinker(
-            Iterable<? extends TypeBasedGuardingDynamicLinker> linkers,
-            ClassLoader classLoader) {
+            Iterable<? extends TypeBasedGuardingDynamicLinker> linkers) {
         final List<TypeBasedGuardingDynamicLinker> l = 
             new LinkedList<TypeBasedGuardingDynamicLinker>();
         for (TypeBasedGuardingDynamicLinker resolver : linkers) {
             l.add(resolver);
         }
         this.linkers = l.toArray(new TypeBasedGuardingDynamicLinker[l.size()]);
-        this.classToLinker = new ClassMap<TypeBasedGuardingDynamicLinker>(classLoader);
+    }
+
+    public boolean canLinkType(Class<?> type) {
+        return classToLinker.get(type) != BottomGuardingDynamicLinker.INSTANCE;
     }
 
     public GuardedInvocation getGuardedInvocation(
@@ -72,26 +77,12 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
         if(arguments.length == 0) {
             return null;
         }
-        final Class<?> clazz = arguments[0].getClass();
-        final TypeBasedGuardingDynamicLinker linker = classToLinker.get(clazz);
-        if(linker != null) {
-            final GuardedInvocation gi = linker.getGuardedInvocation(
-                    callSiteDescriptor, linkerServices, arguments);
-            if(gi != null) {
-                return gi;
-            }
+        final Object obj = arguments[0];
+        if(obj == null) {
+            return null;
         }
-        for (final TypeBasedGuardingDynamicLinker newLinker : linkers) {
-            final GuardedInvocation gi = newLinker.getGuardedInvocation(
-                    callSiteDescriptor, linkerServices, arguments);
-            if(gi != null) {
-                classToLinker.put(clazz, newLinker);
-                return gi;
-            }
-        }
-        // Remember we can't resolve it.
-        classToLinker.put(clazz, BottomGuardingDynamicLinker.INSTANCE);
-        return null;
+        return classToLinker.get(obj.getClass()).getGuardedInvocation(
+            callSiteDescriptor, linkerServices, arguments);
     }
 
     /**
@@ -100,12 +91,10 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
      * will be replaced with a single instance of 
      * {@link CompositeTypeBasedGuardingDynamicLinker} that contains them.
      * @param linkers the list of linkers to optimize
-     * @param classLoader the class loader 
      * @return the optimized list
      */
     public static List<GuardingDynamicLinker> optimize(
-            Iterable<? extends GuardingDynamicLinker> linkers, 
-            ClassLoader classLoader) {
+            Iterable<? extends GuardingDynamicLinker> linkers) {
         final List<GuardingDynamicLinker> llinkers = 
             new LinkedList<GuardingDynamicLinker>();
         final List<TypeBasedGuardingDynamicLinker> tblinkers = 
@@ -115,17 +104,16 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
                 tblinkers.add((TypeBasedGuardingDynamicLinker)linker);
             }
             else {
-                addTypeBased(llinkers, tblinkers, classLoader);
+                addTypeBased(llinkers, tblinkers);
                 llinkers.add(linker);
             }
         }
-        addTypeBased(llinkers, tblinkers, classLoader);
+        addTypeBased(llinkers, tblinkers);
         return llinkers;
     }
     
     private static void addTypeBased(List<GuardingDynamicLinker> llinkers, 
-            List<TypeBasedGuardingDynamicLinker> tblinkers, 
-            ClassLoader classLoader)
+            List<TypeBasedGuardingDynamicLinker> tblinkers)
     {
         switch(tblinkers.size()) {
             case 0: {
@@ -137,8 +125,8 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
                 break;
             }
             default: {
-                llinkers.add(new CompositeTypeBasedGuardingDynamicLinker
-                        (tblinkers, classLoader));
+                llinkers.add(new CompositeTypeBasedGuardingDynamicLinker(
+                    tblinkers));
                 tblinkers.clear();
                 break;
             }

@@ -15,6 +15,7 @@
 */
 package org.dynalang.dynalink.support;
 
+import java.dyn.ClassValue;
 import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
 import java.dyn.MethodType;
@@ -38,20 +39,24 @@ import org.dynalang.dynalink.beans.support.TypeUtilities;
 public class TypeConverterFactory {
 
     private final GuardingTypeConverterFactory[] factories;
-    private final ClassMap<ClassMap<MethodHandle>> converters;
+    private final ClassValue<ClassMap<MethodHandle>> converters = new ClassValue<ClassMap<MethodHandle>>() {
+        protected ClassMap<MethodHandle> computeValue(final Class<?> sourceType) {
+            return new ClassMap<MethodHandle>(sourceType.getClassLoader()) {
+                protected MethodHandle computeValue(Class<?> targetType) {
+                    return createConverter(sourceType, targetType);
+                }
+            };
+        }
+    };
     
     /**
      * Creates a new type converter factory from the available 
      * {@link GuardingTypeConverterFactory} instances.
      * @param factories the {@link GuardingTypeConverterFactory} instances to
      * compose.
-     * @param classLoader the class loader governing the strong 
-     * referenceability of cached information, see {@link ClassMap}.
      */
     public TypeConverterFactory(
-            Iterable<GuardingTypeConverterFactory> factories, 
-            ClassLoader classLoader) {
-        converters = new ClassMap<ClassMap<MethodHandle>>(classLoader);
+            Iterable<GuardingTypeConverterFactory> factories) {
         final List<GuardingTypeConverterFactory> l = new LinkedList<GuardingTypeConverterFactory>();
         for (GuardingTypeConverterFactory factory : factories) {
             l.add(factory);
@@ -210,16 +215,7 @@ public class TypeConverterFactory {
     }
     
     private MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
-        ClassMap<MethodHandle> converterMap = converters.get(sourceType);
-        if(converterMap == null) {
-            converterMap = new ClassMap<MethodHandle>(converters.getClassLoader());
-            converters.put(sourceType, converterMap);
-        }
-        MethodHandle converter = converterMap.get(targetType);
-        if(converter == null) {
-            converter = createConverter(sourceType, targetType);
-            converterMap.put(targetType, converter);
-        }
+        final MethodHandle converter = converters.get(sourceType).get(targetType);
         return converter == IDENTITY_CONVERSION ? null : converter;
     }
     

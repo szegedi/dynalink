@@ -38,6 +38,10 @@ implements TypeBasedGuardingDynamicLinker {
     
     private BottomGuardingDynamicLinker() {
     }
+    
+    public boolean canLinkType(Class<?> type) {
+        return false;
+    }
 
     public GuardedInvocation getGuardedInvocation(
             final CallSiteDescriptor callSitedescriptor,

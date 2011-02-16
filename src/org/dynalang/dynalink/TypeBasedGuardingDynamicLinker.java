@@ -17,15 +17,20 @@ package org.dynalang.dynalink;
 
 
 /**
- * Marker interface that signifies its implementing guarding dynamic linker can 
- * determine whether it can link the call site solely based on the first 
- * argument type of the method type (which is usually the receiver class).
- * Most language-specific linkers will fall into this category, as they 
- * recognize their native objects as Java objects of classes implementing a
- * specific langauge-native interface. The linker mechanism can optimize the
- * dispatch for these linkers. 
+ * A guarding dynamic linker that can determine whether it can link the call
+ * site solely based on the first argument type of the method type (which is
+ * usually the receiver class). Most language-specific linkers will fall into
+ * this category, as they recognize their native objects as Java objects of
+ * classes implementing a specific language-native interface. The linker
+ * mechanism can optimize the dispatch for these linkers. 
  * @author Attila Szegedi
  * @version $Id: $
  */
 public interface TypeBasedGuardingDynamicLinker extends GuardingDynamicLinker {
+    /**
+     * Returns true if the linker can link an object of the specified type.
+     * @param type the type to link
+     * @return true if the linker can link the object, or false otherwise.
+     */
+    public boolean canLinkType(Class<?> type);
 }

@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentMap;
  * @version $Id: $
  * @param <T> the type of the values in the map
  */
-public class ClassMap<T> {
+public abstract class ClassMap<T> {
     private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<Class<?>, T>();
     private final Map<Class<?>, Reference<T>> weakMap = new WeakHashMap<Class<?>, Reference<T>>();
     private final ClassLoader classLoader;
@@ -41,10 +41,20 @@ public class ClassMap<T> {
      * @param classLoader the classloader that determines strong 
      * referenceability.
      */
-    public ClassMap(ClassLoader classLoader) {
+    protected ClassMap(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
-    
+
+
+    /**
+     * Compute the value associated with the given class. It is possible that
+     * the method will be invoked several times (or even concurrently) for the
+     * same class parameter.
+     * @param clazz the class to compute the value for
+     * @return the return value. Must not be null.
+     */
+    protected abstract T computeValue(Class<?> clazz);
+
     /**
      * Returns the class loader that governs the strong referenceability of 
      * this class map.
@@ -61,34 +71,41 @@ public class ClassMap<T> {
      * @return the value associated with the class
      */
     public T get(Class<?> clazz) {
-        // Check in fastest first - linkers we're allowed to strongly reference
+        // Check in fastest first - objects we're allowed to strongly reference
         final T v = map.get(clazz);
         if(v != null) {
             return v;
         }
-        // Check in linkers we aren't allowed to strongly reference
+        // Check objects we're not allowed to strongly reference
+        Reference<T> ref;
         synchronized(weakMap) {
-            Reference<T> ref = weakMap.get(clazz);
-            if(ref != null) {
-                return ref.get();
+            ref = weakMap.get(clazz);
+        }
+        if(ref != null) {
+            final T refv = ref.get();
+            if(refv != null) {
+                return refv;
             }
         }
-        return null;
-    }
-    
-    /**
-     * Associates a value with the class
-     * @param clazz the class
-     * @param v the value to associate with the class
-     */
-    public void put(Class<?> clazz, T v) {
+        // Not found in either place; create a new value
+        final T newV = computeValue(clazz);
+        assert newV != null;
+        // If allowed to strongly reference, put it in the fast map
         if(Guards.canReferenceDirectly(classLoader, clazz.getClassLoader())) {
-            map.put(clazz, v);
+            final T oldV = map.putIfAbsent(clazz, newV);
+            return oldV != null ? oldV : newV;
         }
-        else {
-            synchronized(weakMap) {
-                weakMap.put(clazz, new SoftReference<T>(v));
+        // Otherwise, put it into the weak map
+        synchronized(weakMap) {
+            ref = weakMap.get(clazz);
+            if(ref != null) {
+                final T oldV = ref.get();
+                if(oldV != null) {
+                    return oldV;
+                }
             }
+            weakMap.put(clazz, new SoftReference<T>(newV));
+            return newV;
         }
     }
 }

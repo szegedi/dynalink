@@ -113,7 +113,7 @@ public class BeanLinker implements GuardingDynamicLinker
         }
     }
     
-    private static DynamicMethod addMember(Method method, 
+    private DynamicMethod addMember(Method method, 
             DynamicMethod existing)
     {
         final MethodHandle mh = Lookup.PUBLIC.unreflect(method);
@@ -122,7 +122,7 @@ public class BeanLinker implements GuardingDynamicLinker
             return new SimpleDynamicMethod(mh, varArgs);
         }
         else if(existing instanceof SimpleDynamicMethod) {
-            OverloadedDynamicMethod odm = new OverloadedDynamicMethod();
+            OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
             odm.addMethod(((SimpleDynamicMethod)existing));
             odm.addMethod(mh, varArgs);
             return odm;

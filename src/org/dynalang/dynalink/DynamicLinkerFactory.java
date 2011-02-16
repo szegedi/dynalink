@@ -49,11 +49,8 @@ public class DynamicLinkerFactory {
     
     /**
      * Sets the class loader for automatic discovery of available linkers.
-     * If not set explicitly, then the thread context class loader will be 
-     * used. Also, this linker plays a special role in several other parts of
-     * the linking mechanism, namely various built-in linkers will only cache
-     * information for classes visible from this class loader in order to avoid
-     * class-loader related memory leaks.
+     * If not set explicitly, then the thread context class loader at the time
+     * of the constructor invocation will be used.
      * @param classLoader the class loader used for the autodiscovery of 
      * available linkers.
      */
@@ -122,8 +119,7 @@ public class DynamicLinkerFactory {
             prioritizedLinkers = Collections.emptyList();
         }
         if(fallbackLinkers == null) {
-            fallbackLinkers = Collections.singletonList(new BeansLinker(
-                    classLoader));
+            fallbackLinkers = Collections.singletonList(new BeansLinker());
         }
     
         // Gather classes of all precreated (prioritized and fallback) DIRs.
@@ -150,7 +146,7 @@ public class DynamicLinkerFactory {
         // ... and finally fallback DIRs. 
         linkers.addAll(fallbackLinkers);
         final List<GuardingDynamicLinker> optimized = 
-            CompositeTypeBasedGuardingDynamicLinker.optimize(linkers, classLoader);
+            CompositeTypeBasedGuardingDynamicLinker.optimize(linkers);
         // if there were sufficient proof it improves matters.
         final GuardingDynamicLinker composite;
         switch(linkers.size()) {
@@ -175,7 +171,7 @@ public class DynamicLinkerFactory {
             }
         }
         return new DynamicLinkerImpl(composite, new TypeConverterFactory(
-                typeConverters, classLoader));
+                typeConverters));
     }
 
     private static void addClasses(

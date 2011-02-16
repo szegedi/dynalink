@@ -51,12 +51,14 @@ class OverloadedMethod {
     private final Map<ClassString, MethodHandle> argTypesToMethods = 
         new ConcurrentHashMap<ClassString, MethodHandle>();
     private final boolean varArg;
+    private final ClassLoader classLoader;
     
     private final List<MethodHandle> methods = new LinkedList<MethodHandle>();
 
     public OverloadedMethod(List<MethodHandle> methodHandles, int argNum,
-            boolean varArg) {
+            boolean varArg, ClassLoader classLoader) {
         this.varArg = varArg;
+        this.classLoader = classLoader;
         for (MethodHandle method : methodHandles) {
             methods.add(method);
             MethodType methodType = method.type();
@@ -200,10 +202,9 @@ class OverloadedMethod {
         MethodHandle method = argTypesToMethods.get(classString);
         if(method == null) {
             method = classString.getMostSpecific(methods, varArg);
-            // TODO: pass a class loader here to avoid keeping references to
-            // unrelated classes.
-            // if(classString.isVisibleFrom(classLoader))
-            {
+            // Avoid keeping references to unrelated classes; this ruins
+            // the performance a bit, but avoids class loader memory leaks.
+            if(classString.isVisibleFrom(classLoader)) {
                 argTypesToMethods.put(classString, method);
             }
         }
@@ -211,7 +212,7 @@ class OverloadedMethod {
             throw new InvokeDynamicBootstrapError("Can't unambiguously select one of " + 
                     methods);
         }
-	return method;
+        return method;
     }
 
     public static final void _noSuchMethod() {
