@@ -176,9 +176,6 @@ public class BeanLinker implements GuardingDynamicLinker
         return null;
     }
 
-    private static MethodHandle GET_ARRAY_ELEMENT = Lookup.PUBLIC.findStatic(
-            Array.class, "get", MethodType.methodType(Object.class, Object.class, int.class));
-
     private static MethodHandle GET_LIST_ELEMENT = Lookup.PUBLIC.findVirtual(
             List.class, "get", MethodType.methodType(Object.class, int.class));
 
@@ -198,8 +195,8 @@ public class BeanLinker implements GuardingDynamicLinker
         if(declaredType.isArray()) {
             // TODO: once MethodHandles.arrayElementGetter is implemented, 
             // maybe switch.
-            return new GuardedInvocation(linkerServices.convertArguments(
-                    GET_ARRAY_ELEMENT, callSiteType), null); 
+            return new GuardedInvocation(MethodHandles.convertArguments(
+                MethodHandles.arrayElementGetter(declaredType), callSiteType), null); 
         }
         if(List.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.convertArguments(
@@ -215,8 +212,8 @@ public class BeanLinker implements GuardingDynamicLinker
         final Class<?> clazz = receiver.getClass();
         if(clazz.isArray()) {
             return new GuardedInvocation(linkerServices.convertArguments(
-                    GET_ARRAY_ELEMENT, callSiteType), Guards.isArray(0, 
-                            callSiteType)); 
+                  MethodHandles.arrayElementGetter(clazz), callSiteType), 
+                  Guards.isOfClass(clazz, callSiteType)); 
         }
         if(List.class.isInstance(receiver)) {
             return new GuardedInvocation(linkerServices.convertArguments(
@@ -232,10 +229,6 @@ public class BeanLinker implements GuardingDynamicLinker
         // list, nor maps.
         return null;
     }
-    
-    private static MethodHandle SET_ARRAY_ELEMENT = 
-        Lookup.PUBLIC.findStatic(Array.class, "set", MethodType.methodType(
-                void.class, Object.class, int.class, Object.class));
 
     private static MethodHandle SET_LIST_ELEMENT = 
         Lookup.PUBLIC.findVirtual(List.class, "set", MethodType.methodType(
@@ -257,7 +250,7 @@ public class BeanLinker implements GuardingDynamicLinker
         // advance they're dealing with an array, or a list or map, but hey... 
         if(declaredType.isArray()) {
             return new GuardedInvocation(linkerServices.convertArguments(
-                    SET_ARRAY_ELEMENT, callSiteType), null); 
+                    MethodHandles.arrayElementSetter(declaredType), callSiteType), null); 
         }
         if(List.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.convertArguments(
@@ -273,8 +266,8 @@ public class BeanLinker implements GuardingDynamicLinker
         final Class<?> clazz = receiver.getClass();
         if(clazz.isArray()) {
             return new GuardedInvocation(linkerServices.convertArguments(
-                    SET_ARRAY_ELEMENT, callSiteType), Guards.isArray(0, 
-                            callSiteType)); 
+                    MethodHandles.arrayElementSetter(clazz), callSiteType), 
+                    Guards.isOfClass(clazz,callSiteType)); 
         }
         if(List.class.isInstance(receiver)) {
             return new GuardedInvocation(linkerServices.convertArguments(
