@@ -109,7 +109,7 @@
 				<available file="${test.lib.dir}/emma.jar"/>
 				<available file="${test.lib.dir}/emma_ant.jar"/>
 				<available file="${test.lib.dir}/junit.jar"/>
-				<available file="${test.lib.dir}/asm-all.jar"/>
+				<available file="${test.lib.dir}/asm.jar"/>
 			</and>
 		</condition>
 	</target>
@@ -119,7 +119,7 @@
 		<get src="http://repo1.maven.org/maven2/emma/emma/2.1.5320/emma-2.1.5320.jar" dest="${test.lib.dir}/emma.jar" usetimestamp="true"/>
 		<get src="http://repo1.maven.org/maven2/emma/emma_ant/2.1.5320/emma_ant-2.1.5320.jar" dest="${test.lib.dir}/emma_ant.jar" usetimestamp="true"/>
 		<get src="http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar" dest="${test.lib.dir}/junit.jar" usetimestamp="true"/>
-		<get src="http://download.forge.objectweb.org/asm/asm-4.0_RC1.jar" dest="${test.lib.dir}/asm-all.jar" usetimestamp="true"/>
+		<get src="http://download.forge.objectweb.org/asm/asm-4.0_RC1.jar" dest="${test.lib.dir}/asm.jar" usetimestamp="true"/>
 	</target>
 
 	<target name="coverage-instrument" depends="compile, downloadTestLibs">
@@ -155,7 +155,7 @@
 			<classpath>
 				<pathelement path="${classes.dir}"/>
 				<pathelement path="${test.lib.dir}/junit.jar" />
-				<pathelement path="${test.lib.dir}/asm-all.jar" />
+				<pathelement path="${test.lib.dir}/asm.jar" />
 			</classpath>
 		</javac>
 		<copy toDir="${test.classes.dir}">
@@ -179,7 +179,7 @@
 				<pathelement path="${test.classes.dir}" />
 				<pathelement path="${test.lib.dir}/emma.jar"/>
 				<pathelement path="${test.lib.dir}/junit.jar"/>
-				<pathelement path="${test.lib.dir}/asm-all.jar" />
+				<pathelement path="${test.lib.dir}/asm.jar" />
 			</classpath>
 			<batchtest todir="build/test">
 				<fileset dir="${test.classes.dir}" includes="**/Test*.class" excludes="**/*$*.class, Test*.class"/>
