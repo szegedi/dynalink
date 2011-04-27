@@ -119,7 +119,7 @@
 		<get src="http://repo1.maven.org/maven2/emma/emma/2.1.5320/emma-2.1.5320.jar" dest="${test.lib.dir}/emma.jar" usetimestamp="true"/>
 		<get src="http://repo1.maven.org/maven2/emma/emma_ant/2.1.5320/emma_ant-2.1.5320.jar" dest="${test.lib.dir}/emma_ant.jar" usetimestamp="true"/>
 		<get src="http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar" dest="${test.lib.dir}/junit.jar" usetimestamp="true"/>
-		<get src="http://dl.dropbox.com/u/362958/mlvm/asm-all-4.0-beta1.jar" dest="${test.lib.dir}/asm-all.jar" usetimestamp="true"/>
+		<get src="http://download.forge.objectweb.org/asm/asm-4.0_RC1.jar" dest="${test.lib.dir}/asm-all.jar" usetimestamp="true"/>
 	</target>
 
 	<target name="coverage-instrument" depends="compile, downloadTestLibs">
@@ -196,7 +196,7 @@
 	</target>
 
 	<target name="downloadBackport" unless="backport.available" depends="checkBackportAvailable">
-		<get src="http://jvm-language-runtime.googlecode.com/files/jsr292-backport-1.5a" dest="build/jsr292-backport.zip"/>
+		<get src="http://jvm-language-runtime.googlecode.com/files/jsr292-backport-1.6.zip" dest="build/jsr292-backport.zip"/>
 		<mkdir dir="${backport.dir}"/>
 		<unzip src= "build/jsr292-backport.zip" dest="${backport.dir}"/>
 		<delete file="build/jsr292-backport.zip"/>
