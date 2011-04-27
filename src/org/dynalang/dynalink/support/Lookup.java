@@ -1,9 +1,9 @@
 package org.dynalang.dynalink.support;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
-import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.BootstrapMethodError;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -32,7 +32,7 @@ public class Lookup
     /**
      * Performs a {@link MethodHandles.Lookup#unreflect(Method)}, converting 
      * any encountered {@link IllegalAccessException} into a 
-     * {@link InvokeDynamicBootstrapError}.
+     * {@link BootstrapMethodError}.
      * @param m the method to unreflect
      * @return the unreflected method handle.
      */
@@ -41,7 +41,7 @@ public class Lookup
             return lookup.unreflect(m);
         }
         catch(IllegalAccessException e) {
-            throw new InvokeDynamicBootstrapError("Failed to unreflect " + m, e);
+            throw new BootstrapMethodError("Failed to unreflect " + m, e);
         }
     }
     /**
@@ -51,7 +51,7 @@ public class Lookup
      * @param name the name of the method
      * @param type the type of the method
      * @return a method handle for the method
-     * @throws InvokeDynamicBootstrapError if the method does not exist or is 
+     * @throws BootstrapMethodError if the method does not exist or is 
      * inaccessible.
      */
     public MethodHandle findSpecial(Class<?> declaringClass, String name, 
@@ -73,7 +73,7 @@ public class Lookup
             }
         } 
         catch (IllegalAccessException|NoSuchMethodException e) {
-            throw new InvokeDynamicBootstrapError("Failed to find special method " + 
+            throw new BootstrapMethodError("Failed to find special method " + 
                 methodDescription(declaringClass, name, type), e);
         }
     }
@@ -87,7 +87,7 @@ public class Lookup
             return lookup.findStatic(declaringClass, methodName, methodType);
         }
         catch (IllegalAccessException|NoSuchMethodException e) {
-            throw new InvokeDynamicBootstrapError("Failed to find static method " + 
+            throw new BootstrapMethodError("Failed to find static method " + 
                 methodDescription(declaringClass, methodName, methodType), e);
           }
     }
@@ -97,7 +97,7 @@ public class Lookup
           return lookup.findVirtual(declaringClass, methodName, methodType);
       }
       catch (IllegalAccessException|NoSuchMethodException e) {
-          throw new InvokeDynamicBootstrapError("Failed to find virtual method " + 
+          throw new BootstrapMethodError("Failed to find virtual method " + 
               methodDescription(declaringClass, methodName, methodType), e);
         }
   }

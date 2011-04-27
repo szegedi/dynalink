@@ -1,6 +1,6 @@
 package org.dynalang.dynalink.support;
 
-import java.dyn.MethodHandles;
+import java.lang.invoke.MethodHandles;
 
 /**
  * @author Attila Szegedi

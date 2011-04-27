@@ -8,9 +8,9 @@ import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_7;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MHandle;

@@ -15,9 +15,9 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodType;
-import java.dyn.WrongMethodTypeException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.WrongMethodTypeException;
 
 import org.dynalang.dynalink.support.Guards;
 

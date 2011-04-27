@@ -15,9 +15,9 @@
 */
 package org.dynalang.dynalink.greeter;
 
-import java.dyn.CallSite;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;

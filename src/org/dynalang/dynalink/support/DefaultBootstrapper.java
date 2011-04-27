@@ -1,7 +1,7 @@
 package org.dynalang.dynalink.support;
 
-import java.dyn.CallSite;
-import java.dyn.MethodType;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;

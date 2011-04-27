@@ -15,10 +15,10 @@
 */
 package org.dynalang.dynalink.beans;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
-import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.BootstrapMethodError;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -157,7 +157,7 @@ class OverloadedMethod {
     {
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
-            throw new InvokeDynamicBootstrapError("None of the methods " + methods + 
+            throw new BootstrapMethodError("None of the methods " + methods + 
                     " matches arguments");
         }
         return method.invokeWithArguments(args); 
@@ -183,7 +183,7 @@ class OverloadedMethod {
         }
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
-            throw new InvokeDynamicBootstrapError("None of the methods " + methods + 
+            throw new BootstrapMethodError("None of the methods " + methods + 
                 " matches arguments");
         }
         return SimpleDynamicMethod.collectArguments(method, 
@@ -209,7 +209,7 @@ class OverloadedMethod {
             }
         }
         if(method == AMBIGUOUS_METHOD) {
-            throw new InvokeDynamicBootstrapError("Can't unambiguously select one of " + 
+            throw new BootstrapMethodError("Can't unambiguously select one of " + 
                     methods);
         }
         return method;

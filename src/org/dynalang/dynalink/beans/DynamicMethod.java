@@ -15,7 +15,7 @@
 */
 package org.dynalang.dynalink.beans;
 
-import java.dyn.MethodHandle;
+import java.lang.invoke.MethodHandle;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.LinkerServices;

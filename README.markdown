@@ -51,7 +51,7 @@ Have one class that creates a DynamicLinker and has a bootstrap method:
 
     package org.mycompany.mylanguage;
 
-    import java.dyn.*;
+    import java.lang.invoke.*;
     import org.dynalang.dynalink.*;
     
     class MyLanguageRuntime {

@@ -15,9 +15,9 @@
 */
 package org.dynalang.dynalink.beans;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodType;
-import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.lang.BootstrapMethodError;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -88,7 +88,7 @@ public class TestBeansLinker extends TestCase
                     "dyn", MethodType.methodType(int.class)), null, new Object[1]);
             fail();
         }
-        catch(InvokeDynamicBootstrapError e)
+        catch(BootstrapMethodError e)
         {
             // ignored - it is supposed to fail
         }

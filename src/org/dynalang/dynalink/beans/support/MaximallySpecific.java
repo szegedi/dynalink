@@ -1,6 +1,6 @@
 package org.dynalang.dynalink.beans.support;
 
-import java.dyn.MethodType;
+import java.lang.invoke.MethodType;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;

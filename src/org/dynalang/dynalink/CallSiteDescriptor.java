@@ -15,8 +15,8 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.MethodType;
-import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.invoke.MethodType;
+import java.lang.BootstrapMethodError;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,11 +93,11 @@ public class CallSiteDescriptor
      * Checks that the method type has exactly the desired number of arguments,
      * throws an exception if it doesn't.
      * @param count the desired parameter count
-     * @throws InvokeDynamicBootstrapError if the parameter count doesn't match
+     * @throws BootstrapMethodError if the parameter count doesn't match
      */
     public void assertParameterCount(int count) {
         if(methodType.parameterCount() != count) {
-            throw new InvokeDynamicBootstrapError(tokenizedName + " must have exactly " 
+            throw new BootstrapMethodError(tokenizedName + " must have exactly " 
                     + count + " parameters");
         }
     }

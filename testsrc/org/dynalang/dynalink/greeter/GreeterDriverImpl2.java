@@ -15,7 +15,7 @@
 */
 package org.dynalang.dynalink.greeter;
 
-import java.dyn.Linkage;
+import java.lang.invoke.Linkage;
 
 /**
  * This class is used as a template for the dynamically created class that

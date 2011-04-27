@@ -1,8 +1,8 @@
 package org.dynalang.dynalink.beans;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import junit.framework.TestCase;
 

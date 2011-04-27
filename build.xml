@@ -23,7 +23,8 @@
 
 	<property file="build.properties" />
 	<property name="openjdk.base.dir" location="build/openjdk"/>
-	<property name="openjdk.dir" location="${openjdk.base.dir}/java-1.7.0-internal-mlvm-2011_01_31"/>
+	<property name="openjdk.version" value="java-1.7.0-internal-mlvm-2011_04_04"/>
+	<property name="openjdk.dir" location="${openjdk.base.dir}/${openjdk.version}"/>
 	<property name="backport.dir" location="build/jsr292-backport"/>
 	<property file="build.properties" />
 	<property name="openjdk.rt.jar" location="${openjdk.dir}/jre/lib/rt.jar"/>
@@ -47,7 +48,7 @@
 
 	<target name="downloadOpenJdk" unless="openjdk.available" depends="checkOpenJdkAvailable">
 		<mkdir dir="${openjdk.base.dir}"/>
-		<get src="http://www.concord.org/~sbannasch/mlvm/java-1.7.0-internal-mlvm-2011_01_31.tar.gz" dest="${openjdk.base.dir}/openjdk.tgz" usetimestamp="true"/>
+		<get src="http://www.concord.org/~sbannasch/mlvm/${openjdk.version}.tar.gz" dest="${openjdk.base.dir}/openjdk.tgz" usetimestamp="true"/>
 		<!-- Not using <untar> task as it doesn't preserve UNIX permissions -->
 		<exec executable="tar" dir="${openjdk.base.dir}">
 			<arg value="xzf"/>

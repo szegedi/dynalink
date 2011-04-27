@@ -15,9 +15,9 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.MutableCallSite;
-import java.dyn.MethodHandle;
-import java.dyn.MethodType;
+import java.lang.invoke.MutableCallSite;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 
 /**
  * Base class for relinkable call sites. Language runtimes wishing to use this

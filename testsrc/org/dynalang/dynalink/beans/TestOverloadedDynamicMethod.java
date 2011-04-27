@@ -15,9 +15,9 @@
 */
 package org.dynalang.dynalink.beans;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodType;
-import java.dyn.WrongMethodTypeException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.WrongMethodTypeException;
 import java.util.Collections;
 
 import junit.framework.TestCase;

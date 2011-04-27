@@ -15,9 +15,9 @@
 */
 package org.dynalang.dynalink.support;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;

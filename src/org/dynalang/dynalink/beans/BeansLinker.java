@@ -16,8 +16,7 @@
 package org.dynalang.dynalink.beans;
 
 import java.beans.IntrospectionException;
-import java.dyn.ClassValue;
-import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.BootstrapMethodError;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 
@@ -71,7 +70,7 @@ public class BeansLinker implements GuardingDynamicLinker {
         
         // Every name should be in at least the "dyn:<op>" form
         if(l < 2) {
-            throw new InvokeDynamicBootstrapError("Invalid name " + name);
+            throw new BootstrapMethodError("Invalid name " + name);
         }
         
         final Object receiver = arguments[0];

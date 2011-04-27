@@ -15,8 +15,8 @@
 */
 package org.dynalang.dynalink;
 
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import junit.framework.TestCase;
 

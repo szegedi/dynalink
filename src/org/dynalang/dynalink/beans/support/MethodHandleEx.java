@@ -1,6 +1,6 @@
 package org.dynalang.dynalink.beans.support;
 
-import java.dyn.MethodHandle;
+import java.lang.invoke.MethodHandle;
 
 /**
  * Method handle with a varArg flag.

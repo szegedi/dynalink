@@ -1,9 +1,9 @@
-import java.dyn.CallSite;
-import java.dyn.ConstantCallSite;
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
-import java.dyn.InvokeDynamicBootstrapError;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.ConstantCallSite;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.BootstrapMethodError;
 
 
 public class InvokeDynamicDemo
@@ -21,11 +21,11 @@ public class InvokeDynamicDemo
                         "implForBar", callSiteType.changeReturnType(Void.TYPE));
             }
             else {
-                throw new InvokeDynamicBootstrapError();
+                throw new BootstrapMethodError();
             }
         }
         catch(IllegalAccessException|NoSuchMethodException e) {
-            throw new InvokeDynamicBootstrapError(e);
+            throw new BootstrapMethodError(e);
         }
         return new ConstantCallSite(MethodHandles.convertArguments(mh, callSiteType));
     }

@@ -1,6 +1,6 @@
 package org.dynalang.dynalink.beans;
 
-import java.dyn.MethodType;
+import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.MonomorphicCallSite;
