@@ -27,15 +27,15 @@ import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
 
 /**
- * A composite type-based guarding dynamic linker. When a receiver of a not yet 
- * seen class is encountered, all linkers are invoked sequentially until one 
+ * A composite type-based guarding dynamic linker. When a receiver of a not yet
+ * seen class is encountered, all linkers are invoked sequentially until one
  * returns a value other than null. This linker is then bound to the class, and
- * next time a receiver of same type is encountered, the linking is delegated 
+ * next time a receiver of same type is encountered, the linking is delegated
  * to that linker first, speeding up dispatch.
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class CompositeTypeBasedGuardingDynamicLinker 
+public class CompositeTypeBasedGuardingDynamicLinker
 implements TypeBasedGuardingDynamicLinker, Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -57,7 +57,7 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
      */
     public CompositeTypeBasedGuardingDynamicLinker(
             Iterable<? extends TypeBasedGuardingDynamicLinker> linkers) {
-        final List<TypeBasedGuardingDynamicLinker> l = 
+        final List<TypeBasedGuardingDynamicLinker> l =
             new LinkedList<TypeBasedGuardingDynamicLinker>();
         for (TypeBasedGuardingDynamicLinker resolver : linkers) {
             l.add(resolver);
@@ -71,7 +71,7 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
 
     public GuardedInvocation getGuardedInvocation(
             final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices, final Object... arguments) 
+            final LinkerServices linkerServices, final Object... arguments)
     throws Exception
     {
         if(arguments.length == 0) {
@@ -86,18 +86,18 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
     }
 
     /**
-     * Optimizes a list of type-based linkers. If a group of adjacent linkers 
-     * in the list all implement {@link TypeBasedGuardingDynamicLinker}, they 
-     * will be replaced with a single instance of 
+     * Optimizes a list of type-based linkers. If a group of adjacent linkers
+     * in the list all implement {@link TypeBasedGuardingDynamicLinker}, they
+     * will be replaced with a single instance of
      * {@link CompositeTypeBasedGuardingDynamicLinker} that contains them.
      * @param linkers the list of linkers to optimize
      * @return the optimized list
      */
     public static List<GuardingDynamicLinker> optimize(
             Iterable<? extends GuardingDynamicLinker> linkers) {
-        final List<GuardingDynamicLinker> llinkers = 
+        final List<GuardingDynamicLinker> llinkers =
             new LinkedList<GuardingDynamicLinker>();
-        final List<TypeBasedGuardingDynamicLinker> tblinkers = 
+        final List<TypeBasedGuardingDynamicLinker> tblinkers =
             new LinkedList<TypeBasedGuardingDynamicLinker>();
         for (GuardingDynamicLinker linker : linkers) {
             if(linker instanceof TypeBasedGuardingDynamicLinker) {
@@ -111,8 +111,8 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
         addTypeBased(llinkers, tblinkers);
         return llinkers;
     }
-    
-    private static void addTypeBased(List<GuardingDynamicLinker> llinkers, 
+
+    private static void addTypeBased(List<GuardingDynamicLinker> llinkers,
             List<TypeBasedGuardingDynamicLinker> tblinkers)
     {
         switch(tblinkers.size()) {

@@ -36,17 +36,17 @@ public class CallSiteDescriptor
     private final List<String> tokenizedName;
     private final String name;
     private final MethodType methodType;
-    
+
     /**
      * Create a new call site descriptor from explicit information.
      * @param tokenizedName the tokenized name of the method
      * @param methodType the method type
      */
     public CallSiteDescriptor(List<String> tokenizedName, MethodType methodType) {
-        this(untokenizeName(tokenizedName), internElements(tokenizedName), 
+        this(untokenizeName(tokenizedName), internElements(tokenizedName),
                 methodType);
     }
-    
+
     /**
      * Create a new call site descriptor from explicit information.
      * @param name the name of the method
@@ -55,8 +55,8 @@ public class CallSiteDescriptor
     public CallSiteDescriptor(String name, MethodType methodType) {
         this(name, tokenizeName(name), methodType);
     }
-    
-    private CallSiteDescriptor(String name, List<String> tokenizedName, 
+
+    private CallSiteDescriptor(String name, List<String> tokenizedName,
             MethodType methodType) {
         this.name = name;
         this.tokenizedName = Collections.unmodifiableList(tokenizedName);
@@ -70,17 +70,17 @@ public class CallSiteDescriptor
     public MethodType getMethodType() {
         return methodType;
     }
-    
+
     /**
      * Returns the tokenized name of the method at the call site.
      * @return name of the method at the call site. Returned is an unmodifiable
-     * list of interned strings representing the name tokenized at colon ":" 
+     * list of interned strings representing the name tokenized at colon ":"
      * characters.
      */
     public List<String> getTokenizedName() {
         return tokenizedName;
     }
-    
+
     /**
      * Returns the untokenized name of the method at the call site.
      * @return name of the method at the call site.
@@ -88,7 +88,7 @@ public class CallSiteDescriptor
     public String getName() {
         return name;
     }
-    
+
     /**
      * Checks that the method type has exactly the desired number of arguments,
      * throws an exception if it doesn't.
@@ -97,7 +97,7 @@ public class CallSiteDescriptor
      */
     public void assertParameterCount(int count) {
         if(methodType.parameterCount() != count) {
-            throw new BootstrapMethodError(tokenizedName + " must have exactly " 
+            throw new BootstrapMethodError(tokenizedName + " must have exactly "
                     + count + " parameters");
         }
     }
@@ -111,7 +111,7 @@ public class CallSiteDescriptor
         lname.trimToSize();
         return lname;
     }
-    
+
     private static List<String> internElements(Collection<String> list) {
         final List<String> l = new ArrayList<String>(list);
         for(ListIterator<String> it = l.listIterator(); it.hasNext();) {

@@ -22,7 +22,7 @@ package org.dynalang.dynalink;
  * usually the receiver class). Most language-specific linkers will fall into
  * this category, as they recognize their native objects as Java objects of
  * classes implementing a specific language-native interface. The linker
- * mechanism can optimize the dispatch for these linkers. 
+ * mechanism can optimize the dispatch for these linkers.
  * @author Attila Szegedi
  * @version $Id: $
  */

@@ -22,7 +22,7 @@ import java.lang.invoke.WrongMethodTypeException;
 import org.dynalang.dynalink.support.Guards;
 
 /**
- * A tuple of an invocation method handle and a guard method handle that 
+ * A tuple of an invocation method handle and a guard method handle that
  * defines the validity of the invocation. The method handle is suitable for
  * invocation at a particular call site for particular arguments, and might be
  * used for subsequent invocations as long as the guard condition is fulfilled.
@@ -37,9 +37,9 @@ public class GuardedInvocation
 
     /**
      * Creates a new guarded invocation.
-     * @param invocation the method handle representing the invocation. Must 
+     * @param invocation the method handle representing the invocation. Must
      * not be null.
-     * @param guard the method handle representing the guard. Must have the 
+     * @param guard the method handle representing the guard. Must have the
      * same method type as the invocation, except it must return boolean. For
      * some useful guards, check out the {@link Guards} class. It can be null
      * to represent an unconditional invocation, although this is not really
@@ -53,7 +53,7 @@ public class GuardedInvocation
         this.invocation = invocation;
         this.guard = guard;
     }
-    
+
     /**
      * Returns the invocation method handle.
      * @return the invocation method handle. It will never be null.
@@ -61,31 +61,31 @@ public class GuardedInvocation
     public MethodHandle getInvocation() {
         return invocation;
     }
-    
+
     /**
-     * Returns the guard method handle. 
+     * Returns the guard method handle.
      * @return the guard method handle. Can be null to signify an unconditional
      * invocation.
      */
     public MethodHandle getGuard() {
         return guard;
     }
-    
+
     /**
      * Asserts that the invocation is of the specified type, and the guard (if
      * present) is of the specified type with a boolean return type.
      * @param type the asserted type
      * @throws WrongMethodTypeException if the invocation and the guard are not
-     * of the expected method type. 
+     * of the expected method type.
      */
     public void assertType(MethodType type) {
         assertType(invocation, type);
         assertType(guard, type.changeReturnType(Boolean.TYPE));
     }
-    
+
     private static void assertType(MethodHandle mh, MethodType type) {
         if(!mh.type().equals(type)) {
-            throw new WrongMethodTypeException("Expected type: " + type + 
+            throw new WrongMethodTypeException("Expected type: " + type +
                     " actual type: " + mh.type());
         }
     }

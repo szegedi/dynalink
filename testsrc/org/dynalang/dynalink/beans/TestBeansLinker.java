@@ -52,9 +52,9 @@ public class TestBeansLinker extends TestCase
             {
                 throw new AssertionFailedError();
             }
-            
+
         };
-        
+
         // Can't link with null arguments
         assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE)), ls, (Object[])null));
@@ -65,21 +65,21 @@ public class TestBeansLinker extends TestCase
 
         // Can't link with single null argument
         assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
-                "dyn:foo", MethodType.methodType(Void.TYPE, Object.class)), ls, 
+                "dyn:foo", MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object[] { null }));
 
         // Can't link with name that has less than two components
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor("", 
+        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor("",
                 MethodType.methodType(Void.TYPE, Object.class)), ls, new Object()));
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor("foo", 
+        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor("foo",
                 MethodType.methodType(Void.TYPE, Object.class)), ls, new Object()));
 
         // Can't link with name that doesn't start with dyn:
         assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
-                "dynx:foo", MethodType.methodType(Void.TYPE, Object.class)), ls, 
+                "dynx:foo", MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object()));
     }
-    
+
     public void testInvalidName() throws Exception
     {
         try
@@ -93,5 +93,5 @@ public class TestBeansLinker extends TestCase
             // ignored - it is supposed to fail
         }
     }
-    
+
 }

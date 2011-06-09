@@ -21,24 +21,24 @@ import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
 
 /**
- * A linker that can't link any call site. Only used internally by 
- * {@link CompositeTypeBasedGuardingDynamicLinker}. Can be used by other 
+ * A linker that can't link any call site. Only used internally by
+ * {@link CompositeTypeBasedGuardingDynamicLinker}. Can be used by other
  * language runtimes if they need it though.
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class BottomGuardingDynamicLinker 
+public class BottomGuardingDynamicLinker
 implements TypeBasedGuardingDynamicLinker {
 
     /**
      * The sole instance of this stateless linker.
      */
-    public static final BottomGuardingDynamicLinker INSTANCE = 
+    public static final BottomGuardingDynamicLinker INSTANCE =
         new BottomGuardingDynamicLinker();
-    
+
     private BottomGuardingDynamicLinker() {
     }
-    
+
     public boolean canLinkType(Class<?> type) {
         return false;
     }

@@ -29,15 +29,15 @@ import org.dynalang.dynalink.NoSuchDynamicMethodException;
 import org.dynalang.dynalink.RelinkableCallSite;
 
 /**
- * The implementation a master dynamic linker used by 
+ * The implementation a master dynamic linker used by
  * {@link DynamicLinkerFactory}.
  * @author Attila Szegedi
  * @version $Id: $
  */
 public class DynamicLinkerImpl implements DynamicLinker {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     private final GuardingDynamicLinker guardingDynamicLinker;
     private final LinkerServices linkerServices;
     /**
@@ -47,28 +47,28 @@ public class DynamicLinkerImpl implements DynamicLinker {
      * @param typeConverterFactory the type converter factory used for creating
      * type converters.
      */
-    public DynamicLinkerImpl(GuardingDynamicLinker guardingDynamicLinker, 
+    public DynamicLinkerImpl(GuardingDynamicLinker guardingDynamicLinker,
             final TypeConverterFactory typeConverterFactory) {
         this.guardingDynamicLinker = guardingDynamicLinker;
         linkerServices = typeConverterFactory.createLinkerServices();
     }
-    
+
     public void link(final RelinkableCallSite callSite) {
         callSite.setRelink(createRelinkAndInvokeMethod(callSite));
     }
 
-    private static final MethodHandle RELINK_AND_INVOKE = 
-        new Lookup(MethodHandles.lookup()).findSpecial(DynamicLinkerImpl.class, 
-                "_relinkAndInvoke", MethodType.methodType(Object.class, 
-                        CallSiteDescriptor.class, RelinkableCallSite.class, 
-                        Object[].class)); 
+    private static final MethodHandle RELINK_AND_INVOKE =
+        new Lookup(MethodHandles.lookup()).findSpecial(DynamicLinkerImpl.class,
+                "_relinkAndInvoke", MethodType.methodType(Object.class,
+                        CallSiteDescriptor.class, RelinkableCallSite.class,
+                        Object[].class));
 
     private MethodHandle createRelinkAndInvokeMethod(final RelinkableCallSite callSite) {
         // Make a bound MH of invoke() for this linker and call site
-        final CallSiteDescriptor descriptor = callSite.getCallSiteDescriptor(); 
+        final CallSiteDescriptor descriptor = callSite.getCallSiteDescriptor();
         final MethodHandle boundInvoker = MethodHandles.insertArguments(
                 RELINK_AND_INVOKE, 0, this, descriptor, callSite);
-        // Make a MH that gathers all arguments to the invocation into an 
+        // Make a MH that gathers all arguments to the invocation into an
         // Object[]
         final MethodType type = descriptor.getMethodType();
         final MethodHandle collectingInvoker = boundInvoker.asCollector(
@@ -78,10 +78,10 @@ public class DynamicLinkerImpl implements DynamicLinker {
                 collectingInvoker, type);
         return convertingInvoker;
     }
-    
+
     /**
-     * This method is public for implementation reasons. Do not invoke it 
-     * directly. Relinks a call site conforming to the invocation arguments, 
+     * This method is public for implementation reasons. Do not invoke it
+     * directly. Relinks a call site conforming to the invocation arguments,
      * and then invokes the newly linked method handle.
      * @param callSiteDescriptor the descriptor of the call site
      * @param callSite the call site itself
@@ -89,23 +89,23 @@ public class DynamicLinkerImpl implements DynamicLinker {
      * @return return value of the invocation
     * @throws Throwable rethrown underlying method handle invocation throwable.
      */
-    public Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor, 
-            RelinkableCallSite callSite, Object... arguments) throws Throwable { 
+    public Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor,
+            RelinkableCallSite callSite, Object... arguments) throws Throwable {
         // Find a suitable method handle with a guard
-        final GuardedInvocation guardedInvocation = 
-            guardingDynamicLinker.getGuardedInvocation(callSiteDescriptor, 
-                    linkerServices, arguments); 
+        final GuardedInvocation guardedInvocation =
+            guardingDynamicLinker.getGuardedInvocation(callSiteDescriptor,
+                    linkerServices, arguments);
 
         // None found - throw an exception
         if(guardedInvocation == null) {
             throw new NoSuchDynamicMethodException();
         }
 
-        // Allow the call site to relink and execute its inline caching 
+        // Allow the call site to relink and execute its inline caching
         // strategy.
         callSite.setGuardedInvocation(guardedInvocation);
 
-        // Invoke the method. Note we bypass the guard, as the assumption is 
+        // Invoke the method. Note we bypass the guard, as the assumption is
         // that the current arguments will pass the guard (and there actually
         // might be no guard at all).
         return guardedInvocation.getInvocation().invokeWithArguments(arguments);

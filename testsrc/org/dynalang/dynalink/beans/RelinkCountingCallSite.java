@@ -20,7 +20,7 @@ public class RelinkCountingCallSite extends MonomorphicCallSite
         super.setGuardedInvocation(guardedInvocation);
         ++relinkCount;
     }
-    
+
     public int getRelinkCount()
     {
         return relinkCount;

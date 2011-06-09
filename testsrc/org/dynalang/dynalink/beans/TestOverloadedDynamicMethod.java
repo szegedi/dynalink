@@ -27,7 +27,7 @@ import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 
 /**
- * 
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -35,7 +35,7 @@ public class TestOverloadedDynamicMethod extends TestCase
 {
     private BeanLinker linker;
     private LinkerServices linkerServices;
-    
+
     @Override
     protected void setUp() throws Exception
     {
@@ -43,29 +43,29 @@ public class TestOverloadedDynamicMethod extends TestCase
         linker = new BeanLinker(Test1.class);
         linkerServices = new TypeConverterFactory(Collections.EMPTY_LIST).createLinkerServices();
     }
-    
+
     public void testNoneMatchSignature()
     {
         final DynamicMethod dm = linker.getMethod("add");
         assertTrue(dm instanceof OverloadedDynamicMethod);
 
         // No zero-arg adds
-        assertNull(dm.getInvocation(new CallSiteDescriptor("add", 
+        assertNull(dm.getInvocation(new CallSiteDescriptor("add",
                 MethodType.methodType(int.class, Object.class)), null));
 
         // No single-arg String add
-        MethodHandle inv = dm.getInvocation(new CallSiteDescriptor("add", 
-            MethodType.methodType(String.class, Object.class, String.class)), 
+        MethodHandle inv = dm.getInvocation(new CallSiteDescriptor("add",
+            MethodType.methodType(String.class, Object.class, String.class)),
             linkerServices);
         assertNull(String.valueOf(inv), inv);
     }
-    
+
     public void testExactMatchSignature() throws Throwable
     {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
-        final CallSiteDescriptor cs = new CallSiteDescriptor("add", 
-                MethodType.methodType(String.class, Object.class, String.class, 
+        final CallSiteDescriptor cs = new CallSiteDescriptor("add",
+                MethodType.methodType(String.class, Object.class, String.class,
                         String.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
@@ -86,8 +86,8 @@ public class TestOverloadedDynamicMethod extends TestCase
     {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
-        final CallSiteDescriptor cs = new CallSiteDescriptor("add", 
-                MethodType.methodType(Object.class, Object.class, Object.class, 
+        final CallSiteDescriptor cs = new CallSiteDescriptor("add",
+                MethodType.methodType(Object.class, Object.class, Object.class,
                         Object.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);

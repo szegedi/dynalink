@@ -48,9 +48,9 @@ public class TypeConverterFactory {
             };
         }
     };
-    
+
     /**
-     * Creates a new type converter factory from the available 
+     * Creates a new type converter factory from the available
      * {@link GuardingTypeConverterFactory} instances.
      * @param factories the {@link GuardingTypeConverterFactory} instances to
      * compose.
@@ -62,7 +62,7 @@ public class TypeConverterFactory {
             l.add(factory);
         }
         this.factories = l.toArray(new GuardingTypeConverterFactory[l.size()]);
-        
+
     }
 
     /**
@@ -80,19 +80,19 @@ public class TypeConverterFactory {
             public MethodHandle convertArguments(MethodHandle handle,
                     MethodType fromType)
             {
-                return TypeConverterFactory.this.convertArguments(handle, 
+                return TypeConverterFactory.this.convertArguments(handle,
                         fromType);
             }
-            
+
         };
     }
-    
+
     /**
      * Similar to {@link MethodHandles#convertArguments(MethodHandle, MethodType)}
-     * except it also hooks in method handles produced by 
+     * except it also hooks in method handles produced by
      * {@link GuardingTypeConverterFactory} implementations, providing for
-     * language-specific type coercing of parameters. It will apply 
-     * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} for 
+     * language-specific type coercing of parameters. It will apply
+     * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} for
      * all primitive-to-primitive, wrapper-to-primitive, primitive-to-wrapper
      * conversions as well as for all upcasts. For all other conversions, it'll
      * insert {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)}
@@ -101,10 +101,10 @@ public class TypeConverterFactory {
      * return type.
      * @param handle target method handle
      * @param fromType the types of source arguments
-     * @return a method handle that is a suitable combination of 
+     * @return a method handle that is a suitable combination of
      * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} and
-     * {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)} 
-     * with {@link GuardingTypeConverterFactory} produced type converters as 
+     * {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)}
+     * with {@link GuardingTypeConverterFactory} produced type converters as
      * filters.
      */
     public MethodHandle convertArguments(MethodHandle handle,
@@ -123,7 +123,7 @@ public class TypeConverterFactory {
                 handle = applyConverters(handle, pos, converters);
             }
             else {
-                final MethodHandle converter = getTypeConverter(fromParamType, 
+                final MethodHandle converter = getTypeConverter(fromParamType,
                     toParamType);
                 if(converter != null) {
                     if(converters.isEmpty()) {
@@ -135,11 +135,11 @@ public class TypeConverterFactory {
                 }
             }
         }
-        return MethodHandles.convertArguments(applyConverters(handle, pos, 
+        return MethodHandles.convertArguments(applyConverters(handle, pos,
             converters), fromType);
     }
 
-    private static MethodHandle applyConverters(MethodHandle handle, int pos, 
+    private static MethodHandle applyConverters(MethodHandle handle, int pos,
         List<MethodHandle> converters) {
       if(!converters.isEmpty()) {
           handle = MethodHandles.filterArguments(handle, pos,
@@ -151,29 +151,29 @@ public class TypeConverterFactory {
 
     /**
      * Returns true if there might exist a conversion between the requested
-     * types (either an automatic JVM conversion, or one provided by any 
-     * available {@link GuardingTypeConverterFactory}), or false if there 
+     * types (either an automatic JVM conversion, or one provided by any
+     * available {@link GuardingTypeConverterFactory}), or false if there
      * definitely does not exist a conversion between the requested types. Note
      * that returning true does not guarantee that the conversion will succeed
-     * at runtime (notably, if the "from" or "to" types are sufficiently 
+     * at runtime (notably, if the "from" or "to" types are sufficiently
      * generic), but returning false guarantees that it would fail.
      * @param from the source type for the conversion
      * @param to the target type for the conversion
      * @return true if there can be a conversion, false if there can not.
      */
     public boolean canConvert(final Class<?> from, final Class<?> to) {
-        return canAutoConvert(from, to) || getTypeConverter(from, to) != null; 
+        return canAutoConvert(from, to) || getTypeConverter(from, to) != null;
     }
-    
+
     /**
-     * Determines whether it's safe to perform an automatic conversion 
+     * Determines whether it's safe to perform an automatic conversion
      * between the source and target class.
      * @param fromType convert from this class
      * @param toType convert to this class
      * @return true if it's safe to let MethodHandles.convertArguments() to
      * handle this conversion.
      */
-    private static boolean canAutoConvert(final Class<?> fromType, 
+    private static boolean canAutoConvert(final Class<?> fromType,
             final Class<?> toType)
     {
         if(fromType.isPrimitive()) {
@@ -194,7 +194,7 @@ public class TypeConverterFactory {
             }
             return canAutoConvertPrimitiveToReference(toType, fromType);
         }
-        // In all other cases, only allow automatic conversion from a class to 
+        // In all other cases, only allow automatic conversion from a class to
         // its superclass or superinterface.
         return toType.isAssignableFrom(fromType);
     }
@@ -202,48 +202,48 @@ public class TypeConverterFactory {
     private static boolean canAutoConvertPrimitiveToReference(
             final Class<?> primitiveType, final Class<?> refType)
     {
-        return TypeUtilities.isAssignableFromBoxedPrimitive(refType) && 
-            ((primitiveType != Byte.TYPE && primitiveType != Boolean.TYPE) || 
-                    refType != Character.class); 
+        return TypeUtilities.isAssignableFromBoxedPrimitive(refType) &&
+            ((primitiveType != Byte.TYPE && primitiveType != Boolean.TYPE) ||
+                    refType != Character.class);
     }
 
     private static boolean canAutoConvertPrimitives(Class<?> fromType, Class<?> toType) {
-        // the only cast conversion not allowed between non-boolean primitives 
-        // is byte->char, all other narrowing and widening conversions are 
+        // the only cast conversion not allowed between non-boolean primitives
+        // is byte->char, all other narrowing and widening conversions are
         // allowed. boolean is converted to byte first, so same applies to it.
         return (fromType != Byte.TYPE && fromType != Boolean.TYPE) || toType != Character.TYPE;
     }
-    
+
     private MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
         final MethodHandle converter = converters.get(sourceType).get(targetType);
         return converter == IDENTITY_CONVERSION ? null : converter;
     }
-    
+
     private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) {
         final MethodType type = MethodType.methodType(targetType, sourceType);
         final MethodHandle identity = MethodHandles.convertArguments(
-                IDENTITY_CONVERSION, type); 
+                IDENTITY_CONVERSION, type);
         MethodHandle last = identity;
         for(int i = factories.length; i --> 0;) {
             final GuardedInvocation next = factories[i].convertToType(
                     sourceType, targetType);
             if(next != null) {
                 next.assertType(type);
-                last = MethodHandles.guardWithTest(next.getGuard(), 
+                last = MethodHandles.guardWithTest(next.getGuard(),
                         next.getInvocation(), last);
             }
         }
         return last == identity ? IDENTITY_CONVERSION : last;
     }
 
-    private static final MethodHandle IDENTITY_CONVERSION = 
-        new Lookup(MethodHandles.lookup()).findStatic(TypeConverterFactory.class, 
-                "_identityConversion", MethodType.methodType(Object.class, 
+    private static final MethodHandle IDENTITY_CONVERSION =
+        new Lookup(MethodHandles.lookup()).findStatic(TypeConverterFactory.class,
+                "_identityConversion", MethodType.methodType(Object.class,
                         Object.class));
 
     /**
-     * This method is public for implementation reasons. Do not invoke it 
-     * directly. Returns the object passed in. 
+     * This method is public for implementation reasons. Do not invoke it
+     * directly. Returns the object passed in.
      * @param o the object
      * @return the object
      */

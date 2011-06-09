@@ -16,22 +16,22 @@
 package org.dynalang.dynalink;
 
 /**
- * The interface for invokedynamic linker. Users of invokedynamic will 
- * normally obtain one through a {@link DynamicLinkerFactory} and invoke its 
- * method from their invokedynamic bootstrap method to set the target of all 
- * its call sites. Usual usage would be to create one class per language 
+ * The interface for invokedynamic linker. Users of invokedynamic will
+ * normally obtain one through a {@link DynamicLinkerFactory} and invoke its
+ * method from their invokedynamic bootstrap method to set the target of all
+ * its call sites. Usual usage would be to create one class per language
  * runtime to contain one linker instance as:
  * <pre>
  * class MyLanguageRuntime {
  *     private static final DynamicLinker dynamicLinker = createDynamicLinker();
  *     private static final GuardingDynamicLinker myLanguageLinker = new MyLanguageLinker();
- *     
+ *
  *     private static DynamicLinker createDynamicLinker() {
  *         final DynamicLinkerFactory factory = new DynamicLinkerFactory();
  *         factory.setPrioritizedLinker(myLanguageLinker);
- *         return factory.createLinker(); 
+ *         return factory.createLinker();
  *     }
- *     
+ *
  *     public static CallSite bootstrap(Object caller, String name, MethodType type) {
  *         final RelinkableCallSite callSite = new MonomorphicCallSite(caller, name, type);
  *         dynamicLinker.link(callSite);
@@ -49,7 +49,7 @@ package org.dynalang.dynalink;
  *     ...
  * }
  * </pre>
- * Note how you're expected to implement a {@link GuardingDynamicLinker} for your own 
+ * Note how you're expected to implement a {@link GuardingDynamicLinker} for your own
  * language. If your runtime doesn't have its own language and/or object model
  * (i.e. it's a generic scripting shell), you don't need to implement a dynamic
  * invoker; you would simply not invoke the <tt>setPrioritizedLinker</tt> on
@@ -60,8 +60,8 @@ package org.dynalang.dynalink;
 public interface DynamicLinker {
     /**
      * Links an invokedynamic call site. It will install a relink method handle
-     * into the call site that hooks into the multi-language dispatch and 
-     * relinking mechanisms.  
+     * into the call site that hooks into the multi-language dispatch and
+     * relinking mechanisms.
      * @param callSite the call site to link.
      */
     public void link(RelinkableCallSite callSite);

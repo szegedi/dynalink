@@ -16,7 +16,7 @@
 package org.dynalang.dynalink;
 
 /**
- * Thrown at the invocation if the call site can not be linked by any available 
+ * Thrown at the invocation if the call site can not be linked by any available
  * {@link GuardingDynamicLinker}. (Maybe just use NoAccess?)
  * @author Attila Szegedi
  * @version $Id: $

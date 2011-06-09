@@ -16,11 +16,11 @@ import java.lang.reflect.Modifier;
 public class Lookup
 {
     private final MethodHandles.Lookup lookup;
-    
+
     /**
-     * Creates a new instance, bound to an instance of 
+     * Creates a new instance, bound to an instance of
      * {@link MethodHandles.Lookup}.
-     * @param lookup the {@link MethodHandles.Lookup} it delegates to. 
+     * @param lookup the {@link MethodHandles.Lookup} it delegates to.
      */
     public Lookup(MethodHandles.Lookup lookup) {
         this.lookup = lookup;
@@ -30,8 +30,8 @@ public class Lookup
     }
     public static final Lookup PUBLIC = new Lookup(MethodHandles.publicLookup());
     /**
-     * Performs a {@link MethodHandles.Lookup#unreflect(Method)}, converting 
-     * any encountered {@link IllegalAccessException} into a 
+     * Performs a {@link MethodHandles.Lookup#unreflect(Method)}, converting
+     * any encountered {@link IllegalAccessException} into a
      * {@link BootstrapMethodError}.
      * @param m the method to unreflect
      * @return the unreflected method handle.
@@ -51,17 +51,17 @@ public class Lookup
      * @param name the name of the method
      * @param type the type of the method
      * @return a method handle for the method
-     * @throws BootstrapMethodError if the method does not exist or is 
+     * @throws BootstrapMethodError if the method does not exist or is
      * inaccessible.
      */
-    public MethodHandle findSpecial(Class<?> declaringClass, String name, 
+    public MethodHandle findSpecial(Class<?> declaringClass, String name,
             MethodType type)
     {
         try {
             if(Backport.inUse) {
-                final Method m = declaringClass.getDeclaredMethod(name, 
+                final Method m = declaringClass.getDeclaredMethod(name,
                     type.parameterArray());
-                if(!Modifier.isPublic(declaringClass.getModifiers()) || 
+                if(!Modifier.isPublic(declaringClass.getModifiers()) ||
                     !Modifier.isPublic(m.getModifiers()))
                 {
                     m.setAccessible(true);
@@ -71,9 +71,9 @@ public class Lookup
             else {
                 return lookup.findSpecial(declaringClass, name, type, declaringClass);
             }
-        } 
+        }
         catch (IllegalAccessException|NoSuchMethodException e) {
-            throw new BootstrapMethodError("Failed to find special method " + 
+            throw new BootstrapMethodError("Failed to find special method " +
                 methodDescription(declaringClass, name, type), e);
         }
     }
@@ -81,13 +81,13 @@ public class Lookup
     private static String methodDescription(Class<?> declaringClass, String name, MethodType type) {
         return declaringClass.getName() + "#" + name + type;
     }
-    
+
     public MethodHandle findStatic(Class<?> declaringClass, String methodName, MethodType methodType) {
         try {
             return lookup.findStatic(declaringClass, methodName, methodType);
         }
         catch (IllegalAccessException|NoSuchMethodException e) {
-            throw new BootstrapMethodError("Failed to find static method " + 
+            throw new BootstrapMethodError("Failed to find static method " +
                 methodDescription(declaringClass, methodName, methodType), e);
           }
     }
@@ -97,7 +97,7 @@ public class Lookup
           return lookup.findVirtual(declaringClass, methodName, methodType);
       }
       catch (IllegalAccessException|NoSuchMethodException e) {
-          throw new BootstrapMethodError("Failed to find virtual method " + 
+          throw new BootstrapMethodError("Failed to find virtual method " +
               methodDescription(declaringClass, methodName, methodType), e);
         }
   }

@@ -25,16 +25,16 @@ import org.dynalang.dynalink.GuardingDynamicLinker;
 import org.dynalang.dynalink.LinkerServices;
 
 /**
- * A {@link GuardingDynamicLinker} that delegates sequentially to a list of 
- * other guarding dynamic linkers. The first value returned from a component 
- * linker other than null is returned. If no component linker returns an 
+ * A {@link GuardingDynamicLinker} that delegates sequentially to a list of
+ * other guarding dynamic linkers. The first value returned from a component
+ * linker other than null is returned. If no component linker returns an
  * invocation, null is returned.
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class CompositeGuardingDynamicLinker 
+public class CompositeGuardingDynamicLinker
 implements GuardingDynamicLinker, Serializable {
-    
+
     private static final long serialVersionUID = 1L;
 
     private final GuardingDynamicLinker[] linkers;
@@ -51,15 +51,15 @@ implements GuardingDynamicLinker, Serializable {
         }
         this.linkers = l.toArray(new GuardingDynamicLinker[l.size()]);
     }
-    
+
     public GuardedInvocation getGuardedInvocation(
-            final CallSiteDescriptor callSiteDescriptor, 
-            final LinkerServices linkerServices, final Object... arguments) 
+            final CallSiteDescriptor callSiteDescriptor,
+            final LinkerServices linkerServices, final Object... arguments)
     throws Exception
     {
         for (final GuardingDynamicLinker linker : linkers) {
             final GuardedInvocation invocation = linker.getGuardedInvocation(
-                    callSiteDescriptor, linkerServices, arguments); 
+                    callSiteDescriptor, linkerServices, arguments);
             if(invocation != null) {
                 return invocation;
             }

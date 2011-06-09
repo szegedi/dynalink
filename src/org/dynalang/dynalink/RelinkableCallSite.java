@@ -22,7 +22,7 @@ import java.lang.invoke.MethodType;
 /**
  * Base class for relinkable call sites. Language runtimes wishing to use this
  * framework must use subclasses of this class as their call sites. There is a
- * readily usable {@link MonomorphicCallSite} subclass that implements 
+ * readily usable {@link MonomorphicCallSite} subclass that implements
  * monomorphic inline caching strategy.
  * @author Attila Szegedi
  * @version $Id: $
@@ -31,7 +31,7 @@ public abstract class RelinkableCallSite extends MutableCallSite
 {
     private MethodHandle relink;
     private final CallSiteDescriptor callSiteDescriptor;
-    
+
     /**
      * Creates a new relinkable call site
      * @param name the name of the method at the call site
@@ -41,12 +41,12 @@ public abstract class RelinkableCallSite extends MutableCallSite
         super(type);
         callSiteDescriptor = new CallSiteDescriptor(name, type);
     }
-    
+
     /**
      * Sets the relink method. This is a method matching the method type of the
-     * call site that will try to discover the adequate target for the 
-     * invocation and then subsequently invoke 
-     * {@link #setGuardedInvocation(GuardedInvocation)}. This method is 
+     * call site that will try to discover the adequate target for the
+     * invocation and then subsequently invoke
+     * {@link #setGuardedInvocation(GuardedInvocation)}. This method is
      * normally only called by the {@link DynamicLinker} implementation.
      * @param relink the relink method handle.
      * @throws IllegalArgumentException if the relink is null
@@ -79,11 +79,11 @@ public abstract class RelinkableCallSite extends MutableCallSite
     public CallSiteDescriptor getCallSiteDescriptor() {
         return callSiteDescriptor;
     }
-    
+
     /**
      * Should be implemented by subclasses. Will be called once every time the
-     * call site is relinked. 
-     * @param guardedInvocation the guarded invocation that the call site 
+     * call site is relinked.
+     * @param guardedInvocation the guarded invocation that the call site
      * should set as its target.
      */
     public abstract void setGuardedInvocation(GuardedInvocation guardedInvocation);

@@ -41,7 +41,7 @@ public class TestPropertyGetter extends TestCase
     public void testVariableNamePropertyGetter() throws Throwable
     {
         final RelinkCountingCallSite callSite = new RelinkCountingCallSite(
-                "dyn:getProp", MethodType.methodType(Object.class, Object.class, 
+                "dyn:getProp", MethodType.methodType(Object.class, Object.class,
                         String.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
@@ -71,7 +71,7 @@ public class TestPropertyGetter extends TestCase
     public static class T1
     {
         private Object foo;
-        
+
         public void setFoo(String foo)
         {
             this.foo = foo;
@@ -82,17 +82,17 @@ public class TestPropertyGetter extends TestCase
             return foo;
         }
     }
-    
+
     public static class T2
     {
         private Object foo;
         private Object bar;
-        
+
         public void setFoo(Object foo)
         {
             this.foo = foo;
         }
-        
+
         public Object getFoo()
         {
             return foo;
@@ -102,13 +102,13 @@ public class TestPropertyGetter extends TestCase
         {
             this.bar = bar;
         }
-        
+
         public Object getBar()
         {
             return bar;
         }
     }
-    
+
     public static class T3 extends T1
     {
         private Object bar;
@@ -117,7 +117,7 @@ public class TestPropertyGetter extends TestCase
         {
             this.bar = bar;
         }
-        
+
         public Object getBar()
         {
             return bar;

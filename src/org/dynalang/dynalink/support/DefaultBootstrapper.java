@@ -11,15 +11,15 @@ import org.dynalang.dynalink.RelinkableCallSite;
 /**
  * A convenience default bootstrapper that exposes a static bootstrap method to
  * which language runtimes that need the very default behaviour can use with
- * minimal setup. When first referenced, it will create a 
+ * minimal setup. When first referenced, it will create a
  * @author Attila Szegedi
  * @version $Id: $
  */
 public class DefaultBootstrapper {
-    private static final DynamicLinker dynamicLinker = 
+    private static final DynamicLinker dynamicLinker =
         new DynamicLinkerFactory().createLinker();
-    
-    public static CallSite bootstrap(Object caller, String name, 
+
+    public static CallSite bootstrap(Object caller, String name,
             MethodType type)
     {
         final RelinkableCallSite callSite = new MonomorphicCallSite(name, type);

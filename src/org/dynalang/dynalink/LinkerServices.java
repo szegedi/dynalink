@@ -20,17 +20,17 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
- * Interface for services provided to linkers. 
+ * Interface for services provided to linkers.
  * @author Attila Szegedi
  * @version $Id: $
  */
 public interface LinkerServices {
     /**
      * Similar to {@link MethodHandles#convertArguments(MethodHandle, MethodType)}
-     * except it also hooks in method handles produced by 
+     * except it also hooks in method handles produced by
      * {@link GuardingTypeConverterFactory} implementations, providing for
-     * language-specific type coercing of parameters. It will apply 
-     * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} for 
+     * language-specific type coercing of parameters. It will apply
+     * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} for
      * all primitive-to-primitive, wrapper-to-primitive, primitive-to-wrapper
      * conversions as well as for all upcasts. For all other conversions, it'll
      * insert {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)}
@@ -39,21 +39,21 @@ public interface LinkerServices {
      * return type.
      * @param handle target method handle
      * @param fromType the types of source arguments
-     * @return a method handle that is a suitable combination of 
+     * @return a method handle that is a suitable combination of
      * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} and
-     * {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)} 
-     * with {@link GuardingTypeConverterFactory} produced type converters as 
+     * {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)}
+     * with {@link GuardingTypeConverterFactory} produced type converters as
      * filters.
      */
     public MethodHandle convertArguments(MethodHandle handle, MethodType fromType);
- 
+
     /**
      * Returns true if there might exist a conversion between the requested
-     * types (either an automatic JVM conversion, or one provided by any 
-     * available {@link GuardingTypeConverterFactory}), or false if there 
+     * types (either an automatic JVM conversion, or one provided by any
+     * available {@link GuardingTypeConverterFactory}), or false if there
      * definitely does not exist a conversion between the requested types. Note
      * that returning true does not guarantee that the conversion will succeed
-     * at runtime (notably, if the "from" or "to" types are sufficiently 
+     * at runtime (notably, if the "from" or "to" types are sufficiently
      * generic), but returning false guarantees that it would fail.
      * @param from the source type for the conversion
      * @param to the target type for the conversion

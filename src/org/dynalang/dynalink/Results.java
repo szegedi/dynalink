@@ -1,7 +1,7 @@
 package org.dynalang.dynalink;
 
 /**
- * 
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */

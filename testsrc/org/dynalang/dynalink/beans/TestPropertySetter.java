@@ -13,7 +13,7 @@ public class TestPropertySetter extends TestCase
     public void testFixedNamePropertySetter() throws Throwable
     {
         final RelinkCountingCallSite callSite = new RelinkCountingCallSite(
-                "dyn:setProp:foo", MethodType.methodType(Void.TYPE, Object.class, 
+                "dyn:setProp:foo", MethodType.methodType(Void.TYPE, Object.class,
                         Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
@@ -30,11 +30,11 @@ public class TestPropertySetter extends TestCase
         assertSame(val, t2.foo);
         assertEquals(2, callSite.getRelinkCount());
     }
-    
+
     public void testVariableNamePropertySetter() throws Throwable
     {
         final RelinkCountingCallSite callSite = new RelinkCountingCallSite(
-                "dyn:setProp", MethodType.methodType(Void.TYPE, Object.class, 
+                "dyn:setProp", MethodType.methodType(Void.TYPE, Object.class,
                         String.class, Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
@@ -55,27 +55,27 @@ public class TestPropertySetter extends TestCase
         assertSame(val2, t2.bar);
         assertEquals(2, callSite.getRelinkCount());
     }
-    
+
     public static class T1
     {
         private Object foo;
-        
+
         public void setFoo(String foo)
         {
             this.foo = foo;
         }
     }
-    
+
     public static class T2
     {
         private Object foo;
         private Object bar;
-        
+
         public void setFoo(Object foo)
         {
             this.foo = foo;
         }
-        
+
         public void setBar(Object... args)
         {
             this.bar = args[0];

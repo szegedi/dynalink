@@ -28,72 +28,72 @@ import java.lang.invoke.MethodType;
 public class Guards
 {
     /**
-     * Creates a guard method handle with arguments of a specified type, but 
-     * with boolean return value. When invoked, it returns true if the first 
-     * argument is of the specified class (exactly of it, not a subclass). The 
+     * Creates a guard method handle with arguments of a specified type, but
+     * with boolean return value. When invoked, it returns true if the first
+     * argument is of the specified class (exactly of it, not a subclass). The
      * rest of the arguments will be ignored.
      * @param clazz the class of the first argument to test for
      * @param type the method type
      * @return a method handle testing whether its first argument is of the
-     * specified class. 
+     * specified class.
      */
     public static MethodHandle isOfClass(Class<?> clazz, MethodType type) {
         return getMatchedHandle(IS_OF_CLASS, clazz, 0, type);
     }
-    
+
     /**
-     * Creates a method handle with arguments of a specified type, but with 
-     * boolean return value. When invoked, it returns true if the first 
-     * argument is instance of the specified class or its subclass). The rest 
+     * Creates a method handle with arguments of a specified type, but with
+     * boolean return value. When invoked, it returns true if the first
+     * argument is instance of the specified class or its subclass). The rest
      * of the arguments will be ignored.
      * @param clazz the class of the first argument to test for
      * @param type the method type
      * @return a method handle testing whether its first argument is of the
-     * specified class or subclass. 
+     * specified class or subclass.
      */
     public static MethodHandle isInstance(Class<?> clazz, MethodType type) {
         return isInstance(clazz, 0, type);
     }
-    
+
     /**
-     * Creates a method handle with arguments of a specified type, but with 
-     * boolean return value. When invoked, it returns true if the n'th 
-     * argument is instance of the specified class or its subclass). The rest 
+     * Creates a method handle with arguments of a specified type, but with
+     * boolean return value. When invoked, it returns true if the n'th
+     * argument is instance of the specified class or its subclass). The rest
      * of the arguments will be ignored.
      * @param clazz the class of the first argument to test for
      * @param pos the position on the argument list to test
      * @param type the method type
      * @return a method handle testing whether its first argument is of the
-     * specified class or subclass. 
+     * specified class or subclass.
      */
     public static MethodHandle isInstance(Class<?> clazz, int pos, MethodType type)
     {
         return getMatchedHandle(IS_INSTANCE, clazz, pos, type);
     }
-    
+
     /**
-     * Creates a method handle that returns true if the argument in the 
+     * Creates a method handle that returns true if the argument in the
      * specified position is a Java array.
      * @param pos the position in the argument lit
      * @param type the method type of the handle
-     * @return a method handle that returns true if the argument in the 
-     * specified position is a Java array; the rest of the arguments are 
+     * @return a method handle that returns true if the argument in the
+     * specified position is a Java array; the rest of the arguments are
      * ignored.
      */
     public static MethodHandle isArray(int pos, MethodType type) {
-        return MethodHandles.permuteArguments(IS_ARRAY, 
+        return MethodHandles.permuteArguments(IS_ARRAY,
                 type.changeReturnType(Boolean.TYPE), new int[] { pos });
     }
 
     /**
-     * Return true if it is safe to strongly reference a class from the 
+     * Return true if it is safe to strongly reference a class from the
      * referred class loader from a class associated with the referring class
      * loader without risking a class loader memory leak.
      * @param referrerLoader the referrer class loader
      * @param referredLoader the referred class loader
      * @return true if it is safe to strongly reference the class
      */
-    public static boolean canReferenceDirectly(ClassLoader referrerLoader, 
+    public static boolean canReferenceDirectly(ClassLoader referrerLoader,
             final ClassLoader referredLoader) {
         if(referredLoader == null) {
             // Can always refer directly to a system class
@@ -114,35 +114,35 @@ public class Guards
         return false;
     }
 
-    private static MethodHandle getMatchedHandle(MethodHandle test, 
+    private static MethodHandle getMatchedHandle(MethodHandle test,
             Object classOrRef, int pos, MethodType type)
     {
         if(type.parameterCount() < 1) {
             throw new IllegalArgumentException(
                     "method type must specify at least one argument");
         }
-        final MethodHandle boundToClass = MethodHandles.insertArguments(test, 
+        final MethodHandle boundToClass = MethodHandles.insertArguments(test,
                 0, classOrRef);
         final MethodHandle narrowed = MethodHandles.permuteArguments(
-                boundToClass, type.changeReturnType(Boolean.TYPE), 
+                boundToClass, type.changeReturnType(Boolean.TYPE),
                 new int[] { pos });
         return narrowed;
     }
 
-    private static final MethodHandle IS_OF_CLASS = 
-        Lookup.PUBLIC.findStatic(Guards.class, "_isOfClass", 
+    private static final MethodHandle IS_OF_CLASS =
+        Lookup.PUBLIC.findStatic(Guards.class, "_isOfClass",
             MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
-    
-    private static final MethodHandle IS_INSTANCE = 
-        Lookup.PUBLIC.findVirtual(Class.class, "isInstance", 
+
+    private static final MethodHandle IS_INSTANCE =
+        Lookup.PUBLIC.findVirtual(Class.class, "isInstance",
             MethodType.methodType(Boolean.TYPE, Object.class));
 
-    private static final MethodHandle IS_ARRAY = 
-        Lookup.PUBLIC.findStatic(Guards.class, "_isArray", 
+    private static final MethodHandle IS_ARRAY =
+        Lookup.PUBLIC.findStatic(Guards.class, "_isArray",
             MethodType.methodType(Boolean.TYPE, Object.class));
 
     /**
-     * This method is public for implementation reasons. Do not invoke it 
+     * This method is public for implementation reasons. Do not invoke it
      * directly. Determines whether the passed object is a Java array.
      * @param o an object
      * @return true if o is an instance of a Java array.
@@ -153,7 +153,7 @@ public class Guards
 
     /**
      * This method public for implementation reasons. Do not invoke directly.
-     * Determines whether the class of the object is what's expected to be. 
+     * Determines whether the class of the object is what's expected to be.
      * @param c the class
      * @param o the object
      * @return true if the object is exactly of the class, false otherwise.

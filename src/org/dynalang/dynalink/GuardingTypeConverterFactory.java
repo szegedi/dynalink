@@ -17,7 +17,7 @@ package org.dynalang.dynalink;
 
 /**
  * Optional interface that can be implemented by {@link GuardingDynamicLinker}
- * implementations to provide language-runtime specific type conversion 
+ * implementations to provide language-runtime specific type conversion
  * capabilities.
  * @author Attila Szegedi
  * @version $Id: $
@@ -28,12 +28,12 @@ public interface GuardingTypeConverterFactory
      * Returns a method handle that receives an Object of the specified source
      * type and returns an Object converted to the specified target type. The
      * type of the invocation is targetType(sourceType), while the type of the
-     * guard is boolean(sourceType). 
-     * @param sourceType source type 
+     * guard is boolean(sourceType).
+     * @param sourceType source type
      * @param targetType the target type.
-     * @return a guarded invocation that can take an object (if it passes 
-     * guard) and returns another object that is its representation coerced 
-     * into the target type. In case the factory is certain it is unable to 
+     * @return a guarded invocation that can take an object (if it passes
+     * guard) and returns another object that is its representation coerced
+     * into the target type. In case the factory is certain it is unable to
      * handle a conversion, it can return null.
      */
     public GuardedInvocation convertToType(Class<?> sourceType, Class<?> targetType);

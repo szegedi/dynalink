@@ -24,7 +24,7 @@ import java.lang.invoke.MethodType;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class MonomorphicCallSite extends RelinkableCallSite 
+public class MonomorphicCallSite extends RelinkableCallSite
 {
     /**
      * Creates a new call site with monomorphic inline caching strategy.
@@ -36,7 +36,7 @@ public class MonomorphicCallSite extends RelinkableCallSite
     }
 
     /**
-     * @deprecated use {@link #MonomorphicCallSite(String, MethodType)} 
+     * @deprecated use {@link #MonomorphicCallSite(String, MethodType)}
      * instead.
      */
     @Deprecated
@@ -59,7 +59,7 @@ public class MonomorphicCallSite extends RelinkableCallSite
         catch(IllegalArgumentException e) {
             // Provide more information than the default JDK implementation
             throw new IllegalArgumentException("invocation and guard types " +
-                    "do not match. invocation=" + invocation.type() + 
+                    "do not match. invocation=" + invocation.type() +
                     " guard=" + guard.type(), e);
         }
     }
