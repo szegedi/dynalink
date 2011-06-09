@@ -33,16 +33,13 @@ import org.dynalang.dynalink.support.Guards;
 public class SimpleDynamicMethod implements DynamicMethod
 {
     private final MethodHandle target;
-    private final boolean varArgs;
 
     /**
      * Creates a new simple dynamic method.
      * @param target the target method handle
-     * @param varArgs whether the target method is varargs
      */
-    public SimpleDynamicMethod(MethodHandle target, boolean varArgs) {
+    public SimpleDynamicMethod(MethodHandle target) {
         this.target = target;
-        this.varArgs = varArgs;
     }
 
     /**
@@ -53,20 +50,13 @@ public class SimpleDynamicMethod implements DynamicMethod
         return target;
     }
 
-    /**
-     * Returns whether this is a varargs method.
-     * @return whether this is a varargs method.
-     */
-    public boolean isVarArgs() {
-        return varArgs;
-    }
-
     public MethodHandle getInvocation(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices)
     {
         final MethodType methodType = target.type();
         final int paramsLen = methodType.parameterCount();
+        final boolean varArgs = target.isVarargsCollector();
         final int fixParamsLen = varArgs ? paramsLen - 1 : paramsLen;
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final int argsLen = callSiteType.parameterCount();

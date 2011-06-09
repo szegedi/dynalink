@@ -1,5 +1,6 @@
 package org.dynalang.dynalink.beans.support;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public class ApplicableOverloadedMethods
 {
-    private final List<MethodHandleEx> methods;
+    private final List<MethodHandle> methods;
     private final boolean varArgs;
 
     /**
@@ -23,10 +24,10 @@ public class ApplicableOverloadedMethods
      * {@link #APPLICABLE_BY_METHOD_INVOCATION_CONVERSION}, or
      * {@link #APPLICABLE_BY_VARIABLE_ARITY}.
      */
-    public ApplicableOverloadedMethods(final List<MethodHandleEx> methods,
+    public ApplicableOverloadedMethods(final List<MethodHandle> methods,
             final MethodType callSiteType, final ApplicabilityTest test) {
-        this.methods = new LinkedList<MethodHandleEx>();
-        for (MethodHandleEx m : methods) {
+        this.methods = new LinkedList<MethodHandle>();
+        for (MethodHandle m : methods) {
             if(test.isApplicable(callSiteType, m)) {
                 this.methods.add(m);
             }
@@ -38,7 +39,7 @@ public class ApplicableOverloadedMethods
      * Retrieves all the methods this object holds.
      * @return list of all methods.
      */
-    public List<MethodHandleEx> getMethods() {
+    public List<MethodHandle> getMethods() {
         return methods;
     }
 
@@ -47,15 +48,15 @@ public class ApplicableOverloadedMethods
      * specific.
      * @return a list of maximally specific methods.
      */
-    public List<MethodHandleEx> findMaximallySpecificMethods() {
+    public List<MethodHandle> findMaximallySpecificMethods() {
         return MaximallySpecific.getMaximallySpecificMethods(methods, TF,
                 varArgs);
     }
 
-    private static MaximallySpecific.TypeFunction<MethodHandleEx> TF =
-        new MaximallySpecific.TypeFunction<MethodHandleEx>() {
-            public MethodType type(MethodHandleEx mh) {
-                return mh.getMethodHandle().type();
+    private static MaximallySpecific.TypeFunction<MethodHandle> TF =
+        new MaximallySpecific.TypeFunction<MethodHandle>() {
+            public MethodType type(MethodHandle mh) {
+                return mh.type();
             };
         };
 
@@ -65,7 +66,7 @@ public class ApplicableOverloadedMethods
      * but it will never be null.
      */
     public abstract static class ApplicabilityTest {
-        abstract boolean isApplicable(MethodType callSiteType, MethodHandleEx methodEx);
+        abstract boolean isApplicable(MethodType callSiteType, MethodHandle method);
     }
 
     /**
@@ -74,8 +75,8 @@ public class ApplicableOverloadedMethods
     public static final ApplicabilityTest APPLICABLE_BY_SUBTYPING = new ApplicabilityTest()
     {
         @Override
-        boolean isApplicable(MethodType callSiteType, MethodHandleEx methodEx) {
-            final MethodType methodType = methodEx.methodHandle.type();
+        boolean isApplicable(MethodType callSiteType, MethodHandle method) {
+            final MethodType methodType = method.type();
             final int methodArity = methodType.parameterCount();
             if(methodArity != callSiteType.parameterCount()) {
                 return false;
@@ -98,8 +99,8 @@ public class ApplicableOverloadedMethods
     public static final ApplicabilityTest APPLICABLE_BY_METHOD_INVOCATION_CONVERSION = new ApplicabilityTest()
     {
         @Override
-        boolean isApplicable(MethodType callSiteType, MethodHandleEx methodEx) {
-            final MethodType methodType = methodEx.methodHandle.type();
+        boolean isApplicable(MethodType callSiteType, MethodHandle method) {
+            final MethodType methodType = method.type();
             final int methodArity = methodType.parameterCount();
             if(methodArity != callSiteType.parameterCount()) {
                 return false;
@@ -123,11 +124,11 @@ public class ApplicableOverloadedMethods
     public static final ApplicabilityTest APPLICABLE_BY_VARIABLE_ARITY = new ApplicabilityTest()
     {
         @Override
-        boolean isApplicable(MethodType callSiteType, MethodHandleEx methodEx) {
-            if(!methodEx.varArgs) {
+        boolean isApplicable(MethodType callSiteType, MethodHandle method) {
+            if(!method.isVarargsCollector()) {
                 return false;
             }
-            final MethodType methodType = methodEx.methodHandle.type();
+            final MethodType methodType = method.type();
             final int methodArity = methodType.parameterCount();
             final int fixArity = methodArity - 1;
             final int callSiteArity = callSiteType.parameterCount();

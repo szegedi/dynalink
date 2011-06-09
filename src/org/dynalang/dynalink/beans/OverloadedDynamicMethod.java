@@ -26,7 +26,6 @@ import java.util.List;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.beans.support.ApplicableOverloadedMethods;
-import org.dynalang.dynalink.beans.support.MethodHandleEx;
 import org.dynalang.dynalink.beans.support.TypeUtilities;
 import org.dynalang.dynalink.beans.support.ApplicableOverloadedMethods.ApplicabilityTest;
 
@@ -40,8 +39,8 @@ public class OverloadedDynamicMethod implements DynamicMethod
     /**
      * Holds a list of all methods.
      */
-    private final LinkedList<MethodHandleEx> methods =
-        new LinkedList<MethodHandleEx>();
+    private final LinkedList<MethodHandle> methods =
+        new LinkedList<MethodHandle>();
     private final ClassLoader classLoader;
 
     /**
@@ -76,7 +75,7 @@ public class OverloadedDynamicMethod implements DynamicMethod
 
         // Find the methods that are maximally specific based on the call site
         // signature
-        List<MethodHandleEx> maximallySpecifics =
+        List<MethodHandle> maximallySpecifics =
             subtypingApplicables.findMaximallySpecificMethods();
         if(maximallySpecifics.isEmpty()) {
             maximallySpecifics =
@@ -93,12 +92,12 @@ public class OverloadedDynamicMethod implements DynamicMethod
         // dynamic invocation, as they
         // might match more concrete types passed in invocations. That's why we
         // provisionally call them "invokable".
-        final List<MethodHandleEx> invokables = (List)methods.clone();
+        final List<MethodHandle> invokables = (List)methods.clone();
         invokables.removeAll(subtypingApplicables.getMethods());
         invokables.removeAll(methodInvocationApplicables.getMethods());
         invokables.removeAll(variableArityApplicables.getMethods());
-        for(final Iterator<MethodHandleEx> it = invokables.iterator(); it.hasNext();) {
-            final MethodHandleEx m = it.next();
+        for(final Iterator<MethodHandle> it = invokables.iterator(); it.hasNext();) {
+            final MethodHandle m = it.next();
             if(!isApplicableDynamically(linkerServices, callSiteType, m)) {
                 it.remove();
             }
@@ -123,9 +122,8 @@ public class OverloadedDynamicMethod implements DynamicMethod
                 // Very lucky, we ended up with a single candidate method
                 // handle based on the call site signature; we can link it very
                 // simply by delegating to a SimpleDynamicMethod.
-                final MethodHandleEx mh = invokables.iterator().next();
-                return new SimpleDynamicMethod(mh.getMethodHandle(),
-                        mh.isVarArgs()).getInvocation(callSiteDescriptor,
+                final MethodHandle mh = invokables.iterator().next();
+                return new SimpleDynamicMethod(mh).getInvocation(callSiteDescriptor,
                                 linkerServices);
             }
         }
@@ -138,10 +136,9 @@ public class OverloadedDynamicMethod implements DynamicMethod
         // selection.
         final List<MethodHandle> fixArgMethods = new LinkedList<MethodHandle>();
         final List<MethodHandle> varArgMethods = new LinkedList<MethodHandle>();
-        for (MethodHandleEx m : invokables) {
-            final MethodHandle mh = m.getMethodHandle();
+        for (MethodHandle mh : invokables) {
             fixArgMethods.add(mh);
-            if(m.isVarArgs()) {
+            if(mh.isVarargsCollector()) {
                 varArgMethods.add(mh);
             }
         }
@@ -172,9 +169,9 @@ public class OverloadedDynamicMethod implements DynamicMethod
 
     private static boolean isApplicableDynamically(
             LinkerServices linkerServices, MethodType callSiteType,
-            MethodHandleEx m) {
-        final MethodType methodType = m.getMethodHandle().type();
-        final boolean varArgs = m.isVarArgs();
+            MethodHandle m) {
+        final MethodType methodType = m.type();
+        final boolean varArgs = m.isVarargsCollector();
         final int fixedArgLen = methodType.parameterCount() - (varArgs ? 1 : 0);
         final int callSiteArgLen = callSiteType.parameterCount();
         if(callSiteArgLen < fixedArgLen) {
@@ -236,16 +233,15 @@ public class OverloadedDynamicMethod implements DynamicMethod
      * @param method the method to add.
      */
     public void addMethod(SimpleDynamicMethod method) {
-        addMethod(method.getTarget(), method.isVarArgs());
+        addMethod(method.getTarget());
     }
 
     /**
      * Add a method to this overloaded method's set.
      * @param method a method to add
-     * @param varArgs if true, the method is variable arguments
      */
-    public void addMethod(final MethodHandle method, final boolean varArgs) {
-        methods.add(new MethodHandleEx(method, varArgs));
+    public void addMethod(MethodHandle method) {
+        methods.add(method);
     }
 
 }

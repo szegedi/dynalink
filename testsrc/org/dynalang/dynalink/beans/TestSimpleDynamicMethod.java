@@ -38,18 +38,16 @@ public class TestSimpleDynamicMethod extends TestCase
      */
     public void testLessArgsOnFixArgs()
     {
-        assertNull(new SimpleDynamicMethod(getTest1XMethod(),
-                false).getInvocation(new CallSiteDescriptor("",
-                        MethodType.methodType(Void.TYPE, Object.class, int.class)),
-                        null));
+        assertNull(new SimpleDynamicMethod(getTest1XMethod()).getInvocation(
+            new CallSiteDescriptor("", MethodType.methodType(Void.TYPE,
+                Object.class, int.class)), null));
     }
 
     public void testMoreArgsOnFixArgs()
     {
-        assertNull(new SimpleDynamicMethod(getTest1XMethod(),
-                false).getInvocation(new CallSiteDescriptor("",
-                        MethodType.methodType(Void.TYPE, Object.class, int.class,
-                                int.class, int.class)), null));
+        assertNull(new SimpleDynamicMethod(getTest1XMethod()).getInvocation(
+            new CallSiteDescriptor("", MethodType.methodType(Void.TYPE,
+                Object.class, int.class, int.class, int.class)), null));
     }
 
     private static MethodHandle getTest1XMethod()
@@ -110,7 +108,7 @@ public class TestSimpleDynamicMethod extends TestCase
             }
         };
         // Make sure it didn't interfere - just returned the same method handle
-        assertSame(mh, new SimpleDynamicMethod(mh,false).getInvocation(
+        assertSame(mh, new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", type), ls));
         assertTrue(converterInvoked[0]);
     }
@@ -141,7 +139,7 @@ public class TestSimpleDynamicMethod extends TestCase
             }
         };
         // Make sure it didn't interfere - just returned the same method handle
-        assertSame(mh, new SimpleDynamicMethod(mh, true).getInvocation(
+        assertSame(mh, new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", type), ls));
         assertTrue(converterInvoked[0]);
     }
@@ -185,7 +183,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return handle;
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
@@ -220,7 +218,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return handle;
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
@@ -256,7 +254,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return handle;
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
@@ -291,7 +289,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return handle;
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
@@ -325,7 +323,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return handle;
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertTrue(converterInvoked[0]);
@@ -381,7 +379,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return MethodHandles.convertArguments(handle, fromType);
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertEquals(2, converterInvoked[0]);
@@ -437,7 +435,7 @@ public class TestSimpleDynamicMethod extends TestCase
                 return MethodHandles.convertArguments(handle, fromType);
             }
         };
-        MethodHandle newHandle = new SimpleDynamicMethod(mh, true).getInvocation(
+        MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
                 new CallSiteDescriptor("", callSiteType), ls);
         assertNotSame(newHandle, mh);
         assertEquals(2, converterInvoked[0]);

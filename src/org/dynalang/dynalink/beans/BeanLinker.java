@@ -117,18 +117,17 @@ public class BeanLinker implements GuardingDynamicLinker
             DynamicMethod existing)
     {
         final MethodHandle mh = Lookup.PUBLIC.unreflect(method);
-        final boolean varArgs = method.isVarArgs();
         if(existing == null) {
-            return new SimpleDynamicMethod(mh, varArgs);
+            return new SimpleDynamicMethod(mh);
         }
         else if(existing instanceof SimpleDynamicMethod) {
             OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
             odm.addMethod(((SimpleDynamicMethod)existing));
-            odm.addMethod(mh, varArgs);
+            odm.addMethod(mh);
             return odm;
         }
         else if(existing instanceof OverloadedDynamicMethod) {
-            ((OverloadedDynamicMethod)existing).addMethod(mh, varArgs);
+            ((OverloadedDynamicMethod)existing).addMethod(mh);
             return existing;
         }
         throw new AssertionError();
