@@ -23,10 +23,10 @@ import java.util.Map;
 
 /**
  * Utility class for discovering accessible methods. Normally, a public method
- * declared on a class is accessible (that is, it can be invoked from 
+ * declared on a class is accessible (that is, it can be invoked from
  * anywhere). However, this is not the case if the class itself is not public.
  * In that case, it is required to lookup a method with the same signature in
- * a public superclass or implemented interface of the class, and use it 
+ * a public superclass or implemented interface of the class, and use it
  * instead of the method discovered on the class. This can of course all be
  * avoided by simply using {@link Method#setAccessible(boolean)}, but this
  * solution (which I call "dynamic upcasting") works even in more constrained
@@ -37,10 +37,10 @@ import java.util.Map;
 public class AccessibleMethodsLookup
 {
     private final Map<MethodSignature, Method> map;
-    
+
     /**
      * Creates a mapping for all accessible methods on a class.
-     * @param clazz the inspected class 
+     * @param clazz the inspected class
      */
     public AccessibleMethodsLookup(final Class<?> clazz)
     {
@@ -60,7 +60,7 @@ public class AccessibleMethodsLookup
     }
 
     /**
-     * A helper class that represents a method signature - name and argument 
+     * A helper class that represents a method signature - name and argument
      * types.
      * @author Attila Szegedi
      * @version $Id: $
@@ -79,7 +79,7 @@ public class AccessibleMethodsLookup
             this.name = name;
             this.args = args;
         }
-        
+
         /**
          * Creates a signature for the given method.
          * @param method the method for which a signature is created.
@@ -87,12 +87,12 @@ public class AccessibleMethodsLookup
         public MethodSignature(final Method method) {
             this(method.getName(), method.getParameterTypes());
         }
-        
+
         /**
          * Compares this object to another object
          * @param o the other object
          * @return true if the other object is also a method signature with the
-         * same name, same number of arguments, and same types of arguments. 
+         * same name, same number of arguments, and same types of arguments.
          */
         public boolean equals(final Object o) {
             if(o instanceof MethodSignature) {
@@ -101,9 +101,9 @@ public class AccessibleMethodsLookup
             }
             return false;
         }
-        
+
         /**
-         * Returns a hash code, consistent with the overridden 
+         * Returns a hash code, consistent with the overridden
          * {@link #equals(Object)}.
          */
         public int hashCode() {
@@ -125,14 +125,14 @@ public class AccessibleMethodsLookup
             }
             catch(final SecurityException e) {
                 System.err.println(
-                        "Could not discover accessible methods of class " + 
+                        "Could not discover accessible methods of class " +
                         clazz.getName() + ", attemping superclasses/interfaces.");
                 e.printStackTrace();
-                // Fall through and attempt to discover superclass/interface 
+                // Fall through and attempt to discover superclass/interface
                 // methods
             }
         }
-    
+
         final Class<?>[] interfaces = clazz.getInterfaces();
         for(int i = 0; i < interfaces.length; i++) {
             lookupAccessibleMethods(interfaces[i]);

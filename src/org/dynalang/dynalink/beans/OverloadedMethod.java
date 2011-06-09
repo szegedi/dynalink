@@ -48,11 +48,11 @@ class OverloadedMethod {
     // per argument. It is used for initial conversion.
     private MethodType commonMethodType;
     private final MethodType commonMethodTypeWithException;
-    private final Map<ClassString, MethodHandle> argTypesToMethods = 
+    private final Map<ClassString, MethodHandle> argTypesToMethods =
         new ConcurrentHashMap<ClassString, MethodHandle>();
     private final boolean varArg;
     private final ClassLoader classLoader;
-    
+
     private final List<MethodHandle> methods = new LinkedList<MethodHandle>();
 
     public OverloadedMethod(List<MethodHandle> methodHandles, int argNum,
@@ -77,20 +77,20 @@ class OverloadedMethod {
             else {
                 for(int i = 0; i < argNum; ++i) {
                     final Class<?> oldType = commonMethodType.parameterType(i);
-                    final Class<?> newType = 
-                        TypeUtilities.getMostSpecificCommonType(oldType, 
+                    final Class<?> newType =
+                        TypeUtilities.getMostSpecificCommonType(oldType,
                                 methodType.parameterType(i));
                     if(oldType != newType) {
-                        commonMethodType = 
+                        commonMethodType =
                             commonMethodType.changeParameterType(i, newType);
                     }
                 }
                 final Class<?> oldRetType = commonMethodType.returnType();
-                final Class<?> newRetType = 
-                    TypeUtilities.getMostSpecificCommonType(oldRetType, 
+                final Class<?> newRetType =
+                    TypeUtilities.getMostSpecificCommonType(oldRetType,
                             methodType.returnType());
                 if(oldRetType != newRetType) {
-                    commonMethodType = 
+                    commonMethodType =
                         commonMethodType.changeReturnType(newRetType);
                 }
             }
@@ -98,104 +98,104 @@ class OverloadedMethod {
         commonMethodTypeWithException = commonMethodType.insertParameterTypes(
                 0, NoSuchMethodException.class);
     }
-    
-    public MethodHandle getFixArgsInvocation(LinkerServices linkerServices, 
+
+    public MethodHandle getFixArgsInvocation(LinkerServices linkerServices,
             MethodType callSiteType)
     {
         return getFixArgInvocation(INVOKE_FIXARGS, linkerServices, callSiteType);
     }
 
     public MethodHandle getFixArgsFirstInvocation(
-            LinkerServices linkerServices, MethodType callSiteType) 
+            LinkerServices linkerServices, MethodType callSiteType)
     {
-        return getFixArgInvocation(INVOKE_FIXARGS_FIRST, linkerServices, 
+        return getFixArgInvocation(INVOKE_FIXARGS_FIRST, linkerServices,
                 callSiteType);
     }
-    
-    public MethodHandle getVarArgsInvocation(LinkerServices linkerServices, 
+
+    public MethodHandle getVarArgsInvocation(LinkerServices linkerServices,
             MethodType callSiteType)
     {
         final MethodHandle bound = MethodHandles.insertArguments(
                 INVOKE_VARARGS, 0, this, callSiteType);
-        final MethodHandle collecting = SimpleDynamicMethod.collectArguments(bound, 
+        final MethodHandle collecting = SimpleDynamicMethod.collectArguments(bound,
             commonMethodTypeWithException.parameterCount());
         final MethodHandle converting = linkerServices.convertArguments(
-                collecting, callSiteType.insertParameterTypes(0, 
+                collecting, callSiteType.insertParameterTypes(0,
                         NoSuchMethodException.class));
         return converting;
     }
 
-    private MethodHandle getFixArgInvocation(MethodHandle invoker, 
+    private MethodHandle getFixArgInvocation(MethodHandle invoker,
             LinkerServices linkerServices, MethodType callSiteType) {
-        final MethodHandle bound = MethodHandles.insertArguments(invoker, 0, 
+        final MethodHandle bound = MethodHandles.insertArguments(invoker, 0,
                 this, callSiteType);
-        final MethodHandle collecting = SimpleDynamicMethod.collectArguments(bound, 
+        final MethodHandle collecting = SimpleDynamicMethod.collectArguments(bound,
                 commonMethodType.parameterCount());
         final MethodHandle converting = linkerServices.convertArguments(
                 collecting, callSiteType);
         return converting;
     }
-    
-    private static final MethodHandle INVOKE_FIXARGS = 
+
+    private static final MethodHandle INVOKE_FIXARGS =
         getFixArgsInvocationMethod("_invokeFixArgs");
-    private static final MethodHandle INVOKE_FIXARGS_FIRST = 
-        getFixArgsInvocationMethod("_invokeFixArgsFirst"); 
-    private static final MethodHandle INVOKE_VARARGS = 
+    private static final MethodHandle INVOKE_FIXARGS_FIRST =
+        getFixArgsInvocationMethod("_invokeFixArgsFirst");
+    private static final MethodHandle INVOKE_VARARGS =
         new Lookup(MethodHandles.lookup()).findSpecial(OverloadedMethod.class,
-                "_invokeVarArgs", MethodType.methodType(Object.class, 
-                        MethodType.class, NoSuchMethodException.class,  
-                        Object[].class)); 
-    
+                "_invokeVarArgs", MethodType.methodType(Object.class,
+                        MethodType.class, NoSuchMethodException.class,
+                        Object[].class));
+
     private static MethodHandle getFixArgsInvocationMethod(String name) {
         return new Lookup(MethodHandles.lookup()).findSpecial(
             OverloadedMethod.class, name, MethodType.methodType(Object.class,
                 MethodType.class, Object[].class));
     }
 
-    public Object _invokeFixArgs(MethodType callSiteType, Object... args) 
+    public Object _invokeFixArgs(MethodType callSiteType, Object... args)
     throws Throwable
     {
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
-            throw new BootstrapMethodError("None of the methods " + methods + 
+            throw new BootstrapMethodError("None of the methods " + methods +
                     " matches arguments");
         }
-        return method.invokeWithArguments(args); 
+        return method.invokeWithArguments(args);
     }
 
-    private static final NoSuchMethodException NO_SUCH_FIX_ARGS_METHOD = 
+    private static final NoSuchMethodException NO_SUCH_FIX_ARGS_METHOD =
         new NoSuchMethodException();
-    
-    public Object _invokeFixArgsFirst(MethodType callSiteType, Object... args) 
-    throws Throwable 
+
+    public Object _invokeFixArgsFirst(MethodType callSiteType, Object... args)
+    throws Throwable
     {
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
             throw NO_SUCH_FIX_ARGS_METHOD;
         }
-        return method.invokeWithArguments(args); 
+        return method.invokeWithArguments(args);
     }
 
-    public Object _invokeVarArgs(MethodType callSiteType, 
+    public Object _invokeVarArgs(MethodType callSiteType,
             NoSuchMethodException e, Object... args) throws Throwable {
         if(e != NO_SUCH_FIX_ARGS_METHOD) {
             throw e;
         }
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
-            throw new BootstrapMethodError("None of the methods " + methods + 
+            throw new BootstrapMethodError("None of the methods " + methods +
                 " matches arguments");
         }
-        return SimpleDynamicMethod.collectArguments(method, 
-                callSiteType.parameterCount()).invokeWithArguments(args); 
-        
+        return SimpleDynamicMethod.collectArguments(method,
+                callSiteType.parameterCount()).invokeWithArguments(args);
+
     }
 
     MethodHandle getInvocationForArgs(MethodType callSiteType, Object... args) {
         Class<?>[] argTypes = new Class[args.length];
         for(int i = 0; i < argTypes.length; ++i) {
             Object arg = args[i];
-            argTypes[i] = arg == null ? callSiteType.parameterType(i) : 
+            argTypes[i] = arg == null ? callSiteType.parameterType(i) :
                 arg.getClass();
         }
         final ClassString classString = new ClassString(argTypes);
@@ -209,7 +209,7 @@ class OverloadedMethod {
             }
         }
         if(method == AMBIGUOUS_METHOD) {
-            throw new BootstrapMethodError("Can't unambiguously select one of " + 
+            throw new BootstrapMethodError("Can't unambiguously select one of " +
                     methods);
         }
         return method;

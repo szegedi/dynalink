@@ -26,7 +26,7 @@ import org.dynalang.dynalink.beans.support.TypeUtilities;
 import org.dynalang.dynalink.support.Guards;
 
 /**
- * 
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -34,15 +34,15 @@ final class ClassString
 {
     private final Class<?>[] classes;
     private int hashCode;
-    
+
     ClassString(Class<?>[] classes) {
 	this.classes = classes;
     }
-    
+
     Class<?>[] getClasses() {
         return classes;
     }
-    
+
     @Override
     public boolean equals(Object other)
     {
@@ -60,19 +60,19 @@ final class ClassString
         }
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         if(hashCode == 0) {
             int h = 0;
             for(int i = 0; i < classes.length; ++i) {
-                h ^= classes[i].hashCode(); 
+                h ^= classes[i].hashCode();
             }
             hashCode = h;
         }
-        return hashCode; 
+        return hashCode;
     }
-    
+
     boolean isVisibleFrom(final ClassLoader classLoader) {
         for(int i = 0; i < classes.length; ++i) {
             if(!Guards.canReferenceDirectly(classLoader, classes[i].getClassLoader())) {
@@ -81,8 +81,8 @@ final class ClassString
         }
         return true;
     }
-    
-    private static MaximallySpecific.TypeFunction<MethodHandle> TF = 
+
+    private static MaximallySpecific.TypeFunction<MethodHandle> TF =
         new MaximallySpecific.TypeFunction<MethodHandle>() {
             public MethodType type(MethodHandle mh) {
                 return mh.type();
@@ -91,7 +91,7 @@ final class ClassString
 
     MethodHandle getMostSpecific(List<MethodHandle> methods, boolean varArg)
     {
-        final List<MethodHandle> maximals = 
+        final List<MethodHandle> maximals =
             MaximallySpecific.getMaximallySpecificMethods(getApplicables(
                     methods, varArg), TF, varArg);
         switch(maximals.size()) {
@@ -106,7 +106,7 @@ final class ClassString
             }
         }
     }
-    
+
     /**
      * Returns all methods that are applicable to actual
      * parameter classes represented by this ClassString object.
@@ -120,11 +120,11 @@ final class ClassString
         }
         return list;
     }
-    
+
     /**
      * Returns true if the supplied method is applicable to actual
      * parameter classes represented by this ClassString object.
-     * 
+     *
      */
     private boolean isApplicable(MethodHandle method, boolean varArg) {
         final Class<?>[] formalTypes = method.type().parameterArray();

@@ -44,7 +44,7 @@ public class BeansLinker implements GuardingDynamicLinker {
             }
         }
     };
-    
+
     /**
      * Creates a new POJO linker.
      */
@@ -60,25 +60,25 @@ public class BeansLinker implements GuardingDynamicLinker {
             // Can't handle static calls; must have a receiver
             return null;
         }
-        
+
         final List<String> name = callSiteDescriptor.getTokenizedName();
         final int l = name.size();
         // All names conforming to the dynalang MOP should be prefixed by "dyn:"
         if(l < 1 || !"dyn".equals(name.get(0))) {
             return null;
         }
-        
+
         // Every name should be in at least the "dyn:<op>" form
         if(l < 2) {
             throw new BootstrapMethodError("Invalid name " + name);
         }
-        
+
         final Object receiver = arguments[0];
         if(receiver == null) {
             // Can't operate on null
             return null;
         }
-        
+
         return linkers.get(receiver.getClass()).getGuardedInvocation(
                 callSiteDescriptor, linkerServices, arguments);
     }

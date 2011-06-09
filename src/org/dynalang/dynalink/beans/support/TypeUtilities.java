@@ -32,15 +32,15 @@ import java.util.Set;
 public class TypeUtilities
 {
     static final Class<Object> OBJECT_CLASS = Object.class;
-    
+
     /**
      * Given two types represented by c1 and c2, returns a type that is their
-     * most specific common superclass or superinterface. 
+     * most specific common superclass or superinterface.
      * @param c1 one type
      * @param c2 another type
      * @return their most common superclass or superinterface. If they have
      * several unrelated superinterfaces as their most specific common type, or
-     * the types themselves are completely unrelated interfaces, 
+     * the types themselves are completely unrelated interfaces,
      * {@link java.lang.Object} is returned.
      */
     public static Class<?> getMostSpecificCommonType(Class<?> c1, Class<?> c2) {
@@ -60,14 +60,14 @@ public class TypeUtilities
         Set<Class<?>> a2 = getAssignables(c2, c1);
         a1.retainAll(a2);
         if(a1.isEmpty()) {
-            // Can happen when at least one of the arguments is an interface, 
+            // Can happen when at least one of the arguments is an interface,
             // as they don't have Object at the root of their hierarchy.
             return Object.class;
         }
-        // Gather maximally specific elements. Yes, there can be more than one 
-        // thank to interfaces. I.e., if you call this method for String.class 
-        // and Number.class, you'll have Comparable, Serializable, and Object 
-        // as maximal elements. 
+        // Gather maximally specific elements. Yes, there can be more than one
+        // thank to interfaces. I.e., if you call this method for String.class
+        // and Number.class, you'll have Comparable, Serializable, and Object
+        // as maximal elements.
         List<Class<?>> max = new ArrayList<Class<?>>();
 outer:  for (Class<?> clazz : a1) {
             for (Iterator<Class<?>> maxiter = max.iterator(); maxiter.hasNext();) {
@@ -98,7 +98,7 @@ outer:  for (Class<?> clazz : a1) {
         collectAssignables(c1, c2, s);
         return s;
     }
-    
+
     private static void collectAssignables(Class<?> c1, Class<?> c2, Set<Class<?>> s) {
         if(c1.isAssignableFrom(c2)) {
             s.add(c1);
@@ -115,9 +115,9 @@ outer:  for (Class<?> clazz : a1) {
 
     private static final Map<Class<?>, Class<?>> WRAPPER_TYPES = createWrapperTypes();
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TYPES = invertMap(WRAPPER_TYPES);
-    
+
     private static Map<Class<?>, Class<?>> createWrapperTypes() {
-        final Map<Class<?>, Class<?>> wrapperTypes = 
+        final Map<Class<?>, Class<?>> wrapperTypes =
             new IdentityHashMap<Class<?>, Class<?>>(8);
         wrapperTypes.put(Boolean.TYPE, Boolean.class);
         wrapperTypes.put(Byte.TYPE, Byte.class);
@@ -129,7 +129,7 @@ outer:  for (Class<?> clazz : a1) {
         wrapperTypes.put(Double.TYPE, Double.class);
         return Collections.unmodifiableMap(wrapperTypes);
     }
-    
+
     private static <K, V> Map<V, K> invertMap(Map<K, V> map) {
         final Map<V, K> inverted = new IdentityHashMap<V, K>(map.size());
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -137,21 +137,21 @@ outer:  for (Class<?> clazz : a1) {
         }
         return Collections.unmodifiableMap(inverted);
     }
-    
+
     /**
-     * Determines whether one type can be converted to another type using a 
-     * method invocation conversion, as per JLS 5.3 "Method Invocation 
+     * Determines whether one type can be converted to another type using a
+     * method invocation conversion, as per JLS 5.3 "Method Invocation
      * Conversion". This is basically all conversions allowed by subtyping (see
-     * {@link #isSubtype(Class, Class)}) as well as boxing conversion 
-     * (JLS 5.1.7) optionally followed by widening reference conversion and 
-     * unboxing conversion (JLS 5.1.8) optionally followed by widening 
+     * {@link #isSubtype(Class, Class)}) as well as boxing conversion
+     * (JLS 5.1.7) optionally followed by widening reference conversion and
+     * unboxing conversion (JLS 5.1.8) optionally followed by widening
      * primitive conversion.
      * @param callSiteType the parameter type at the call site
      * @param methodType the parameter type in the method declaration
-     * @return true if callSiteType is method invocation convertible to the 
+     * @return true if callSiteType is method invocation convertible to the
      * methodType.
      */
-    public static boolean isMethodInvocationConvertible(Class<?> callSiteType, 
+    public static boolean isMethodInvocationConvertible(Class<?> callSiteType,
             Class<?> methodType)
     {
         if(methodType.isAssignableFrom(callSiteType)) {
@@ -167,29 +167,29 @@ outer:  for (Class<?> clazz : a1) {
         if(methodType.isPrimitive()) {
             final Class<?> unboxedCallSiteType = PRIMITIVE_TYPES.get(
                     callSiteType);
-            return unboxedCallSiteType != null && 
+            return unboxedCallSiteType != null &&
             (unboxedCallSiteType == methodType || isProperPrimitiveSubtype(
                     unboxedCallSiteType, methodType));
         }
         return false;
     }
-    
+
     /**
-     * Determines whether one type can be potentially converted to another 
+     * Determines whether one type can be potentially converted to another
      * type at runtime. Allows a conversion between any subtype and supertype
-     * in either direction, and also allows a conversion between any two 
+     * in either direction, and also allows a conversion between any two
      * primitive types, as well as between any primitive type and any reference
      * type that can hold a boxed primitive.
      * @param callSiteType the parameter type at the call site
      * @param methodType the parameter type in the method declaration
-     * @return true if callSiteType is potentially convertible to the 
+     * @return true if callSiteType is potentially convertible to the
      * methodType.
      */
     public static boolean isPotentiallyConvertible(
             Class<?> callSiteType, Class<?> methodType)
     {
         // Widening or narrowing reference conversion
-        if(methodType.isAssignableFrom(callSiteType) || 
+        if(methodType.isAssignableFrom(callSiteType) ||
                 callSiteType.isAssignableFrom(methodType)) {
             return true;
         }
@@ -200,11 +200,11 @@ outer:  for (Class<?> clazz : a1) {
             // MethodHandles.convertArguments() allows it, so we might need to
             // too.
             return methodType.isPrimitive() || isAssignableFromBoxedPrimitive(
-                    methodType); 
+                    methodType);
         }
         if(methodType.isPrimitive()) {
-            // Allow conversion from any reference type that can contain a 
-            // boxed primitive to any primitive.  
+            // Allow conversion from any reference type that can contain a
+            // boxed primitive to any primitive.
             // TODO: narrow this a bit too?
             return isAssignableFromBoxedPrimitive(callSiteType);
         }
@@ -212,15 +212,15 @@ outer:  for (Class<?> clazz : a1) {
     }
 
     /**
-     * Determines whether one type is a subtype of another type, as per JLS 
+     * Determines whether one type is a subtype of another type, as per JLS
      * 4.10 "Subtyping". Note: this is not strict or proper subtype, therefore
      * true is also returned for identical types; to be completely precise, it
-     * allows identity conversion (JLS 5.1.1), widening primitive conversion 
-     * (JLS 5.1.2) and widening reference conversion (JLS 5.1.5). 
+     * allows identity conversion (JLS 5.1.1), widening primitive conversion
+     * (JLS 5.1.2) and widening reference conversion (JLS 5.1.5).
      * @param subType the supposed subtype
      * @param superType the supposed supertype of the subtype
-     * @return true if subType can be converted by identity conversion, 
-     * widening primitive conversion, or widening reference conversion to 
+     * @return true if subType can be converted by identity conversion,
+     * widening primitive conversion, or widening reference conversion to
      * superType.
      */
     public static boolean isSubtype(Class<?> subType, Class<?> superType) {
@@ -231,7 +231,7 @@ outer:  for (Class<?> clazz : a1) {
             return true;
         }
         // JLS 4.10.1 "Subtyping among Primitive Types". Note we don't test for
-        // identity, as identical types were taken care of in the 
+        // identity, as identical types were taken care of in the
         // isAssignableFrom test. As per 4.10.1, the supertype relation is as
         // follows:
         // double > float
@@ -245,14 +245,14 @@ outer:  for (Class<?> clazz : a1) {
         }
         return false;
     }
-    
+
     /**
      * Returns true if a supposed primitive subtype is a proper subtype (
      * meaning, subtype and not identical) of the supposed primitive supertype
      * @param subType the supposed subtype
      * @param superType the supposed supertype
      * @return true if subType is a proper (not identical to) primitive subtype
-     * of the superType 
+     * of the superType
      */
     public static boolean isProperPrimitiveSubtype(Class<?> subType, Class<?> superType) {
         if(superType == boolean.class || subType == boolean.class) {
@@ -268,7 +268,7 @@ outer:  for (Class<?> clazz : a1) {
             return superType != char.class && superType != byte.class;
         }
         if(subType == int.class) {
-            return superType == long.class || superType == float.class || 
+            return superType == long.class || superType == float.class ||
             superType == double.class;
         }
         if(subType == long.class) {
@@ -281,7 +281,7 @@ outer:  for (Class<?> clazz : a1) {
     }
 
     private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES = createPrimitiveWrapperTypes();
-    
+
     private static Set<Class<?>> createPrimitiveWrapperTypes() {
         final Map<Class<?>, Class<?>> classes = new IdentityHashMap<Class<?>, Class<?>>();
         addClassHierarchy(classes, Boolean.class);
@@ -294,7 +294,7 @@ outer:  for (Class<?> clazz : a1) {
         addClassHierarchy(classes, Double.class);
         return classes.keySet();
     }
-    
+
     private static void addClassHierarchy(Map<Class<?>, Class<?>> map, Class<?> clazz) {
         if(clazz == null) {
             return;
@@ -305,7 +305,7 @@ outer:  for (Class<?> clazz : a1) {
             addClassHierarchy(map, itf);
         }
     }
-    
+
     /**
      * Returns true if the class can be assigned from any boxed primitive.
      * @param clazz the class

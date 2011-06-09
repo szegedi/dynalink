@@ -40,7 +40,7 @@ public class OverloadedDynamicMethod implements DynamicMethod
     /**
      * Holds a list of all methods.
      */
-    private final LinkedList<MethodHandleEx> methods = 
+    private final LinkedList<MethodHandleEx> methods =
         new LinkedList<MethodHandleEx>();
     private final ClassLoader classLoader;
 
@@ -60,36 +60,36 @@ public class OverloadedDynamicMethod implements DynamicMethod
 
         // First, find all methods applicable to the call site by subtyping
         // (JLS 15.12.2.2)
-        final ApplicableOverloadedMethods subtypingApplicables = 
-            getApplicables(callSiteType, 
+        final ApplicableOverloadedMethods subtypingApplicables =
+            getApplicables(callSiteType,
                     ApplicableOverloadedMethods.APPLICABLE_BY_SUBTYPING);
         // Next, find all methods applicable by method invocation conversion to
         // the call site (JLS 15.12.2.3).
-        final ApplicableOverloadedMethods methodInvocationApplicables = 
-            getApplicables(callSiteType, 
+        final ApplicableOverloadedMethods methodInvocationApplicables =
+            getApplicables(callSiteType,
                     ApplicableOverloadedMethods.APPLICABLE_BY_METHOD_INVOCATION_CONVERSION);
         // Finally, find all methods applicable by variable arity invocation.
         // (JLS 15.12.2.4).
-        final ApplicableOverloadedMethods variableArityApplicables = 
-            getApplicables(callSiteType, 
+        final ApplicableOverloadedMethods variableArityApplicables =
+            getApplicables(callSiteType,
                     ApplicableOverloadedMethods.APPLICABLE_BY_VARIABLE_ARITY);
 
         // Find the methods that are maximally specific based on the call site
         // signature
-        List<MethodHandleEx> maximallySpecifics = 
+        List<MethodHandleEx> maximallySpecifics =
             subtypingApplicables.findMaximallySpecificMethods();
         if(maximallySpecifics.isEmpty()) {
-            maximallySpecifics = 
+            maximallySpecifics =
                 methodInvocationApplicables.findMaximallySpecificMethods();
             if(maximallySpecifics.isEmpty()) {
-                maximallySpecifics = 
+                maximallySpecifics =
                     variableArityApplicables.findMaximallySpecificMethods();
             }
         }
- 
-        // Now, get a list of the rest of the methods; those that are *not* 
-        // applicable to the call site signature based on JLS rules. As 
-        // paradoxical as that might sound, we have to consider these for 
+
+        // Now, get a list of the rest of the methods; those that are *not*
+        // applicable to the call site signature based on JLS rules. As
+        // paradoxical as that might sound, we have to consider these for
         // dynamic invocation, as they
         // might match more concrete types passed in invocations. That's why we
         // provisionally call them "invokable".
@@ -103,15 +103,15 @@ public class OverloadedDynamicMethod implements DynamicMethod
                 it.remove();
             }
         }
-        
-        // If no additional methods can apply at run time, and there's more 
-        // than one maximally specific method based on call site signature, 
+
+        // If no additional methods can apply at run time, and there's more
+        // than one maximally specific method based on call site signature,
         // that is a link-time ambiguity.
         if(invokables.isEmpty() && maximallySpecifics.size() > 1) {
-            throw new BootstrapMethodError("Can't choose among " + 
+            throw new BootstrapMethodError("Can't choose among " +
                     maximallySpecifics + " for argument types " + callSiteType);
         }
-        
+
         // Merge them all.
         invokables.addAll(maximallySpecifics);
         switch(invokables.size()) {
@@ -120,16 +120,16 @@ public class OverloadedDynamicMethod implements DynamicMethod
                 return null;
             }
             case 1: {
-                // Very lucky, we ended up with a single candidate method 
+                // Very lucky, we ended up with a single candidate method
                 // handle based on the call site signature; we can link it very
                 // simply by delegating to a SimpleDynamicMethod.
                 final MethodHandleEx mh = invokables.iterator().next();
-                return new SimpleDynamicMethod(mh.getMethodHandle(), 
-                        mh.isVarArgs()).getInvocation(callSiteDescriptor, 
+                return new SimpleDynamicMethod(mh.getMethodHandle(),
+                        mh.isVarArgs()).getInvocation(callSiteDescriptor,
                                 linkerServices);
             }
         }
-        
+
         // We have more than one candidate. We have no choice but to link to a
         // method that resolves overloads on every invocation (alternatively,
         // we could opportunistically link the one method that resolves for the
@@ -139,7 +139,7 @@ public class OverloadedDynamicMethod implements DynamicMethod
         final List<MethodHandle> fixArgMethods = new LinkedList<MethodHandle>();
         final List<MethodHandle> varArgMethods = new LinkedList<MethodHandle>();
         for (MethodHandleEx m : invokables) {
-            final MethodHandle mh = m.getMethodHandle();  
+            final MethodHandle mh = m.getMethodHandle();
             fixArgMethods.add(mh);
             if(m.isVarArgs()) {
                 varArgMethods.add(mh);
@@ -148,7 +148,7 @@ public class OverloadedDynamicMethod implements DynamicMethod
         final int paramCount = callSiteType.parameterCount();
         final OverloadedMethod fixArgsMethod = new OverloadedMethod(
                 fixArgMethods, paramCount, false, classLoader);
-        final OverloadedMethod varArgsMethod = varArgMethods.isEmpty() ? null : 
+        final OverloadedMethod varArgsMethod = varArgMethods.isEmpty() ? null :
             new OverloadedMethod(varArgMethods, paramCount, true, classLoader);
         if(varArgsMethod == null) {
             return fixArgsMethod.getFixArgsInvocation(linkerServices, callSiteType);
@@ -157,21 +157,21 @@ public class OverloadedDynamicMethod implements DynamicMethod
             // We're using catchException because it is actually surprisingly
             // effective - we'll be throwing a shared instance of the exception
             // for signaling there's no appropriate fixarg method. We could've
-            // used foldArguments() too, except then the vararg invocation 
+            // used foldArguments() too, except then the vararg invocation
             // would also always be invoked, causing unnecessary conversions on
             // its arguments.
             // TODO: use dropArguments() once bug with catchException failing
             // with non-boot-classpath exception classes is fixed...
             return MethodHandles.catchException(
-                    fixArgsMethod.getFixArgsFirstInvocation(linkerServices, 
+                    fixArgsMethod.getFixArgsFirstInvocation(linkerServices,
                             callSiteType), NoSuchMethodException.class,
-                    varArgsMethod.getVarArgsInvocation(linkerServices, 
-                            callSiteType)); 
+                    varArgsMethod.getVarArgsInvocation(linkerServices,
+                            callSiteType));
         }
     }
-    
+
     private static boolean isApplicableDynamically(
-            LinkerServices linkerServices, MethodType callSiteType, 
+            LinkerServices linkerServices, MethodType callSiteType,
             MethodHandleEx m) {
         final MethodType methodType = m.getMethodHandle().type();
         final boolean varArgs = m.isVarArgs();
@@ -180,9 +180,9 @@ public class OverloadedDynamicMethod implements DynamicMethod
         if(callSiteArgLen < fixedArgLen) {
             return false;
         }
-        // Starting from 1, as receiver type doesn't participate 
+        // Starting from 1, as receiver type doesn't participate
         for(int i = 1; i < fixedArgLen; ++i) {
-            if(!isApplicableDynamically(linkerServices, 
+            if(!isApplicableDynamically(linkerServices,
                     callSiteType.parameterType(i), methodType.parameterType(i)))
             {
                 return false;
@@ -190,19 +190,19 @@ public class OverloadedDynamicMethod implements DynamicMethod
         }
         if(varArgs) {
             final Class<?> varArgArrayType = methodType.parameterType(
-                    fixedArgLen); 
+                    fixedArgLen);
             final Class<?> varArgType = varArgArrayType.getComponentType();
             if(fixedArgLen == callSiteArgLen - 1) {
                 final Class<?> callSiteArgType = callSiteType.parameterType(fixedArgLen);
                 // Exactly one vararg; check both exact matching and component
                 // matching.
-                return isApplicableDynamically(linkerServices, callSiteArgType, 
+                return isApplicableDynamically(linkerServices, callSiteArgType,
                         varArgArrayType) || isApplicableDynamically(
                                 linkerServices, callSiteArgType, varArgType);
             }
             else {
                 for(int i = fixedArgLen; i < callSiteArgLen; ++i) {
-                    if(!isApplicableDynamically(linkerServices, 
+                    if(!isApplicableDynamically(linkerServices,
                             callSiteType.parameterType(i), varArgType))
                     {
                         return false;
@@ -231,14 +231,14 @@ public class OverloadedDynamicMethod implements DynamicMethod
     }
 
     /**
-     * Add a method identified by a {@link SimpleDynamicMethod} to this 
+     * Add a method identified by a {@link SimpleDynamicMethod} to this
      * overloaded method's set.
      * @param method the method to add.
      */
     public void addMethod(SimpleDynamicMethod method) {
         addMethod(method.getTarget(), method.isVarArgs());
     }
-    
+
     /**
      * Add a method to this overloaded method's set.
      * @param method a method to add
@@ -247,5 +247,5 @@ public class OverloadedDynamicMethod implements DynamicMethod
     public void addMethod(final MethodHandle method, final boolean varArgs) {
         methods.add(new MethodHandleEx(method, varArgs));
     }
-    
+
 }
