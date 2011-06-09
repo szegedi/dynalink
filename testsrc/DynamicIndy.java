@@ -5,6 +5,7 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.MH_INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_7;
 
@@ -13,8 +14,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MHandle;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 /**
@@ -47,8 +48,8 @@ public class DynamicIndy extends ClassLoader {
       slot += parameterType.getSize();
     }
 
-    mv.visitIndyMethodInsn(name, descriptor,
-        new MHandle(MHandle.REF_invokeStatic,
+    mv.visitInvokeDynamicInsn(name, descriptor,
+        new org.objectweb.asm.MethodHandle(MH_INVOKESTATIC,
             bsmClass.getName().replace('.', '/'),
             bsmName,
             bsmType.toMethodDescriptorString()),
