@@ -137,9 +137,12 @@ public class OverloadedDynamicMethod implements DynamicMethod
         final List<MethodHandle> fixArgMethods = new LinkedList<MethodHandle>();
         final List<MethodHandle> varArgMethods = new LinkedList<MethodHandle>();
         for (MethodHandle mh : invokables) {
-            fixArgMethods.add(mh);
             if(mh.isVarargsCollector()) {
+                fixArgMethods.add(mh.asFixedArity());
                 varArgMethods.add(mh);
+            }
+            else {
+                fixArgMethods.add(mh);
             }
         }
         final int paramCount = callSiteType.parameterCount();
