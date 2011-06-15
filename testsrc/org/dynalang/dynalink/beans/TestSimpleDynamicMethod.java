@@ -30,77 +30,62 @@ import org.dynalang.dynalink.support.Lookup;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class TestSimpleDynamicMethod extends TestCase
-{
+public class TestSimpleDynamicMethod extends TestCase {
     /**
      * Test that it returns null when tried to link with a call site that has
      * less arguments than the method has fixed arguments.
      */
-    public void testLessArgsOnFixArgs()
-    {
+    public void testLessArgsOnFixArgs() {
         assertNull(new SimpleDynamicMethod(getTest1XMethod()).getInvocation(
             new CallSiteDescriptor("", MethodType.methodType(Void.TYPE,
                 Object.class, int.class)), null));
     }
 
-    public void testMoreArgsOnFixArgs()
-    {
+    public void testMoreArgsOnFixArgs() {
         assertNull(new SimpleDynamicMethod(getTest1XMethod()).getInvocation(
             new CallSiteDescriptor("", MethodType.methodType(Void.TYPE,
                 Object.class, int.class, int.class, int.class)), null));
     }
 
-    private static MethodHandle getTest1XMethod()
-    {
+    private static MethodHandle getTest1XMethod() {
         return Lookup.PUBLIC.findVirtual(Test1.class, "x",
             MethodType.methodType(int.class, int.class, int.class));
     }
 
-    public class Test1
-    {
-        public int x(int y, int z)
-        {
+    public class Test1 {
+        public int x(int y, int z) {
             return y + z;
         }
 
-        public int xv(int y, int... z)
-        {
-            for (int zz : z)
-            {
+        public int xv(int y, int... z) {
+            for (int zz : z) {
                 y += zz;
             }
             return y;
         }
 
-        public String sv(String y, String... z)
-        {
-            for (String zz : z)
-            {
+        public String sv(String y, String... z) {
+            for (String zz : z) {
                 y += zz;
             }
             return y;
         }
     }
 
-    public void testExactArgsOnFixArgs()
-    {
+    public void testExactArgsOnFixArgs() {
         final MethodHandle mh = getTest1XMethod();
         final MethodType type = MethodType.methodType(int.class, Test1.class,
                 int.class, int.class);
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 fail(); // Not supposed to be called
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertSame(handle, mh);
                 assertEquals(type, fromType);
                 converterInvoked[0] = true;
@@ -113,25 +98,20 @@ public class TestSimpleDynamicMethod extends TestCase
         assertTrue(converterInvoked[0]);
     }
 
-    public void testVarArgsWithoutConversion()
-    {
+    public void testVarArgsWithoutConversion() {
         final MethodHandle mh = getTest1XvMethod();
         final MethodType type = MethodType.methodType(int.class, Test1.class,
                 int.class, int[].class);
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 fail(); // Not supposed to be called
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertSame(handle, mh);
                 assertEquals(type, fromType);
                 converterInvoked[0] = true;
@@ -144,37 +124,30 @@ public class TestSimpleDynamicMethod extends TestCase
         assertTrue(converterInvoked[0]);
     }
 
-    private static MethodHandle getTest1XvMethod()
-    {
+    private static MethodHandle getTest1XvMethod() {
         return Lookup.PUBLIC.findVirtual(
                 Test1.class, "xv", MethodType.methodType(int.class, int.class, int[].class));
     }
 
-    private static MethodHandle getTest1SvMethod()
-    {
+    private static MethodHandle getTest1SvMethod() {
         return Lookup.PUBLIC.findVirtual(
                 Test1.class, "sv", MethodType.methodType(String.class, String.class, String[].class));
     }
 
-    public void testVarArgsWithFixArgsOnly() throws Throwable
-    {
+    public void testVarArgsWithFixArgsOnly() throws Throwable {
         final MethodHandle mh = getTest1XvMethod();
         final MethodType callSiteType = MethodType.methodType(int.class,
                 Object.class, int.class);
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 fail(); // Not supposed to be called
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(int.class, Test1.class,
                         int.class), handle.type());
@@ -190,8 +163,7 @@ public class TestSimpleDynamicMethod extends TestCase
         assertEquals(1, newHandle.invokeWithArguments(new Test1(), 1));
     }
 
-    public void testVarArgsWithPrimitiveConversion() throws Throwable
-    {
+    public void testVarArgsWithPrimitiveConversion() throws Throwable {
         final MethodHandle mh = getTest1XvMethod();
         final MethodType callSiteType = MethodType.methodType(int.class,
                 Object.class, int.class, int.class, int.class);
@@ -200,17 +172,13 @@ public class TestSimpleDynamicMethod extends TestCase
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 fail(); // Not supposed to be called
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(declaredType, handle.type());
                 assertEquals(callSiteType, fromType);
@@ -225,8 +193,7 @@ public class TestSimpleDynamicMethod extends TestCase
         assertEquals(6, newHandle.invokeWithArguments(new Test1(), 1, 2, 3));
     }
 
-    public void testVarArgsWithSinglePrimitiveArgConversion() throws Throwable
-    {
+    public void testVarArgsWithSinglePrimitiveArgConversion() throws Throwable {
         final MethodHandle mh = getTest1XvMethod();
         final MethodType declaredType = MethodType.methodType(int.class,
                 Test1.class, int.class, int.class);
@@ -235,18 +202,14 @@ public class TestSimpleDynamicMethod extends TestCase
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(int.class, from);
                 assertSame(int[].class, to);
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(declaredType, handle.type());
                 assertEquals(callSiteType, fromType);
@@ -261,26 +224,21 @@ public class TestSimpleDynamicMethod extends TestCase
         assertEquals(3, newHandle.invokeWithArguments(new Test1(), 1, 2));
     }
 
-    public void testVarArgsWithSingleStringArgConversion() throws Throwable
-    {
+    public void testVarArgsWithSingleStringArgConversion() throws Throwable {
         final MethodHandle mh = getTest1SvMethod();
         final MethodType callSiteType = MethodType.methodType(String.class,
                 Object.class, String.class, String.class);
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(String.class, from);
                 assertSame(String[].class, to);
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(String.class, Test1.class,
                         String.class, String.class), handle.type());
@@ -296,25 +254,20 @@ public class TestSimpleDynamicMethod extends TestCase
         assertEquals("ab", newHandle.invokeWithArguments(new Test1(), "a", "b"));
     }
 
-    public void testVarArgsWithStringConversion() throws Throwable
-    {
+    public void testVarArgsWithStringConversion() throws Throwable {
         final MethodHandle mh = getTest1SvMethod();
         final MethodType callSiteType = MethodType.methodType(String.class,
                 Object.class, String.class, String.class, String.class);
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 fail(); // Not supposed to be called
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(String.class, Test1.class,
                         String.class, String.class, String.class), handle.type());
@@ -331,8 +284,7 @@ public class TestSimpleDynamicMethod extends TestCase
 
     }
 
-    public void testVarArgsWithSinglePrimitiveArgRuntimeConversion() throws Throwable
-    {
+    public void testVarArgsWithSinglePrimitiveArgRuntimeConversion() throws Throwable {
         final MethodHandle mh = getTest1XvMethod();
         final MethodType methodType = MethodType.methodType(int.class, Test1.class,
                 int.class, int[].class);
@@ -341,37 +293,29 @@ public class TestSimpleDynamicMethod extends TestCase
 
         final int[] converterInvoked = new int[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(Object.class, from);
                 assertSame(int[].class, to);
                 return true;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertEquals(callSiteType, fromType);
                 int c = ++converterInvoked[0];
-                switch(c)
-                {
-                    case 1:
-                    {
+                switch(c) {
+                    case 1: {
                         assertSame(handle, mh);
                         break;
                     }
-                    case 2:
-                    {
+                    case 2: {
                         assertNotSame(handle, mh);
                         assertEquals(MethodType.methodType(int.class,
                                 Test1.class, int.class, int.class),
                                 handle.type());
                         break;
                     }
-                    default:
-                    {
+                    default: {
                         fail();
                         break;
                     }
@@ -387,8 +331,7 @@ public class TestSimpleDynamicMethod extends TestCase
         assertEquals(6, newHandle.invokeWithArguments(new Test1(), 1, new int[] { 2, 3 }));
     }
 
-    public void testVarArgsWithSingleStringArgRuntimeConversion() throws Throwable
-    {
+    public void testVarArgsWithSingleStringArgRuntimeConversion() throws Throwable {
         final MethodHandle mh = getTest1SvMethod();
         final MethodType methodType = MethodType.methodType(String.class, Test1.class,
                 String.class, String[].class);
@@ -397,37 +340,29 @@ public class TestSimpleDynamicMethod extends TestCase
 
         final int[] converterInvoked = new int[1];
 
-        LinkerServices ls = new LinkerServices()
-        {
-            public boolean canConvert(Class<?> from, Class<?> to)
-            {
+        LinkerServices ls = new LinkerServices() {
+            public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(Object.class, from);
                 assertSame(String[].class, to);
                 return true;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
+            public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertEquals(callSiteType, fromType);
                 int c = ++converterInvoked[0];
-                switch(c)
-                {
-                    case 1:
-                    {
+                switch(c) {
+                    case 1: {
                         assertSame(handle, mh);
                         break;
                     }
-                    case 2:
-                    {
+                    case 2: {
                         assertNotSame(handle, mh);
                         assertEquals(MethodType.methodType(String.class,
                                 Test1.class, String.class, String.class),
                                 handle.type());
                         break;
                     }
-                    default:
-                    {
+                    default: {
                         fail();
                         break;
                     }
