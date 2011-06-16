@@ -23,12 +23,14 @@
 
 	<property file="build.properties" />
 	<property name="openjdk.base.dir" location="build/openjdk"/>
-	<property name="openjdk.version" value="java-1.7.0-internal-mlvm-2011_04_04"/>
-	<property name="openjdk.dir" location="${openjdk.base.dir}/${openjdk.version}"/>
+	<property name="openjdk.dir" location="${openjdk.base.dir}/jdk1.7.0"/>
 	<property name="backport.dir" location="build/jsr292-backport"/>
 	<property file="build.properties" />
 	<property name="openjdk.rt.jar" location="${openjdk.dir}/jre/lib/rt.jar"/>
 	<property name="backport.agent.jar" location="${backport.dir}/lib/jsr292-backport.jar"/>
+
+	<condition property="isMac"><equals arg1="${os.name}" arg2="Mac OS X"/></condition>
+	<condition property="isLinux"><equals arg1="${os.name}" arg2="Linux"/></condition>
 
 	<target name="clean-all" description="Cleans everything, including downloaded 3rd party software.">
 		<delete dir="${build.dir}" quiet="true"/>
@@ -46,16 +48,29 @@
 		</condition>
 	</target>
 
-	<target name="downloadOpenJdk" unless="openjdk.available" depends="checkOpenJdkAvailable">
+	<target name="downloadMacOpenJdk" if="isMac" unless="openjdk.available">
+		<property name="openjdk.mac.version" value="java-1.7.0-internal-mlvm-2011_06_09"/>
 		<mkdir dir="${openjdk.base.dir}"/>
-		<get src="http://www.concord.org/~sbannasch/mlvm/${openjdk.version}.tar.gz" dest="${openjdk.base.dir}/openjdk.tgz" usetimestamp="true"/>
+		<get src="http://www.concord.org/~sbannasch/mlvm/${openjdk.mac.version}.tar.gz" dest="${openjdk.base.dir}/openjdk.tgz" usetimestamp="true"/>
 		<!-- Not using <untar> task as it doesn't preserve UNIX permissions -->
 		<exec executable="tar" dir="${openjdk.base.dir}">
 			<arg value="xzf"/>
 			<arg value="${openjdk.base.dir}/openjdk.tgz"/>
 		</exec>
-		<!-- <delete file="${openjdk.base.dir}/openjdk.tgz"/> -->
+		<rename dest="${openjdk.dir}" src="${openjdk.base.dir}/${openjdk.mac.version}"/>
 	</target>
+
+	<target name="downloadLinuxOpenJdk" if="isLinux" unless="openjdk.available">
+		<mkdir dir="${openjdk.base.dir}"/>
+		<get src="http://www.java.net/download/jdk7/archive/b139/binaries/jdk-7-ea-bin-b139-linux-i586-21_apr_2011.tar.gz" dest="${openjdk.base.dir}/openjdk.tgz" usetimestamp="true"/>
+		<!-- Not using <untar> task as it doesn't preserve UNIX permissions -->
+		<exec executable="tar" dir="${openjdk.base.dir}">
+			<arg value="xzf"/>
+			<arg value="${openjdk.base.dir}/openjdk.tgz"/>
+		</exec>
+	</target>
+
+	<target name="downloadOpenJdk" depends="checkOpenJdkAvailable,downloadMacOpenJdk,downloadLinuxOpenJdk"/>
 
 	<target name="compile" depends="downloadOpenJdk">
 		<property name="classes.dir" location="${build.dir}/classes"/>
@@ -171,6 +186,7 @@
 			<bootclasspath>
 				<pathelement path="openjdk.rt.jar"/>
 			</bootclasspath>
+			<jvmarg value="-XX:+UnlockDiagnosticVMOptions"/>
 			<jvmarg value="-XX:+UnlockExperimentalVMOptions"/>
 			<jvmarg value="-XX:+EnableInvokeDynamic"/>
 			<sysproperty key="emma.coverage.out.file" value="${coverage.outfile}"/>
@@ -222,7 +238,7 @@
 		</junit>
 	</target>
 
-	<target name="test-run" depends="test-run-openjdk"/>
+	<target name="test-run" depends="test-run-openjdk,test-run-backport"/>
 
 	<target name="test" depends="test-run">
 		<mkdir dir="build/test/report"/>
