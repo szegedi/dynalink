@@ -54,9 +54,13 @@ public class SimpleDynamicMethod implements DynamicMethod
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices)
     {
+        MethodHandle target = this.target;
         final MethodType methodType = target.type();
         final int paramsLen = methodType.parameterCount();
         final boolean varArgs = target.isVarargsCollector();
+        if(varArgs) {
+            target = target.asFixedArity();
+        }
         final int fixParamsLen = varArgs ? paramsLen - 1 : paramsLen;
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final int argsLen = callSiteType.parameterCount();
@@ -110,7 +114,7 @@ public class SimpleDynamicMethod implements DynamicMethod
                 // Call site signature guarantees the argument can definitely
                 // not be an array (i.e. it is primitive); link immediately to
                 // a vararg-packing method handle.
-                return createConvertingInvocation(collectArguments(
+                return createConvertingInvocation(collectArguments(target,
                         argsLen), linkerServices, callSiteType);
             }
             else {
@@ -122,13 +126,13 @@ public class SimpleDynamicMethod implements DynamicMethod
                         varArgType, fixParamsLen, callSiteType),
                         createConvertingInvocation(target, linkerServices,
                                 callSiteType), createConvertingInvocation(
-                                    collectArguments(argsLen),
+                                    collectArguments(target, argsLen),
                                     linkerServices, callSiteType));
             }
         }
         else {
             // Remaining case: more than one vararg.
-            return createConvertingInvocation(collectArguments(argsLen),
+            return createConvertingInvocation(collectArguments(target, argsLen),
                     linkerServices, callSiteType);
         }
     }
@@ -152,20 +156,6 @@ public class SimpleDynamicMethod implements DynamicMethod
             fixParamsLen);
         return target.asCollector(arrayType, parameterCount -
             fixParamsLen);
-    }
-
-    /**
-     * Creates a method handle out of the original target that will collect
-     * the varargs for the exact component type of the varArg array. Note that
-     * this will nicely trigger language-specific type converters for exactly
-     * those varargs for which it is necessary when later passed to
-     * linkerServices.convertArguments().
-     * @param parameterCount the total number of arguments in the new method handle
-     * @return a collecting method handle
-     */
-    private MethodHandle collectArguments(final int parameterCount)
-    {
-        return collectArguments(target, parameterCount);
     }
 
     private static MethodHandle createConvertingInvocation(

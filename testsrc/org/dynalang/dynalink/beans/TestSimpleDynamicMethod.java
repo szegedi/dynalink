@@ -112,16 +112,21 @@ public class TestSimpleDynamicMethod extends TestCase {
             }
 
             public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
-                assertSame(handle, mh);
+                assertEqualHandle(handle, mh.asFixedArity());
                 assertEquals(type, fromType);
                 converterInvoked[0] = true;
                 return handle;
             }
         };
         // Make sure it didn't interfere - just returned the same method handle
-        assertSame(mh, new SimpleDynamicMethod(mh).getInvocation(
-                new CallSiteDescriptor("", type), ls));
+        assertEqualHandle(mh.asFixedArity(), new SimpleDynamicMethod(
+            mh).getInvocation(new CallSiteDescriptor("", type), ls));
         assertTrue(converterInvoked[0]);
+    }
+
+    private static void assertEqualHandle(MethodHandle m1, MethodHandle m2) {
+        assertEquals(m1.type(), m2.type());
+        assertEquals(m1.isVarargsCollector(), m2.isVarargsCollector());
     }
 
     private static MethodHandle getTest1XvMethod() {
@@ -305,7 +310,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                 int c = ++converterInvoked[0];
                 switch(c) {
                     case 1: {
-                        assertSame(handle, mh);
+                        assertEqualHandle(handle, mh.asFixedArity());
                         break;
                     }
                     case 2: {
@@ -352,7 +357,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                 int c = ++converterInvoked[0];
                 switch(c) {
                     case 1: {
-                        assertSame(handle, mh);
+                        assertEqualHandle(handle, mh.asFixedArity());
                         break;
                     }
                     case 2: {
