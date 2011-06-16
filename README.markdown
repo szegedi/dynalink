@@ -23,8 +23,11 @@ Here's how to build the JAR file:
 
     ant jar
 
-Note that this will download a private copy of OpenJDK into the build directory
-(about 60MB).
+Note that this will download a private copy of OpenJDK into the build
+directory (about 60MB). The build process has been tested to work on Mac OS X.
+There is experimental build support for Linux. There is currently no build
+support on Windows.
+
 Here's how to test the JAR file:
 
     ant test
@@ -34,7 +37,6 @@ Known issues
 
 * It doesn't currently work with Rémi Forax's JSR-292 backport, as the backport
 was not updated to reflect newest JSR-292
-* Some tests still fail as MethodHandle.asCollector still doesn't work.
 
 Using the library
 =================
