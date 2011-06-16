@@ -54,13 +54,10 @@ public class SimpleDynamicMethod implements DynamicMethod
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices)
     {
-        MethodHandle target = this.target;
         final MethodType methodType = target.type();
         final int paramsLen = methodType.parameterCount();
         final boolean varArgs = target.isVarargsCollector();
-        if(varArgs) {
-            target = target.asFixedArity();
-        }
+        final MethodHandle fixTarget = varArgs ? target.asFixedArity() : target;
         final int fixParamsLen = varArgs ? paramsLen - 1 : paramsLen;
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final int argsLen = callSiteType.parameterCount();
@@ -78,14 +75,14 @@ public class SimpleDynamicMethod implements DynamicMethod
                 // If vararg, add a zero-length array of the expected type as
                 // the last argument to signify no variable arguments. TODO:
                 // check whether collectArguments() would handle this too.
-                matchedMethod = MethodHandles.insertArguments(target,
+                matchedMethod = MethodHandles.insertArguments(fixTarget,
                         fixParamsLen, Array.newInstance(
                                 methodType.parameterType(
                                         fixParamsLen).getComponentType(), 0));
             }
             else {
                 // Otherwise, just use the method
-                matchedMethod = target;
+                matchedMethod = fixTarget;
             }
             return createConvertingInvocation(matchedMethod, linkerServices,
                     callSiteType);
@@ -107,14 +104,14 @@ public class SimpleDynamicMethod implements DynamicMethod
             {
                 // Call site signature guarantees we'll always be passed a
                 // single compatible array; just link directly to the method.
-                return createConvertingInvocation(target, linkerServices,
+                return createConvertingInvocation(fixTarget, linkerServices,
                         callSiteType);
             }
             else if(!linkerServices.canConvert(callSiteLastArgType, varArgType)) {
                 // Call site signature guarantees the argument can definitely
                 // not be an array (i.e. it is primitive); link immediately to
                 // a vararg-packing method handle.
-                return createConvertingInvocation(collectArguments(target,
+                return createConvertingInvocation(collectArguments(fixTarget,
                         argsLen), linkerServices, callSiteType);
             }
             else {
@@ -124,15 +121,15 @@ public class SimpleDynamicMethod implements DynamicMethod
                 // fall back to generic vararg method when it is not.
                 return MethodHandles.guardWithTest(Guards.isInstance(
                         varArgType, fixParamsLen, callSiteType),
-                        createConvertingInvocation(target, linkerServices,
+                        createConvertingInvocation(fixTarget, linkerServices,
                                 callSiteType), createConvertingInvocation(
-                                    collectArguments(target, argsLen),
+                                    collectArguments(fixTarget, argsLen),
                                     linkerServices, callSiteType));
             }
         }
         else {
             // Remaining case: more than one vararg.
-            return createConvertingInvocation(collectArguments(target, argsLen),
+            return createConvertingInvocation(collectArguments(fixTarget, argsLen),
                     linkerServices, callSiteType);
         }
     }
