@@ -124,9 +124,9 @@ Guarding linker?
 Yes, the interface is named `GuardingDynamicLinker`. It has a sole method with
 this signature:
 
-  public GuardedInvocation getGuardedInvocation(
-      CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-      Object... arguments);
+    public GuardedInvocation getGuardedInvocation(
+        CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
+        Object... arguments);
       
 It is invoked for a particular invocation at particular call site. It needs to
 inspect both the call site (mostly for its method name and types) and the 
