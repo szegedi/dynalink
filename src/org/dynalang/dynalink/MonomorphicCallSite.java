@@ -35,15 +35,6 @@ public class MonomorphicCallSite extends RelinkableCallSite
         super(name, type);
     }
 
-    /**
-     * @deprecated use {@link #MonomorphicCallSite(String, MethodType)}
-     * instead.
-     */
-    @Deprecated
-    public MonomorphicCallSite(Class<?> callerClass, String name, MethodType type) {
-        this(name, type);
-    }
-
     @Override
     public void setGuardedInvocation(GuardedInvocation guardedInvocation) {
         if(guardedInvocation == null)
