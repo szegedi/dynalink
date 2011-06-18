@@ -11,7 +11,9 @@ import org.dynalang.dynalink.RelinkableCallSite;
 /**
  * A convenience default bootstrapper that exposes a static bootstrap method to
  * which language runtimes that need the very default behaviour can use with
- * minimal setup. When first referenced, it will create a
+ * minimal setup. When first referenced, it will create a dynamic linker with
+ * default settings for the {@link DynamicLinkerFactory}, and it will create
+ * {@link MonomorphicCallSite} for all call sites.
  * @author Attila Szegedi
  * @version $Id: $
  */

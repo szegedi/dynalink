@@ -26,8 +26,10 @@ import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 /**
- * A descriptor of a call site. Used in place of passing a real call site so
- * that guarding linkers aren't tempted to do nasty things to it.
+ * A descriptor of a call site. Used in place of passing a real call site to
+ * guarding linkers so they aren't tempted to do nasty things to it; also it
+ * carries the tokenized name of the method, which is not available in the call
+ * site object itself.
  * @author Attila Szegedi
  * @version $Id: $
  */
