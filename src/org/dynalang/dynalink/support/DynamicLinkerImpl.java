@@ -38,7 +38,6 @@ public class DynamicLinkerImpl implements DynamicLinker {
 
     private static final long serialVersionUID = 1L;
 
-    private final GuardingDynamicLinker guardingDynamicLinker;
     private final LinkerServices linkerServices;
     /**
      * Creates a new master linker that delegates to a single guarding dynamic
@@ -49,7 +48,6 @@ public class DynamicLinkerImpl implements DynamicLinker {
      */
     public DynamicLinkerImpl(GuardingDynamicLinker guardingDynamicLinker,
             final TypeConverterFactory typeConverterFactory) {
-        this.guardingDynamicLinker = guardingDynamicLinker;
         linkerServices = typeConverterFactory.createLinkerServices(guardingDynamicLinker);
     }
 
@@ -91,8 +89,7 @@ public class DynamicLinkerImpl implements DynamicLinker {
             RelinkableCallSite callSite, Object... arguments) throws Throwable {
         // Find a suitable method handle with a guard
         final GuardedInvocation guardedInvocation =
-            guardingDynamicLinker.getGuardedInvocation(callSiteDescriptor,
-                    linkerServices, arguments);
+          linkerServices.getGuardedInvocation(callSiteDescriptor, arguments);
 
         // None found - throw an exception
         if(guardedInvocation == null) {
