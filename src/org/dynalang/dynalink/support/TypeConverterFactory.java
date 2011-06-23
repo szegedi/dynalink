@@ -23,7 +23,9 @@ import java.lang.invoke.WrongMethodTypeException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
+import org.dynalang.dynalink.GuardingDynamicLinker;
 import org.dynalang.dynalink.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.beans.support.TypeUtilities;
@@ -68,9 +70,10 @@ public class TypeConverterFactory {
     /**
      * Creates an implementation of {@link LinkerServices} that relies on this
      * type converter factory.
+     * @param linker the top-level linker exposed by this linker services.
      * @return an implementation of {@link LinkerServices}.
      */
-    public LinkerServices createLinkerServices() {
+    public LinkerServices createLinkerServices(final GuardingDynamicLinker linker) {
         return new LinkerServices() {
 
             public boolean canConvert(Class<?> from, Class<?> to) {
@@ -82,6 +85,12 @@ public class TypeConverterFactory {
             {
                 return TypeConverterFactory.this.convertArguments(handle,
                         fromType);
+            }
+
+            @Override
+            public GuardedInvocation getGuardedInvocation(CallSiteDescriptor callSiteDescriptor,
+              Object... arguments) throws Exception {
+              return linker.getGuardedInvocation(callSiteDescriptor, this, arguments);
             }
 
         };

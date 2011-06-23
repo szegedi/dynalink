@@ -23,6 +23,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
+import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.LinkerServices;
 
 /**
@@ -50,6 +51,11 @@ public class TestBeansLinker extends TestCase
             public MethodHandle convertArguments(MethodHandle handle,
                     MethodType fromType)
             {
+                throw new AssertionFailedError();
+            }
+
+            public GuardedInvocation getGuardedInvocation(CallSiteDescriptor callSiteDescriptor,
+                Object... arguments) throws Exception {
                 throw new AssertionFailedError();
             }
 

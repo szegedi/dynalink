@@ -42,7 +42,7 @@ public class TestOverloadedDynamicMethod extends TestCase
         super.setUp();
         linker = new BeanLinker(Test1.class);
         linkerServices = new TypeConverterFactory(
-            new LinkedList<GuardingTypeConverterFactory>()).createLinkerServices();
+            new LinkedList<GuardingTypeConverterFactory>()).createLinkerServices(linker);
     }
 
     public void testNoneMatchSignature()

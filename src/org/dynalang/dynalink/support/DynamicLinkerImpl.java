@@ -50,7 +50,7 @@ public class DynamicLinkerImpl implements DynamicLinker {
     public DynamicLinkerImpl(GuardingDynamicLinker guardingDynamicLinker,
             final TypeConverterFactory typeConverterFactory) {
         this.guardingDynamicLinker = guardingDynamicLinker;
-        linkerServices = typeConverterFactory.createLinkerServices();
+        linkerServices = typeConverterFactory.createLinkerServices(guardingDynamicLinker);
     }
 
     public void link(final RelinkableCallSite callSite) {

@@ -59,4 +59,19 @@ public interface LinkerServices {
      * @return true if there can be a conversion, false if there can not.
      */
     public boolean canConvert(Class<?> from, Class<?> to);
+
+    /**
+     * Creates a guarded invocation using the top-level linker associated with
+     * this linker services. Linkers can typically use them to delegate linking
+     * of wrapped objects.
+     * @param callSiteDescriptor the descriptor of the call site
+     * @param arguments the arguments for the invocation
+     * @return a guarded invocation linked by the top-level linker (or any of its
+     * delegates). Can be null if no available linker is able to link the
+     * invocation.
+     * @throws Exception in case the top-level linker throws an exception
+     */
+    public GuardedInvocation getGuardedInvocation(
+        CallSiteDescriptor callSiteDescriptor, Object... arguments)
+    throws Exception;
 }

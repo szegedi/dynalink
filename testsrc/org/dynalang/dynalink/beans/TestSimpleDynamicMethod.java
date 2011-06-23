@@ -15,12 +15,12 @@
 */
 package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import junit.framework.TestCase;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
+import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
 
@@ -71,6 +71,19 @@ public class TestSimpleDynamicMethod extends TestCase {
         }
     }
 
+    private abstract static class MockLinkerServices implements LinkerServices {
+        public boolean canConvert(Class<?> from, Class<?> to) {
+            fail(); // Not supposed to be called
+            return false;
+        }
+
+        public GuardedInvocation getGuardedInvocation(CallSiteDescriptor callSiteDescriptor,
+            Object... arguments) throws Exception {
+            fail(); // Not supposed to be called
+            return null;
+        }
+    }
+
     public void testExactArgsOnFixArgs() {
         final MethodHandle mh = getTest1XMethod();
         final MethodType type = MethodType.methodType(int.class, Test1.class,
@@ -78,12 +91,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
-            public boolean canConvert(Class<?> from, Class<?> to) {
-                fail(); // Not supposed to be called
-                return false;
-            }
-
+        LinkerServices ls = new MockLinkerServices() {
             public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertSame(handle, mh);
                 assertEquals(type, fromType);
@@ -104,12 +112,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
-            public boolean canConvert(Class<?> from, Class<?> to) {
-                fail(); // Not supposed to be called
-                return false;
-            }
-
+        LinkerServices ls = new MockLinkerServices() {
             public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertEqualHandle(handle, mh.asFixedArity());
                 assertEquals(type, fromType);
@@ -145,12 +148,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
-            public boolean canConvert(Class<?> from, Class<?> to) {
-                fail(); // Not supposed to be called
-                return false;
-            }
-
+        LinkerServices ls = new MockLinkerServices() {
             public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(int.class, Test1.class,
@@ -176,12 +174,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
-            public boolean canConvert(Class<?> from, Class<?> to) {
-                fail(); // Not supposed to be called
-                return false;
-            }
-
+        LinkerServices ls = new MockLinkerServices() {
             public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(declaredType, handle.type());
@@ -206,7 +199,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
+        LinkerServices ls = new MockLinkerServices() {
             public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(int.class, from);
                 assertSame(int[].class, to);
@@ -235,7 +228,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
+        LinkerServices ls = new MockLinkerServices() {
             public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(String.class, from);
                 assertSame(String[].class, to);
@@ -265,12 +258,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final boolean[] converterInvoked = new boolean[1];
 
-        LinkerServices ls = new LinkerServices() {
-            public boolean canConvert(Class<?> from, Class<?> to) {
-                fail(); // Not supposed to be called
-                return false;
-            }
-
+        LinkerServices ls = new MockLinkerServices() {
             public MethodHandle convertArguments(MethodHandle handle, MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(String.class, Test1.class,
@@ -295,7 +283,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final int[] converterInvoked = new int[1];
 
-        LinkerServices ls = new LinkerServices() {
+        LinkerServices ls = new MockLinkerServices() {
             public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(Object.class, from);
                 assertSame(int[].class, to);
@@ -322,7 +310,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                         break;
                     }
                 }
-                return MethodHandles.convertArguments(handle, fromType);
+                return handle.asType(fromType);
             }
         };
         MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
@@ -340,7 +328,7 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         final int[] converterInvoked = new int[1];
 
-        LinkerServices ls = new LinkerServices() {
+        LinkerServices ls = new MockLinkerServices() {
             public boolean canConvert(Class<?> from, Class<?> to) {
                 assertSame(Object.class, from);
                 assertSame(String[].class, to);
@@ -367,7 +355,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                         break;
                     }
                 }
-                return MethodHandles.convertArguments(handle, fromType);
+                return handle.asType(fromType);
             }
         };
         MethodHandle newHandle = new SimpleDynamicMethod(mh).getInvocation(
