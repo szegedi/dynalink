@@ -74,9 +74,7 @@ public class DynamicLinkerImpl implements DynamicLinker {
         final MethodHandle collectingInvoker = boundInvoker.asCollector(
             Object[].class, type.parameterCount());
         // Make a MH that converts all args to Object
-        final MethodHandle convertingInvoker = MethodHandles.convertArguments(
-                collectingInvoker, type);
-        return convertingInvoker;
+        return collectingInvoker.asType(type);
     }
 
     /**

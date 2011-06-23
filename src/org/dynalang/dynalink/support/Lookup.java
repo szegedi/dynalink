@@ -72,9 +72,13 @@ public class Lookup
                 return lookup.findSpecial(declaringClass, name, type, declaringClass);
             }
         }
-        catch (IllegalAccessException|NoSuchMethodException e) {
+        catch (IllegalAccessException e) {
             throw new BootstrapMethodError("Failed to find special method " +
                 methodDescription(declaringClass, name, type), e);
+        }
+        catch(NoSuchMethodException e) {
+          throw new BootstrapMethodError("Failed to find special method " +
+              methodDescription(declaringClass, name, type), e);
         }
     }
 
@@ -86,20 +90,28 @@ public class Lookup
         try {
             return lookup.findStatic(declaringClass, methodName, methodType);
         }
-        catch (IllegalAccessException|NoSuchMethodException e) {
+        catch (IllegalAccessException e) {
             throw new BootstrapMethodError("Failed to find static method " +
                 methodDescription(declaringClass, methodName, methodType), e);
-          }
+        }
+        catch (NoSuchMethodException e) {
+          throw new BootstrapMethodError("Failed to find static method " +
+              methodDescription(declaringClass, methodName, methodType), e);
+      }
     }
 
     public MethodHandle findVirtual(Class<?> declaringClass, String methodName, MethodType methodType) {
       try {
           return lookup.findVirtual(declaringClass, methodName, methodType);
       }
-      catch (IllegalAccessException|NoSuchMethodException e) {
+      catch (IllegalAccessException e) {
           throw new BootstrapMethodError("Failed to find virtual method " +
               methodDescription(declaringClass, methodName, methodType), e);
         }
+      catch (NoSuchMethodException e) {
+        throw new BootstrapMethodError("Failed to find virtual method " +
+            methodDescription(declaringClass, methodName, methodType), e);
+      }
   }
 
 }

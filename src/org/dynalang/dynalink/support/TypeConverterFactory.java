@@ -88,22 +88,21 @@ public class TypeConverterFactory {
     }
 
     /**
-     * Similar to {@link MethodHandles#convertArguments(MethodHandle, MethodType)}
-     * except it also hooks in method handles produced by
-     * {@link GuardingTypeConverterFactory} implementations, providing for
-     * language-specific type coercing of parameters. It will apply
-     * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} for
+     * Similar to {@link MethodHandle#asType(MethodType)} except it also hooks
+     * in method handles produced by {@link GuardingTypeConverterFactory}
+     * implementations, providing for language-specific type coercing of
+     * parameters. It will apply {@link MethodHandle#asType(MethodType)} for
      * all primitive-to-primitive, wrapper-to-primitive, primitive-to-wrapper
      * conversions as well as for all upcasts. For all other conversions, it'll
-     * insert {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)}
-     * with composite filters provided by {@link GuardingTypeConverterFactory}
-     * implementations. It doesn't use language-specific conversions on the
-     * return type.
+     * insert {@link MethodHandles#filterArguments(MethodHandle, int,
+     * MethodHandle...)} with composite filters provided by
+     * {@link GuardingTypeConverterFactory} implementations. It doesn't use
+     * language-specific conversions on the return type.
      * @param handle target method handle
      * @param fromType the types of source arguments
      * @return a method handle that is a suitable combination of
-     * {@link MethodHandles#convertArguments(MethodHandle, MethodType)} and
-     * {@link MethodHandles#filterArguments(MethodHandle, MethodHandle...)}
+     * {@link MethodHandle#asType(MethodType)} and
+     * {@link MethodHandles#filterArguments(MethodHandle, int, MethodHandle...)}
      * with {@link GuardingTypeConverterFactory} produced type converters as
      * filters.
      */
@@ -135,8 +134,7 @@ public class TypeConverterFactory {
                 }
             }
         }
-        return MethodHandles.convertArguments(applyConverters(handle, pos,
-            converters), fromType);
+        return applyConverters(handle, pos, converters).asType(fromType);
     }
 
     private static MethodHandle applyConverters(MethodHandle handle, int pos,
@@ -221,8 +219,7 @@ public class TypeConverterFactory {
 
     private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) {
         final MethodType type = MethodType.methodType(targetType, sourceType);
-        final MethodHandle identity = MethodHandles.convertArguments(
-                IDENTITY_CONVERSION, type);
+        final MethodHandle identity = IDENTITY_CONVERSION.asType(type);
         MethodHandle last = identity;
         for(int i = factories.length; i --> 0;) {
             final GuardedInvocation next = factories[i].convertToType(
