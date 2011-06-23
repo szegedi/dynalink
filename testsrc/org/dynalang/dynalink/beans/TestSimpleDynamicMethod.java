@@ -22,7 +22,6 @@ import junit.framework.TestCase;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.support.Backport;
 import org.dynalang.dynalink.support.Lookup;
 
 /**
@@ -291,8 +290,6 @@ public class TestSimpleDynamicMethod extends TestCase {
 
     public void testVarArgsWithSinglePrimitiveArgRuntimeConversion() throws Throwable {
         final MethodHandle mh = getTest1XvMethod();
-        final MethodType methodType = MethodType.methodType(int.class, Test1.class,
-                int.class, int[].class);
         final MethodType callSiteType = MethodType.methodType(int.class,
                 Object.class, Object.class, Object.class);
 
@@ -338,8 +335,6 @@ public class TestSimpleDynamicMethod extends TestCase {
 
     public void testVarArgsWithSingleStringArgRuntimeConversion() throws Throwable {
         final MethodHandle mh = getTest1SvMethod();
-        final MethodType methodType = MethodType.methodType(String.class, Test1.class,
-                String.class, String[].class);
         final MethodType callSiteType = MethodType.methodType(String.class,
                 Object.class, Object.class, Object.class);
 
