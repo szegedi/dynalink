@@ -39,17 +39,26 @@ public class CompositeTypeBasedGuardingDynamicLinker
 implements TypeBasedGuardingDynamicLinker, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final TypeBasedGuardingDynamicLinker[] linkers;
-    private final ClassValue<TypeBasedGuardingDynamicLinker> classToLinker = new ClassValue<TypeBasedGuardingDynamicLinker>() {
-        protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
-            for(TypeBasedGuardingDynamicLinker linker: linkers) {
+    // Using a separate static class instance so there's no strong reference
+    // from the class value back to the composite linker.
+    private static class ClassToLinker extends ClassValue<TypeBasedGuardingDynamicLinker> {
+      private final TypeBasedGuardingDynamicLinker[] linkers;
+
+      ClassToLinker(TypeBasedGuardingDynamicLinker[] linkers) {
+          this.linkers = linkers;
+      }
+
+      protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
+          for(TypeBasedGuardingDynamicLinker linker: linkers) {
                 if(linker.canLinkType(clazz)) {
                     return linker;
                 }
             }
             return BottomGuardingDynamicLinker.INSTANCE;
         }
-    };
+    }
+
+    private final ClassValue<TypeBasedGuardingDynamicLinker> classToLinker;
 
     /**
      * Creates a new composite type-based linker.
@@ -62,7 +71,7 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
         for (TypeBasedGuardingDynamicLinker resolver : linkers) {
             l.add(resolver);
         }
-        this.linkers = l.toArray(new TypeBasedGuardingDynamicLinker[l.size()]);
+        this.classToLinker = new ClassToLinker(l.toArray(new TypeBasedGuardingDynamicLinker[l.size()]));
     }
 
     public boolean canLinkType(Class<?> type) {
