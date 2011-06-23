@@ -1,7 +1,6 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -92,14 +91,14 @@ public class TestLengthGetter extends TestCase
         assertEquals(5, callSiteInvoker.invokeWithArguments(new Object[] { Arrays.asList(new Object[5])}));
         // Relinked for collections
         assertEquals(2, callSite.getRelinkCount());
-        assertEquals(0, callSiteInvoker.invokeWithArguments(new HashSet()));
+        assertEquals(0, callSiteInvoker.invokeWithArguments(new HashSet<Object>()));
         // No relink for various collection types
         assertEquals(2, callSite.getRelinkCount());
 
         assertEquals(1, callSiteInvoker.invokeWithArguments(Collections.singletonMap("1", "2")));
         // Relinked for maps
         assertEquals(3, callSite.getRelinkCount());
-        assertEquals(0, callSiteInvoker.invokeWithArguments(new HashMap()));
+        assertEquals(0, callSiteInvoker.invokeWithArguments(new HashMap<Object,Object>()));
         // No relink for various map types
         assertEquals(3, callSite.getRelinkCount());
 

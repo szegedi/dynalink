@@ -17,11 +17,12 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.util.Collections;
+import java.util.LinkedList;
 
 import junit.framework.TestCase;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
+import org.dynalang.dynalink.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 
@@ -40,7 +41,8 @@ public class TestOverloadedDynamicMethod extends TestCase
     {
         super.setUp();
         linker = new BeanLinker(Test1.class);
-        linkerServices = new TypeConverterFactory(Collections.EMPTY_LIST).createLinkerServices();
+        linkerServices = new TypeConverterFactory(
+            new LinkedList<GuardingTypeConverterFactory>()).createLinkerServices();
     }
 
     public void testNoneMatchSignature()
