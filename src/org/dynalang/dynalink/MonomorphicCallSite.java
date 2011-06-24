@@ -16,15 +16,16 @@
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+
+import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 
 /**
  * A relinkable call site that implements monomorphic inline caching strategy.
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class MonomorphicCallSite extends RelinkableCallSite
+public class MonomorphicCallSite extends AbstractRelinkableCallSite
 {
     /**
      * Creates a new call site with monomorphic inline caching strategy.
@@ -36,22 +37,15 @@ public class MonomorphicCallSite extends RelinkableCallSite
     }
 
     @Override
-    public void setGuardedInvocation(GuardedInvocation guardedInvocation) {
-        if(guardedInvocation == null)
-        {
-            throw new IllegalArgumentException("guardedInvocation == null");
-        }
-        final MethodHandle guard = guardedInvocation.getGuard();
-        final MethodHandle invocation = guardedInvocation.getInvocation();
-        try {
-            setTarget(guard == null ? invocation : MethodHandles.guardWithTest(
-                    guard, invocation, getRelink()));
-        }
-        catch(IllegalArgumentException e) {
-            // Provide more information than the default JDK implementation
-            throw new IllegalArgumentException("invocation and guard types " +
-                    "do not match. invocation=" + invocation.type() +
-                    " guard=" + guard.type(), e);
-        }
+    protected MethodHandle getGuardFallback() {
+        // Relink the call site when a guard fails.
+        return getRelink();
+    }
+
+    @Override
+    protected MethodHandle getSwitchPointFallback() {
+        // Relink the call site when a switch point invalidates the linked
+        // method.
+        return getRelink();
     }
 }

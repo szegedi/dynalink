@@ -116,7 +116,7 @@ public class DynamicLinkerImpl implements DynamicLinker {
                 final List<Class<?>> prefix =
                     origType.parameterList().subList(contextStart, paramCount);
                 final MethodHandle guard = guardedInvocation.getGuard();
-                guardedInvocation = new GuardedInvocation(
+                guardedInvocation = guardedInvocation.replaceMethods(
                     MethodHandles.dropArguments(
                         guardedInvocation.getInvocation(), contextStart,
                         prefix), guard == null ? null :

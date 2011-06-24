@@ -15,33 +15,20 @@
 */
 package org.dynalang.dynalink;
 
-import java.lang.invoke.MutableCallSite;
+import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 
 /**
- * Base class for relinkable call sites. Language runtimes wishing to use this
- * framework must use subclasses of this class as their call sites. There is a
- * readily usable {@link MonomorphicCallSite} subclass that implements
- * monomorphic inline caching strategy.
+ * Interface for relinkable call sites. Language runtimes wishing to use this
+ * framework must use subclasses of {@link CallSite} that also implement this
+ * interface as their call sites. There is a readily usable
+ * {@link MonomorphicCallSite} subclass that implements monomorphic inline
+ * caching strategy.
  * @author Attila Szegedi
  * @version $Id: $
  */
-public abstract class RelinkableCallSite extends MutableCallSite
+public interface RelinkableCallSite
 {
-    private MethodHandle relink;
-    private final CallSiteDescriptor callSiteDescriptor;
-
-    /**
-     * Creates a new relinkable call site
-     * @param name the name of the method at the call site
-     * @param type the method type of the call site
-     */
-    protected RelinkableCallSite(String name, MethodType type) {
-        super(type);
-        callSiteDescriptor = new CallSiteDescriptor(name, type);
-    }
-
     /**
      * Sets the relink method. This is a method matching the method type of the
      * call site that will try to discover the adequate target for the
@@ -52,33 +39,13 @@ public abstract class RelinkableCallSite extends MutableCallSite
      * @throws IllegalArgumentException if the relink is null
      * @throws IllegalStateException if the method was already called
      */
-    public void setRelink(MethodHandle relink) {
-        if(relink == null) {
-            throw new IllegalArgumentException("relink == null");
-        }
-        if(this.relink != null) {
-            throw new IllegalStateException("this.relink already set");
-        }
-        this.relink = relink;
-        // Set it as the initial target
-        setTarget(relink);
-    }
-
-    /**
-     * Returns the relink method handle
-     * @return the method handle for relinking this call site.
-     */
-    protected MethodHandle getRelink() {
-        return relink;
-    }
+    public void setRelink(MethodHandle relink);
 
     /**
      * Returns the descriptor for this call site.
      * @return the descriptor for this call site.
      */
-    public CallSiteDescriptor getCallSiteDescriptor() {
-        return callSiteDescriptor;
-    }
+    public CallSiteDescriptor getCallSiteDescriptor();
 
     /**
      * Should be implemented by subclasses. Will be called once every time the
@@ -86,5 +53,5 @@ public abstract class RelinkableCallSite extends MutableCallSite
      * @param guardedInvocation the guarded invocation that the call site
      * should set as its target.
      */
-    public abstract void setGuardedInvocation(GuardedInvocation guardedInvocation);
+    public void setGuardedInvocation(GuardedInvocation guardedInvocation);
 }

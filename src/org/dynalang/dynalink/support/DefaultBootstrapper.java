@@ -7,7 +7,6 @@ import java.lang.invoke.MethodType;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.MonomorphicCallSite;
-import org.dynalang.dynalink.RelinkableCallSite;
 
 /**
  * A convenience default bootstrapper that exposes a static bootstrap method to
@@ -34,7 +33,7 @@ public class DefaultBootstrapper {
     public static CallSite bootstrap(MethodHandles.Lookup caller, String name,
             MethodType type)
     {
-        final RelinkableCallSite callSite = new MonomorphicCallSite(name, type);
+        final MonomorphicCallSite callSite = new MonomorphicCallSite(name, type);
         dynamicLinker.link(callSite);
         return callSite;
     }
