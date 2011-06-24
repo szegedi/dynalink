@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandles;
@@ -25,24 +26,20 @@ import org.dynalang.dynalink.RelinkableCallSite;
 
 /**
  * Tests for the {@link RelinkableCallSite}.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class TestRelinkableCallSite extends TestCase
-{
+public class TestRelinkableCallSite extends TestCase {
     /**
      * Tests against allowing setting null as the relink method.
      */
-    public void testNullRelink()
-    {
-        try
-        {
-            new MonomorphicCallSite("", MethodType.methodType(Void.TYPE)).setRelink(
-                    null);
+    public void testNullRelink() {
+        try {
+            new MonomorphicCallSite("", MethodType.methodType(Void.TYPE))
+                    .setRelink(null);
             fail();
-        }
-        catch(IllegalArgumentException e)
-        {
+        } catch(IllegalArgumentException e) {
             // This is expected
         }
     }
@@ -50,18 +47,14 @@ public class TestRelinkableCallSite extends TestCase
     /**
      * Tests against allowing relink to be called twice.
      */
-    public void testRelinkSetTwice()
-    {
-        RelinkableCallSite cs = new MonomorphicCallSite("", MethodType.methodType(
-                Object.class));
+    public void testRelinkSetTwice() {
+        RelinkableCallSite cs =
+                new MonomorphicCallSite("", MethodType.methodType(Object.class));
         cs.setRelink(MethodHandles.constant(Object.class, new Object()));
-        try
-        {
+        try {
             cs.setRelink(MethodHandles.constant(Object.class, new Object()));
             fail();
-        }
-        catch(IllegalStateException e)
-        {
+        } catch(IllegalStateException e) {
             // This is expected
         }
     }

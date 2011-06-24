@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink.support;
 
 import java.lang.ref.Reference;
@@ -25,19 +26,23 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * A dual map that can either strongly or weakly reference a given class
  * depending on whether the class is visible from a class loader or not.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  * @param <T> the type of the values in the map
  */
 public abstract class ClassMap<T> {
-    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<Class<?>, T>();
-    private final Map<Class<?>, Reference<T>> weakMap = new WeakHashMap<Class<?>, Reference<T>>();
+    private final ConcurrentMap<Class<?>, T> map =
+            new ConcurrentHashMap<Class<?>, T>();
+    private final Map<Class<?>, Reference<T>> weakMap =
+            new WeakHashMap<Class<?>, Reference<T>>();
     private final ClassLoader classLoader;
 
     /**
      * Creates a new class map. It will use strong references for all keys and
      * values where the key is a class visible from the class loader, and will
      * use weak keys and soft values for all other classes.
+     *
      * @param classLoader the classloader that determines strong
      * referenceability.
      */
@@ -45,21 +50,22 @@ public abstract class ClassMap<T> {
         this.classLoader = classLoader;
     }
 
-
     /**
      * Compute the value associated with the given class. It is possible that
      * the method will be invoked several times (or even concurrently) for the
      * same class parameter.
+     *
      * @param clazz the class to compute the value for
      * @return the return value. Must not be null.
      */
     protected abstract T computeValue(Class<?> clazz);
 
     /**
-     * Returns the class loader that governs the strong referenceability of
-     * this class map.
-     * @return the class loader that governs the strong referenceability of
-     * this class map.
+     * Returns the class loader that governs the strong referenceability of this
+     * class map.
+     *
+     * @return the class loader that governs the strong referenceability of this
+     * class map.
      */
     public ClassLoader getClassLoader() {
         return classLoader;
@@ -67,6 +73,7 @@ public abstract class ClassMap<T> {
 
     /**
      * Returns the value associated with the class
+     *
      * @param clazz the class
      * @return the value associated with the class
      */

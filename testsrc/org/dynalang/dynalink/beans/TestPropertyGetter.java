@@ -11,12 +11,11 @@ import org.dynalang.dynalink.DynamicLinkerFactory;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class TestPropertyGetter extends TestCase
-{
-    public void testFixedNamePropertyGetter() throws Throwable
-    {
-        final RelinkCountingCallSite callSite = new RelinkCountingCallSite(
-                "dyn:getProp:foo", MethodType.methodType(Object.class, Object.class));
+public class TestPropertyGetter extends TestCase {
+    public void testFixedNamePropertyGetter() throws Throwable {
+        final RelinkCountingCallSite callSite =
+                new RelinkCountingCallSite("dyn:getProp:foo", MethodType
+                        .methodType(Object.class, Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
         final T1 t1 = new T1();
@@ -37,11 +36,10 @@ public class TestPropertyGetter extends TestCase
         assertEquals(2, callSite.getRelinkCount());
     }
 
-    public void testVariableNamePropertyGetter() throws Throwable
-    {
-        final RelinkCountingCallSite callSite = new RelinkCountingCallSite(
-                "dyn:getProp", MethodType.methodType(Object.class, Object.class,
-                        String.class));
+    public void testVariableNamePropertyGetter() throws Throwable {
+        final RelinkCountingCallSite callSite =
+                new RelinkCountingCallSite("dyn:getProp", MethodType
+                        .methodType(Object.class, Object.class, String.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
         final T1 t1 = new T1();
@@ -67,58 +65,47 @@ public class TestPropertyGetter extends TestCase
         assertEquals(3, callSite.getRelinkCount());
     }
 
-    public static class T1
-    {
+    public static class T1 {
         private Object foo;
 
-        public void setFoo(String foo)
-        {
+        public void setFoo(String foo) {
             this.foo = foo;
         }
 
-        public Object getFoo()
-        {
+        public Object getFoo() {
             return foo;
         }
     }
 
-    public static class T2
-    {
+    public static class T2 {
         private Object foo;
         private Object bar;
 
-        public void setFoo(Object foo)
-        {
+        public void setFoo(Object foo) {
             this.foo = foo;
         }
 
-        public Object getFoo()
-        {
+        public Object getFoo() {
             return foo;
         }
 
-        public void setBar(Object bar)
-        {
+        public void setBar(Object bar) {
             this.bar = bar;
         }
 
-        public Object getBar()
-        {
+        public Object getBar() {
             return bar;
         }
     }
 
-    public static class T3 extends T1
-    {
+    public static class T3 extends T1 {
         private Object bar;
 
-        public void setBar(Object bar)
-        {
+        public void setBar(Object bar) {
             this.bar = bar;
         }
 
-        public Object getBar()
-        {
+        public Object getBar() {
             return bar;
         }
     }

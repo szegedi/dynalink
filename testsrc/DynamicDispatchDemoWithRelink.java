@@ -17,7 +17,7 @@ public class DynamicDispatchDemoWithRelink
             System.out.println("Hello!");
         }
     }
-    
+
     public static class Spanish
     {
         public void sayHello()
@@ -25,20 +25,20 @@ public class DynamicDispatchDemoWithRelink
             System.out.println("Hola!");
         }
     }
-    
+
     public static void main(String[] args) throws Throwable
     {
         final Object[] greeters = new Object[] { new English(), new Spanish(), new English(), new Spanish(), new Spanish(), new English(), new English() };
 
-        final MethodHandle sayHelloInvoker = new DynamicIndy().invokeDynamic("sayHello", MethodType.methodType(Void.TYPE), 
+        final MethodHandle sayHelloInvoker = new DynamicIndy().invokeDynamic("sayHello", MethodType.methodType(Void.TYPE),
             DynamicDispatchDemoWithRelink.class, "bootstrap", MethodType.methodType(CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class));
-        
+
         for(Object greeter: greeters)
         {
           sayHelloInvoker.invokeGeneric(greeter);
         }
     }
-    
+
     public static CallSite bootstrap(MethodHandles.Lookup lookup, String name, MethodType callSiteType)
     {
         final RelinkableCallSite cs = new RelinkableCallSite(name, callSiteType);
@@ -55,11 +55,11 @@ public class DynamicDispatchDemoWithRelink
 
     static {
         try {
-            RELINK_AND_INVOKE = 
-                MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class, 
+            RELINK_AND_INVOKE =
+                MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class,
                       "relinkAndInvoke", MethodType.methodType(Object.class, RelinkableCallSite.class, Object[].class));
-              IS_OF_CLASS = 
-                  MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class, 
+              IS_OF_CLASS =
+                  MethodHandles.lookup().findStatic(DynamicDispatchDemoWithRelink.class,
                       "isOfClass", MethodType.methodType(boolean.class, Class.class, Object.class));
         }
         catch(IllegalAccessException|NoSuchMethodException e) {
@@ -76,7 +76,7 @@ public class DynamicDispatchDemoWithRelink
         final Method m = receiverClass.getMethod(callSite.name(), reflectSignature);
         final MethodHandle unreflected = MethodHandles.lookup().unreflect(m);
         final MethodHandle convertedTarget = MethodHandles.convertArguments(unreflected, callSite.type());
-        
+
         final MethodHandle test = MethodHandles.insertArguments(IS_OF_CLASS, 0, receiverClass);
         final MethodHandle projected = MethodHandles.permuteArguments(test, callSite.type().generic(), new int[] { 0 });
         final MethodHandle convertedTest = MethodHandles.convertArguments(projected, callSite.type().changeReturnType(boolean.class));
@@ -89,7 +89,7 @@ public class DynamicDispatchDemoWithRelink
     {
         return o != null && o.getClass() == c;
     }
-    
+
     static class RelinkableCallSite extends MutableCallSite
     {
         private MethodHandle relink;
@@ -99,7 +99,7 @@ public class DynamicDispatchDemoWithRelink
             super(type);
             this.name = name;
         }
-        
+
         String name() {
             return name;
         }

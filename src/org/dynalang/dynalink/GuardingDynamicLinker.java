@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,25 +12,28 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 /**
- * The base interface for language-specific dynamic linkers. Such linkers
- * always have to produce method handles with guards, as the validity of the
- * method handle for calls at a call site inevitably depends on some condition
- * (at the very least, it depends on the receiver belonging to the language
- * runtime of the linker). Language runtime implementors will normally implement
- * one for their own language, and declare it in the
+ * The base interface for language-specific dynamic linkers. Such linkers always
+ * have to produce method handles with guards, as the validity of the method
+ * handle for calls at a call site inevitably depends on some condition (at the
+ * very least, it depends on the receiver belonging to the language runtime of
+ * the linker). Language runtime implementors will normally implement one for
+ * their own language, and declare it in the
  * <tt>META-INF/services/org.dynalang.dynalink/GuardingDynamicLinker<tt> file
  * within their JAR file.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public interface GuardingDynamicLinker {
     /**
-     * Creates a guarded invocation appropriate for a particular invocation
-     * with the specified arguments at a call site.
+     * Creates a guarded invocation appropriate for a particular invocation with
+     * the specified arguments at a call site.
+     *
      * @param linkRequest the object describing the request for linking a
      * particular invocation
      * @param linkerServices linker services
@@ -46,6 +49,5 @@ public interface GuardingDynamicLinker {
      * @throws Exception if the operation fails for whatever reason
      */
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
-        LinkerServices linkerServices)
-    throws Exception;
+            LinkerServices linkerServices) throws Exception;
 }

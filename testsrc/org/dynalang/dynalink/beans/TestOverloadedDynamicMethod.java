@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
@@ -32,65 +33,59 @@ import org.dynalang.dynalink.support.TypeConverterFactory;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class TestOverloadedDynamicMethod extends TestCase
-{
+public class TestOverloadedDynamicMethod extends TestCase {
     private BeanLinker linker;
     private LinkerServices linkerServices;
 
     @Override
-    protected void setUp() throws Exception
-    {
+    protected void setUp() throws Exception {
         super.setUp();
         linker = new BeanLinker(Test1.class);
-        linkerServices = new LinkerServicesImpl(new TypeConverterFactory(
-            new LinkedList<GuardingTypeConverterFactory>()), linker);
+        linkerServices =
+                new LinkerServicesImpl(new TypeConverterFactory(
+                        new LinkedList<GuardingTypeConverterFactory>()), linker);
     }
 
-    public void testNoneMatchSignature()
-    {
+    public void testNoneMatchSignature() {
         final DynamicMethod dm = linker.getMethod("add");
         assertTrue(dm instanceof OverloadedDynamicMethod);
 
         // No zero-arg adds
-        assertNull(dm.getInvocation(new CallSiteDescriptor("add",
-                MethodType.methodType(int.class, Object.class)), null));
+        assertNull(dm.getInvocation(new CallSiteDescriptor("add", MethodType
+                .methodType(int.class, Object.class)), null));
 
         // No single-arg String add
-        MethodHandle inv = dm.getInvocation(new CallSiteDescriptor("add",
-            MethodType.methodType(String.class, Object.class, String.class)),
-            linkerServices);
+        MethodHandle inv =
+                dm.getInvocation(new CallSiteDescriptor("add", MethodType
+                        .methodType(String.class, Object.class, String.class)),
+                        linkerServices);
         assertNull(String.valueOf(inv), inv);
     }
 
-    public void testExactMatchSignature() throws Throwable
-    {
+    public void testExactMatchSignature() throws Throwable {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
-        final CallSiteDescriptor cs = new CallSiteDescriptor("add",
-                MethodType.methodType(String.class, Object.class, String.class,
-                        String.class));
+        final CallSiteDescriptor cs =
+                new CallSiteDescriptor("add", MethodType.methodType(
+                        String.class, Object.class, String.class, String.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two strings
         assertEquals("x", mh.invokeWithArguments(new Test1(), "a", "b"));
         // Must not be able to invoke it with two ints
-        try
-        {
+        try {
             mh.invokeWithArguments(new Test1(), 1, 2);
-        }
-        catch(ClassCastException e)
-        {
+        } catch(ClassCastException e) {
             // This is expected
         }
     }
 
-    public void testVeryGenericSignature() throws Throwable
-    {
+    public void testVeryGenericSignature() throws Throwable {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
-        final CallSiteDescriptor cs = new CallSiteDescriptor("add",
-                MethodType.methodType(Object.class, Object.class, Object.class,
-                        Object.class));
+        final CallSiteDescriptor cs =
+                new CallSiteDescriptor("add", MethodType.methodType(
+                        Object.class, Object.class, Object.class, Object.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two Strings
@@ -101,25 +96,20 @@ public class TestOverloadedDynamicMethod extends TestCase
         assertEquals(4, mh.invokeWithArguments(new Test1(), 1, new int[] { 2 }));
     }
 
-    public class Test1
-    {
-        public int add(int i1, int i2)
-        {
+    public class Test1 {
+        public int add(int i1, int i2) {
             return 1;
         }
 
-        public int add(int i1, int i2, int i3)
-        {
+        public int add(int i1, int i2, int i3) {
             return 2;
         }
 
-        public String add(String i1, String i2)
-        {
+        public String add(String i1, String i2) {
             return "x";
         }
 
-        public int add(int i1, int... in)
-        {
+        public int add(int i1, int... in) {
             return 4;
         }
     }

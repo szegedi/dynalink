@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink.beans;
 
 import java.beans.BeanInfo;
@@ -40,37 +41,39 @@ import org.dynalang.dynalink.Results;
 import org.dynalang.dynalink.beans.support.AccessibleMethodsLookup;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
+
 /**
  * A class that provides linking capabilities for a single POJO class. Normally
- * not used directly, but managed by {@link BeansLinker}.
- * TODO: add a class guard method, and propagate it downstream
+ * not used directly, but managed by {@link BeansLinker}. TODO: add a class
+ * guard method, and propagate it downstream
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class BeanLinker implements GuardingDynamicLinker
-{
+public class BeanLinker implements GuardingDynamicLinker {
     private final Class<?> clazz;
 
     private final Map<String, PropertyGetterDescriptor> properties =
-        new HashMap<String, PropertyGetterDescriptor>();
+            new HashMap<String, PropertyGetterDescriptor>();
     private final Map<String, DynamicMethod> methods =
-        new HashMap<String, DynamicMethod>();
+            new HashMap<String, DynamicMethod>();
 
     BeanLinker(Class<?> clazz) throws IntrospectionException {
         this.clazz = clazz;
         final BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         final AccessibleMethodsLookup accessibleLookup =
-            new AccessibleMethodsLookup(clazz);
-        final PropertyDescriptor[] propDescs = beanInfo.getPropertyDescriptors();
-        for (int i = 0; i < propDescs.length; i++) {
+                new AccessibleMethodsLookup(clazz);
+        final PropertyDescriptor[] propDescs =
+                beanInfo.getPropertyDescriptors();
+        for(int i = 0; i < propDescs.length; i++) {
             final PropertyDescriptor descriptor = propDescs[i];
             final Method readMethod = descriptor.getReadMethod();
             if(readMethod == null) {
                 continue;
             }
-            final Method accReadMethod = accessibleLookup.getAccessibleMethod(
-                    readMethod);
-            if(accReadMethod == null ) {
+            final Method accReadMethod =
+                    accessibleLookup.getAccessibleMethod(readMethod);
+            if(accReadMethod == null) {
                 continue;
             }
             properties.put(descriptor.getName(), new PropertyGetterDescriptor(
@@ -79,14 +82,14 @@ public class BeanLinker implements GuardingDynamicLinker
 
         // Add instance methods
         final MethodDescriptor[] methodDescs = beanInfo.getMethodDescriptors();
-        for (int i = 0; i < methodDescs.length; i++) {
+        for(int i = 0; i < methodDescs.length; i++) {
             final MethodDescriptor descriptor = methodDescs[i];
             final Method method = descriptor.getMethod();
             if(Modifier.isStatic(method.getModifiers())) {
                 continue;
             }
-            final Method accMethod = accessibleLookup.getAccessibleMethod(
-                    method);
+            final Method accMethod =
+                    accessibleLookup.getAccessibleMethod(method);
             if(accMethod == null) {
                 continue;
             }
@@ -96,10 +99,11 @@ public class BeanLinker implements GuardingDynamicLinker
 
     /**
      * Returns a dynamic method of the specified name.
+     *
      * @param name name of the method
      * @return the dynamic method (either {@link SimpleDynamicMethod} or
-     * {@link OverloadedDynamicMethod}, or null if the method with the
-     * specified name does not exist.
+     * {@link OverloadedDynamicMethod}, or null if the method with the specified
+     * name does not exist.
      */
     public DynamicMethod getMethod(String name) {
         return methods.get(name);
@@ -114,41 +118,40 @@ public class BeanLinker implements GuardingDynamicLinker
         }
     }
 
-    private DynamicMethod addMember(Method method,
-            DynamicMethod existing)
-    {
+    private DynamicMethod addMember(Method method, DynamicMethod existing) {
         final MethodHandle mh = Lookup.PUBLIC.unreflect(method);
         if(existing == null) {
             return new SimpleDynamicMethod(mh);
-        }
-        else if(existing instanceof SimpleDynamicMethod) {
-            OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
-            odm.addMethod(((SimpleDynamicMethod)existing));
-            odm.addMethod(mh);
-            return odm;
-        }
-        else if(existing instanceof OverloadedDynamicMethod) {
-            ((OverloadedDynamicMethod)existing).addMethod(mh);
-            return existing;
-        }
+        } else
+            if(existing instanceof SimpleDynamicMethod) {
+                OverloadedDynamicMethod odm =
+                        new OverloadedDynamicMethod(clazz);
+                odm.addMethod(((SimpleDynamicMethod)existing));
+                odm.addMethod(mh);
+                return odm;
+            } else
+                if(existing instanceof OverloadedDynamicMethod) {
+                    ((OverloadedDynamicMethod)existing).addMethod(mh);
+                    return existing;
+                }
         throw new AssertionError();
     }
 
     public GuardedInvocation getGuardedInvocation(LinkRequest request,
-        final LinkerServices linkerServices)
-    {
+            final LinkerServices linkerServices) {
         request = request.withoutRuntimeContext();
         // BeansLinker already checked that the name is at least 2 elements
         // long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor =
-            request.getCallSiteDescriptor();
+                request.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getTokenizedName().get(1);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
         if("getProp".equals(op)) {
             return getPropertyGetter(callSiteDescriptor);
         }
         final Object[] arguments = request.getArguments();
-        // Either dyn:setProp:name(this, value) or dyn:setProp(this, name, value)
+        // Either dyn:setProp:name(this, value) or dyn:setProp(this, name,
+        // value)
         if("setProp".equals(op)) {
             return getPropertySetter(callSiteDescriptor, linkerServices,
                     arguments);
@@ -178,11 +181,13 @@ public class BeanLinker implements GuardingDynamicLinker
         return null;
     }
 
-    private static MethodHandle GET_LIST_ELEMENT = Lookup.PUBLIC.findVirtual(
-            List.class, "get", MethodType.methodType(Object.class, int.class));
+    private static MethodHandle GET_LIST_ELEMENT =
+            Lookup.PUBLIC.findVirtual(List.class, "get", MethodType.methodType(
+                    Object.class, int.class));
 
-    private static MethodHandle GET_MAP_ELEMENT = Lookup.PUBLIC.findVirtual(
-            Map.class, "get", MethodType.methodType(Object.class, Object.class));
+    private static MethodHandle GET_MAP_ELEMENT =
+            Lookup.PUBLIC.findVirtual(Map.class, "get", MethodType.methodType(
+                    Object.class, Object.class));
 
     private GuardedInvocation getElementGetter(
             final CallSiteDescriptor callSiteDescriptor,
@@ -196,7 +201,7 @@ public class BeanLinker implements GuardingDynamicLinker
         // advance they're dealing with an array, or a list or map, but hey...
         if(declaredType.isArray()) {
             return new GuardedInvocation(MethodHandles.arrayElementGetter(
-                declaredType).asType(callSiteType), null);
+                    declaredType).asType(callSiteType), null);
         }
         if(List.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.convertArguments(
@@ -212,18 +217,18 @@ public class BeanLinker implements GuardingDynamicLinker
         final Class<?> clazz = receiver.getClass();
         if(clazz.isArray()) {
             return new GuardedInvocation(linkerServices.convertArguments(
-                  MethodHandles.arrayElementGetter(clazz), callSiteType),
-                  Guards.isOfClass(clazz, callSiteType));
+                    MethodHandles.arrayElementGetter(clazz), callSiteType),
+                    Guards.isOfClass(clazz, callSiteType));
         }
         if(List.class.isInstance(receiver)) {
             return new GuardedInvocation(linkerServices.convertArguments(
                     GET_LIST_ELEMENT, callSiteType), Guards.isInstance(
-                            List.class, callSiteType));
+                    List.class, callSiteType));
         }
         if(Map.class.isInstance(receiver)) {
             return new GuardedInvocation(linkerServices.convertArguments(
                     GET_MAP_ELEMENT, callSiteType), Guards.isInstance(
-                            Map.class, callSiteType));
+                    Map.class, callSiteType));
         }
         // Can't retrieve elements for objects that are neither arrays, nor
         // list, nor maps.
@@ -231,12 +236,12 @@ public class BeanLinker implements GuardingDynamicLinker
     }
 
     private static MethodHandle SET_LIST_ELEMENT =
-        Lookup.PUBLIC.findVirtual(List.class, "set", MethodType.methodType(
-                Object.class, int.class, Object.class));
+            Lookup.PUBLIC.findVirtual(List.class, "set", MethodType.methodType(
+                    Object.class, int.class, Object.class));
 
     private static MethodHandle PUT_MAP_ELEMENT =
-        Lookup.PUBLIC.findVirtual(Map.class, "put", MethodType.methodType(
-                Object.class, Object.class, Object.class));
+            Lookup.PUBLIC.findVirtual(Map.class, "put", MethodType.methodType(
+                    Object.class, Object.class, Object.class));
 
     private GuardedInvocation getElementSetter(
             final CallSiteDescriptor callSiteDescriptor,
@@ -250,7 +255,8 @@ public class BeanLinker implements GuardingDynamicLinker
         // advance they're dealing with an array, or a list or map, but hey...
         if(declaredType.isArray()) {
             return new GuardedInvocation(linkerServices.convertArguments(
-                    MethodHandles.arrayElementSetter(declaredType), callSiteType), null);
+                    MethodHandles.arrayElementSetter(declaredType),
+                    callSiteType), null);
         }
         if(List.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.convertArguments(
@@ -267,36 +273,38 @@ public class BeanLinker implements GuardingDynamicLinker
         if(clazz.isArray()) {
             return new GuardedInvocation(linkerServices.convertArguments(
                     MethodHandles.arrayElementSetter(clazz), callSiteType),
-                    Guards.isOfClass(clazz,callSiteType));
+                    Guards.isOfClass(clazz, callSiteType));
         }
         if(List.class.isInstance(receiver)) {
             return new GuardedInvocation(linkerServices.convertArguments(
                     SET_LIST_ELEMENT, callSiteType), Guards.isInstance(
-                            List.class, callSiteType));
+                    List.class, callSiteType));
         }
         if(Map.class.isInstance(receiver)) {
             return new GuardedInvocation(linkerServices.convertArguments(
                     PUT_MAP_ELEMENT, callSiteType), Guards.isInstance(
-                            Map.class, callSiteType));
+                    Map.class, callSiteType));
         }
         // Can't retrieve elements for objects that are neither arrays, nor
         // list, nor maps.
         return null;
     }
 
-    private static MethodHandle GET_ARRAY_LENGTH = Lookup.PUBLIC.findStatic(
-            Array.class, "getLength", MethodType.methodType(int.class, Object.class));
+    private static MethodHandle GET_ARRAY_LENGTH =
+            Lookup.PUBLIC.findStatic(Array.class, "getLength", MethodType
+                    .methodType(int.class, Object.class));
 
-    private static MethodHandle GET_COLLECTION_LENGTH = Lookup.PUBLIC.findVirtual(
-            Collection.class, "size", MethodType.methodType(int.class));
+    private static MethodHandle GET_COLLECTION_LENGTH =
+            Lookup.PUBLIC.findVirtual(Collection.class, "size", MethodType
+                    .methodType(int.class));
 
-    private static MethodHandle GET_MAP_LENGTH = Lookup.PUBLIC.findVirtual(
-            Map.class, "size", MethodType.methodType(int.class));
+    private static MethodHandle GET_MAP_LENGTH =
+            Lookup.PUBLIC.findVirtual(Map.class, "size", MethodType
+                    .methodType(int.class));
 
     private GuardedInvocation getLengthGetter(
             final CallSiteDescriptor callSiteDescriptor,
-            final Object... arguments)
-    {
+            final Object... arguments) {
         callSiteDescriptor.assertParameterCount(1);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
@@ -308,26 +316,26 @@ public class BeanLinker implements GuardingDynamicLinker
         if(declaredType.isArray()) {
             // TODO: maybe we'll have a MethodHandles.arrayLengthGetter()?
             return new GuardedInvocation(GET_ARRAY_LENGTH.asType(callSiteType),
-                null);
+                    null);
         }
         if(Collection.class.isAssignableFrom(declaredType)) {
-            return new GuardedInvocation(GET_COLLECTION_LENGTH.asType(
-                callSiteType), null);
+            return new GuardedInvocation(GET_COLLECTION_LENGTH
+                    .asType(callSiteType), null);
         }
         if(Map.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(GET_MAP_LENGTH.asType(callSiteType),
-                null);
+                    null);
         }
         // Otherwise, create a binding based on the actual type of the argument
         // with an appropriate guard.
         final Class<?> clazz = arguments[0].getClass();
         if(clazz.isArray()) {
             return new GuardedInvocation(GET_ARRAY_LENGTH.asType(callSiteType),
-                Guards.isArray(0, callSiteType));
+                    Guards.isArray(0, callSiteType));
         }
         if(Collection.class.isAssignableFrom(clazz)) {
-            return new GuardedInvocation(GET_COLLECTION_LENGTH.asType(
-                callSiteType), Guards.isInstance(Collection.class,
+            return new GuardedInvocation(GET_COLLECTION_LENGTH
+                    .asType(callSiteType), Guards.isInstance(Collection.class,
                     callSiteType));
         }
         if(Map.class.isAssignableFrom(clazz)) {
@@ -341,8 +349,7 @@ public class BeanLinker implements GuardingDynamicLinker
 
     private GuardedInvocation getCallPropWithThis(
             CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, Object... args)
-    {
+            LinkerServices linkerServices, Object... args) {
         final List<String> name = callSiteDescriptor.getTokenizedName();
         switch(name.size()) {
             case 3: {
@@ -357,18 +364,17 @@ public class BeanLinker implements GuardingDynamicLinker
 
     private GuardedInvocation getCallPropWithThis(
             CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, String methodName, Object... args)
-    {
-        final MethodHandle invocation = getMethodInvocation(callSiteDescriptor,
-                linkerServices, methodName);
-        return new GuardedInvocation(invocation, Guards.isOfClass(
-                args[0].getClass(), callSiteDescriptor.getMethodType()));
+            LinkerServices linkerServices, String methodName, Object... args) {
+        final MethodHandle invocation =
+                getMethodInvocation(callSiteDescriptor, linkerServices,
+                        methodName);
+        return new GuardedInvocation(invocation, Guards.isOfClass(args[0]
+                .getClass(), callSiteDescriptor.getMethodType()));
     }
 
     private MethodHandle getMethodInvocation(
-        CallSiteDescriptor callSiteDescriptor,
-        LinkerServices linkerServices, String methodName)
-    {
+            CallSiteDescriptor callSiteDescriptor,
+            LinkerServices linkerServices, String methodName) {
         final DynamicMethod dynaMethod = methods.get(methodName);
         if(dynaMethod == null) {
             return null;
@@ -379,8 +385,7 @@ public class BeanLinker implements GuardingDynamicLinker
 
     private GuardedInvocation getPropertySetter(
             CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, Object... arguments)
-    {
+            LinkerServices linkerServices, Object... arguments) {
         final List<String> name = callSiteDescriptor.getTokenizedName();
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(name.size()) {
@@ -392,12 +397,12 @@ public class BeanLinker implements GuardingDynamicLinker
                 // argument. This is used for embedded overloaded method
                 // lookup.
                 final CallSiteDescriptor newDescriptor =
-                    new CallSiteDescriptor(callSiteDescriptor.getName(),
-                            type.dropParameterTypes(1, 2));
+                        new CallSiteDescriptor(callSiteDescriptor.getName(),
+                                type.dropParameterTypes(1, 2));
                 return new GuardedInvocation(MethodHandles.insertArguments(
-                                SET_PROPERTY_WITH_VARIABLE_ID, 0,
-                                newDescriptor, linkerServices).asType(type),
-                                Guards.isOfClass(clazz, type));
+                        SET_PROPERTY_WITH_VARIABLE_ID, 0, newDescriptor,
+                        linkerServices).asType(type), Guards.isOfClass(clazz,
+                        type));
             }
             case 3: {
                 // Must have two arguments: target object and property value
@@ -415,11 +420,12 @@ public class BeanLinker implements GuardingDynamicLinker
     }
 
     private static String getSetterMethodId(String propertyName) {
-        return "set" + Character.toUpperCase(propertyName.charAt(0)) +
-            propertyName.substring(1);
+        return "set" + Character.toUpperCase(propertyName.charAt(0))
+                + propertyName.substring(1);
     }
 
-    private GuardedInvocation getPropertyGetter(CallSiteDescriptor callSiteDescriptor) {
+    private GuardedInvocation getPropertyGetter(
+            CallSiteDescriptor callSiteDescriptor) {
         final List<String> name = callSiteDescriptor.getTokenizedName();
         final MethodHandle getter;
         final MethodType type = callSiteDescriptor.getMethodType();
@@ -427,15 +433,15 @@ public class BeanLinker implements GuardingDynamicLinker
             case 2: {
                 // Must have exactly two arguments: receiver and name
                 callSiteDescriptor.assertParameterCount(2);
-                return new GuardedInvocation(
-                    GET_PROPERTY_WITH_VARIABLE_ID.asType(type),
-                    Guards.isOfClass(clazz, type));
+                return new GuardedInvocation(GET_PROPERTY_WITH_VARIABLE_ID
+                        .asType(type), Guards.isOfClass(clazz, type));
             }
             case 3: {
                 // Must have exactly one argument: receiver
                 callSiteDescriptor.assertParameterCount(1);
                 // Fixed name
-                final PropertyGetterDescriptor desc = properties.get(name.get(2));
+                final PropertyGetterDescriptor desc =
+                        properties.get(name.get(2));
                 if(desc == null) {
                     // No such property
                     return null;
@@ -450,126 +456,131 @@ public class BeanLinker implements GuardingDynamicLinker
                 // we can discover the most abstract superclass that has the
                 // method, and use that as the guard with Guards.isInstance()
                 // for a more stably linked call site.
-                return new GuardedInvocation(getter.asType(type),
-                    Guards.isInstance(desc.mostGenericClassForGetter, type));
+                return new GuardedInvocation(getter.asType(type), Guards
+                        .isInstance(desc.mostGenericClassForGetter, type));
             }
             default: {
                 // Can't do anything with more than 3 name components
                 return null;
             }
         }
-   }
+    }
 
-    private static final Lookup privateLookup = new Lookup(MethodHandles.lookup());
+    private static final Lookup privateLookup =
+            new Lookup(MethodHandles.lookup());
 
     private MethodHandle GET_PROPERTY_WITH_VARIABLE_ID =
-       MethodHandles.insertArguments(privateLookup.findSpecial(BeanLinker.class,
-               "_getPropertyWithVariableId", MethodType.methodType(Object.class,
-                       Object.class, Object.class)), 0, this);
+            MethodHandles.insertArguments(privateLookup.findSpecial(
+                    BeanLinker.class, "_getPropertyWithVariableId", MethodType
+                            .methodType(Object.class, Object.class,
+                                    Object.class)), 0, this);
 
-   /**
-    * This method is public for implementation reasons. Do not invoke it
-    * directly. Retrieves a property value from an object.
-    * @param obj the object
-    * @param id the property ID
-    * @return the value of the property, or {@link Results#doesNotExist} if the
-    * property does not exist, or {@link Results#notReadable} if the property
-    * is not readable.
-    * @throws Throwable rethrown underlying method handle invocation throwable.
-    */
-   public Object _getPropertyWithVariableId(Object obj, Object id)
-   throws Throwable
-   {
-       PropertyGetterDescriptor desc = properties.get(String.valueOf(id));
-       if(desc == null) {
-           // No such property
-           return Results.doesNotExist;
-       }
-       MethodHandle getter = desc.getter;
-       if(getter == null) {
-           return Results.notReadable;
-       }
-       return getter.invokeWithArguments(obj);
-   }
+    /**
+     * This method is public for implementation reasons. Do not invoke it
+     * directly. Retrieves a property value from an object.
+     *
+     * @param obj the object
+     * @param id the property ID
+     * @return the value of the property, or {@link Results#doesNotExist} if the
+     * property does not exist, or {@link Results#notReadable} if the property
+     * is not readable.
+     * @throws Throwable rethrown underlying method handle invocation throwable.
+     */
+    public Object _getPropertyWithVariableId(Object obj, Object id)
+            throws Throwable {
+        PropertyGetterDescriptor desc = properties.get(String.valueOf(id));
+        if(desc == null) {
+            // No such property
+            return Results.doesNotExist;
+        }
+        MethodHandle getter = desc.getter;
+        if(getter == null) {
+            return Results.notReadable;
+        }
+        return getter.invokeWithArguments(obj);
+    }
 
-   private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID =
-       MethodHandles.insertArguments(privateLookup.findSpecial(
-               BeanLinker.class, "_setPropertyWithVariableId", MethodType.methodType(
-                       Results.class, CallSiteDescriptor.class,
-                       LinkerServices.class, Object.class, Object.class,
-                       Object.class)), 0, this);
+    private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID =
+            MethodHandles.insertArguments(privateLookup.findSpecial(
+                    BeanLinker.class, "_setPropertyWithVariableId", MethodType
+                            .methodType(Results.class,
+                                    CallSiteDescriptor.class,
+                                    LinkerServices.class, Object.class,
+                                    Object.class, Object.class)), 0, this);
 
-   /**
-    * This method is public for implementation reasons. Do not invoke it
-    * directly. Sets a property on an object.
-    * @param callSiteDescriptor the descriptor of the setter call site
-    * @param linkerServices the linker services used for value conversion
-    * @param obj the object
-    * @param id the property ID
-    * @param value the new value for the property
-    * @return {@link Results#ok} if the operation succeeded, or
-    * {@link Results#notWritable} if the property is not writable.
-    * @throws Throwable rethrown underlying method handle invocation throwable.
-    */
-   public Results _setPropertyWithVariableId(CallSiteDescriptor callSiteDescriptor,
-           LinkerServices linkerServices, Object obj, Object id,
-           Object value)
-   throws Throwable
-   {
-       // TODO: this is quite likely terribly inefficient. Optimize.
-       final MethodHandle invocation = getMethodInvocation(callSiteDescriptor,
-               linkerServices, getSetterMethodId(String.valueOf(id)));
-       if(invocation != null) {
-           invocation.invokeWithArguments(obj, value);
-           return Results.ok;
-       }
-       return Results.notWritable;
-   }
+    /**
+     * This method is public for implementation reasons. Do not invoke it
+     * directly. Sets a property on an object.
+     *
+     * @param callSiteDescriptor the descriptor of the setter call site
+     * @param linkerServices the linker services used for value conversion
+     * @param obj the object
+     * @param id the property ID
+     * @param value the new value for the property
+     * @return {@link Results#ok} if the operation succeeded, or
+     * {@link Results#notWritable} if the property is not writable.
+     * @throws Throwable rethrown underlying method handle invocation throwable.
+     */
+    public Results _setPropertyWithVariableId(
+            CallSiteDescriptor callSiteDescriptor,
+            LinkerServices linkerServices, Object obj, Object id, Object value)
+            throws Throwable {
+        // TODO: this is quite likely terribly inefficient. Optimize.
+        final MethodHandle invocation =
+                getMethodInvocation(callSiteDescriptor, linkerServices,
+                        getSetterMethodId(String.valueOf(id)));
+        if(invocation != null) {
+            invocation.invokeWithArguments(obj, value);
+            return Results.ok;
+        }
+        return Results.notWritable;
+    }
 
-   private static class PropertyGetterDescriptor {
-       // mostGenericClassForGetter is an optimization; since property getters
-       // are no-arg, they can't be overloaded with the same number of
-       // arguments. Therefore, it is safe to find the most generic superclass
-       // or superinterface that declares the getter method, and use it as the
-       // type guard, resulting in a more stable call site (one that'll be
-       // relinked less).
-       private final Class<?> mostGenericClassForGetter;
-       private final MethodHandle getter;
+    private static class PropertyGetterDescriptor {
+        // mostGenericClassForGetter is an optimization; since property getters
+        // are no-arg, they can't be overloaded with the same number of
+        // arguments. Therefore, it is safe to find the most generic superclass
+        // or superinterface that declares the getter method, and use it as the
+        // type guard, resulting in a more stable call site (one that'll be
+        // relinked less).
+        private final Class<?> mostGenericClassForGetter;
+        private final MethodHandle getter;
 
-       PropertyGetterDescriptor(Method getter) {
-           getter = getMostGenericGetter(getter.getName(),
-                   getter.getReturnType(), getter.getDeclaringClass());
-           this.getter = Lookup.PUBLIC.unreflect(getter);
-           this.mostGenericClassForGetter = getter.getDeclaringClass();
-       }
+        PropertyGetterDescriptor(Method getter) {
+            getter =
+                    getMostGenericGetter(getter.getName(), getter
+                            .getReturnType(), getter.getDeclaringClass());
+            this.getter = Lookup.PUBLIC.unreflect(getter);
+            this.mostGenericClassForGetter = getter.getDeclaringClass();
+        }
 
-       private static Method getMostGenericGetter(String name,
-               Class<?> returnType, Class<?> declaringClass) {
-           if(declaringClass == null) {
-               return null;
-           }
-           // Prefer interfaces
-           for (Class<?> itf : declaringClass.getInterfaces()) {
-               final Method itfGetter = getMostGenericGetter(name, returnType,
-                       itf);
-               if(itfGetter != null) {
-                   return itfGetter;
-               }
-           }
-           final Method superGetter = getMostGenericGetter(name, returnType,
-                   declaringClass.getSuperclass());
-           if(superGetter != null) {
-               return superGetter;
-           }
-           if(Modifier.isPublic(declaringClass.getModifiers())) {
-               try {
-                   return declaringClass.getMethod(name);
-               }
-               catch(NoSuchMethodException e) {
-                   // Intentionally ignored, meant to fall through
-               }
-           }
-           return null;
-       }
-   }
- }
+        private static Method getMostGenericGetter(String name,
+                Class<?> returnType, Class<?> declaringClass) {
+            if(declaringClass == null) {
+                return null;
+            }
+            // Prefer interfaces
+            for(Class<?> itf: declaringClass.getInterfaces()) {
+                final Method itfGetter =
+                        getMostGenericGetter(name, returnType, itf);
+                if(itfGetter != null) {
+                    return itfGetter;
+                }
+            }
+            final Method superGetter =
+                    getMostGenericGetter(name, returnType, declaringClass
+                            .getSuperclass());
+            if(superGetter != null) {
+                return superGetter;
+            }
+            if(Modifier.isPublic(declaringClass.getModifiers())) {
+                try {
+                    return declaringClass.getMethod(name);
+                } catch(NoSuchMethodException e) {
+                    // Intentionally ignored, meant to fall through
+                }
+            }
+            return null;
+        }
+    }
+}

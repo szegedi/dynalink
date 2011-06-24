@@ -5,8 +5,7 @@ package org.dynalang.dynalink;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public enum Results
-{
+public enum Results {
     /**
      * The requested property does not exist.
      */

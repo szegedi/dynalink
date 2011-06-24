@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink.beans.support;
 
 import java.lang.reflect.Method;
@@ -23,34 +24,33 @@ import java.util.Map;
 
 /**
  * Utility class for discovering accessible methods. Normally, a public method
- * declared on a class is accessible (that is, it can be invoked from
- * anywhere). However, this is not the case if the class itself is not public.
- * In that case, it is required to lookup a method with the same signature in
- * a public superclass or implemented interface of the class, and use it
- * instead of the method discovered on the class. This can of course all be
- * avoided by simply using {@link Method#setAccessible(boolean)}, but this
- * solution (which I call "dynamic upcasting") works even in more constrained
- * security environments.
+ * declared on a class is accessible (that is, it can be invoked from anywhere).
+ * However, this is not the case if the class itself is not public. In that
+ * case, it is required to lookup a method with the same signature in a public
+ * superclass or implemented interface of the class, and use it instead of the
+ * method discovered on the class. This can of course all be avoided by simply
+ * using {@link Method#setAccessible(boolean)}, but this solution (which I call
+ * "dynamic upcasting") works even in more constrained security environments.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class AccessibleMethodsLookup
-{
+public class AccessibleMethodsLookup {
     private final Map<MethodSignature, Method> map;
 
     /**
      * Creates a mapping for all accessible methods on a class.
+     *
      * @param clazz the inspected class
      */
-    public AccessibleMethodsLookup(final Class<?> clazz)
-    {
+    public AccessibleMethodsLookup(final Class<?> clazz) {
         this.map = new HashMap<MethodSignature, Method>();
         lookupAccessibleMethods(clazz);
     }
 
-
     /**
      * Returns an accessible method equivalent of a method.
+     *
      * @param m the method whose accessible equivalent is requested.
      * @return the accessible equivalent for the method (can be the same as the
      * passed in method), or null if there is no accessible method equivalent.
@@ -62,16 +62,17 @@ public class AccessibleMethodsLookup
     /**
      * A helper class that represents a method signature - name and argument
      * types.
+     *
      * @author Attila Szegedi
      * @version $Id: $
      */
-    public static final class MethodSignature
-    {
+    public static final class MethodSignature {
         private final String name;
         private final Class<?>[] args;
 
         /**
          * Creates a new method signature from arbitrary data.
+         *
          * @param name the name of the method this signature represents.
          * @param args the argument types of the method.
          */
@@ -82,6 +83,7 @@ public class AccessibleMethodsLookup
 
         /**
          * Creates a signature for the given method.
+         *
          * @param method the method for which a signature is created.
          */
         public MethodSignature(final Method method) {
@@ -90,6 +92,7 @@ public class AccessibleMethodsLookup
 
         /**
          * Compares this object to another object
+         *
          * @param o the other object
          * @return true if the other object is also a method signature with the
          * same name, same number of arguments, and same types of arguments.
@@ -111,8 +114,7 @@ public class AccessibleMethodsLookup
         }
     }
 
-    private void lookupAccessibleMethods(final Class<?> clazz)
-    {
+    private void lookupAccessibleMethods(final Class<?> clazz) {
         if(Modifier.isPublic(clazz.getModifiers())) {
             try {
                 final Method[] methods = clazz.getMethods();
@@ -122,11 +124,11 @@ public class AccessibleMethodsLookup
                     map.put(sig, method);
                 }
                 return;
-            }
-            catch(final SecurityException e) {
-                System.err.println(
-                        "Could not discover accessible methods of class " +
-                        clazz.getName() + ", attemping superclasses/interfaces.");
+            } catch(final SecurityException e) {
+                System.err
+                        .println("Could not discover accessible methods of class "
+                                + clazz.getName()
+                                + ", attemping superclasses/interfaces.");
                 e.printStackTrace();
                 // Fall through and attempt to discover superclass/interface
                 // methods

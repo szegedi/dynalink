@@ -13,18 +13,22 @@ import org.dynalang.dynalink.RelinkableCallSite;
 /**
  * A basic implementation of the {@link RelinkableCallSite} as a
  * {@link MutableCallSite} subclass.
+ * 
  * @author Attila Szegedi
  * @version $Id: $
  */
 public abstract class AbstractRelinkableCallSite extends MutableCallSite
-implements RelinkableCallSite {
+        implements RelinkableCallSite {
     private MethodHandle relink;
     private final CallSiteDescriptor callSiteDescriptor;
 
     /**
      * Creates a new relinkable call site.
-     * @param name the name of the method at the call site
-     * @param type the method type of the call site
+     * 
+     * @param name
+     *            the name of the method at the call site
+     * @param type
+     *            the method type of the call site
      */
     protected AbstractRelinkableCallSite(String name, MethodType type) {
         super(type);
@@ -46,6 +50,7 @@ implements RelinkableCallSite {
 
     /**
      * Returns the relink method handle
+     * 
      * @return the method handle for relinking this call site.
      */
     protected MethodHandle getRelink() {
@@ -67,23 +72,23 @@ implements RelinkableCallSite {
         final SwitchPoint switchPoint = guardedInvocation.getSwitchPoint();
         if(switchPoint != null) {
             invocation = switchPoint.guardWithTest(invocation,
-                getSwitchPointFallback());
+                    getSwitchPointFallback());
         }
         try {
             setTarget(guard == null ? invocation : MethodHandles.guardWithTest(
-                guard, invocation, getGuardFallback()));
-        }
-        catch(IllegalArgumentException e) {
+                    guard, invocation, getGuardFallback()));
+        } catch(IllegalArgumentException e) {
             // Provide more information than the default JDK implementation
-            throw new IllegalArgumentException("invocation and guard types " +
-                  "do not match. invocation=" + invocation.type() +
-                  " guard=" + guard.type(), e);
-      }
+            throw new IllegalArgumentException("invocation and guard types "
+                    + "do not match. invocation=" + invocation.type()
+                    + " guard=" + guard.type(), e);
+        }
     }
 
     /**
      * Implement this method to specify the fallback method handle when a guard
      * fails.
+     * 
      * @return the fallback method handle
      */
     protected abstract MethodHandle getGuardFallback();
@@ -91,6 +96,7 @@ implements RelinkableCallSite {
     /**
      * Implement this method to specify the fallback method handle when a method
      * handle is invalidated by a switch point.
+     * 
      * @return the fallback method handle for switch point invalidation.
      */
     protected abstract MethodHandle getSwitchPointFallback();

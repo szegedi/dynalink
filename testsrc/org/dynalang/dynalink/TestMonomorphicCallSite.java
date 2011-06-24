@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandle;
@@ -26,27 +27,24 @@ import org.dynalang.dynalink.MonomorphicCallSite;
 
 /**
  * Tests for the {@link MonomorphicCallSite}.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class TestMonomorphicCallSite extends TestCase
-{
-    static
-    {
+public class TestMonomorphicCallSite extends TestCase {
+    static {
         MethodHandles.lookup();
     }
+
     /**
      * Tests prohibition of setting null target.
      */
-    public void testSetNull()
-    {
-        try
-        {
-            new MonomorphicCallSite("", MethodType.methodType(Void.TYPE)).setGuardedInvocation(null);
+    public void testSetNull() {
+        try {
+            new MonomorphicCallSite("", MethodType.methodType(Void.TYPE))
+                    .setGuardedInvocation(null);
             fail();
-        }
-        catch(IllegalArgumentException e)
-        {
+        } catch(IllegalArgumentException e) {
             // This is expected
         }
     }
@@ -54,8 +52,7 @@ public class TestMonomorphicCallSite extends TestCase
     /**
      * Tests setting a guardless target (it has to be linked directly).
      */
-    public void testSetGuardless()
-    {
+    public void testSetGuardless() {
         final MethodHandle mh = MethodHandles.identity(Object.class);
         final MonomorphicCallSite mcs = new MonomorphicCallSite("", mh.type());
         mcs.setGuardedInvocation(new GuardedInvocation(mh, null));

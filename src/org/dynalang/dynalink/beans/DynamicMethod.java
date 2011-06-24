@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
@@ -29,21 +30,22 @@ import org.dynalang.dynalink.LinkerServices;
  * identify exactly one target method, it will generate a method handle that
  * will perform the rest of the overload resolution at invocation time for
  * actual argument types).
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public interface DynamicMethod
-{
+public interface DynamicMethod {
     /**
      * Creates an invocation for the dynamic method. If the method is
      * overloaded, it will perform overloaded method resolution based on the
      * formal argument types in the call site. The resulting resolution can
-     * either identify a single method to be invoked among the overloads, or
-     * it can identify multiple ones. In the latter case, the returned method
-     * handle will perform further overload resolution among these candidates
-     * at every invocation. If the method to be invoked is a variable arguments
+     * either identify a single method to be invoked among the overloads, or it
+     * can identify multiple ones. In the latter case, the returned method
+     * handle will perform further overload resolution among these candidates at
+     * every invocation. If the method to be invoked is a variable arguments
      * (vararg) method, it will pack the extra arguments in an array before the
      * invocation of the underlying method if it is not already done.
+     *
      * @param callSiteDescriptor descriptor of the call site
      * @param linkerServices linker services. Used for querying available
      * language-specific type conversions in order to identify candidate
@@ -52,6 +54,5 @@ public interface DynamicMethod
      * call site.
      */
     public abstract MethodHandle getInvocation(
-            CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices);
+            CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices);
 }

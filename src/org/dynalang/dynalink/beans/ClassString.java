@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
 
 package org.dynalang.dynalink.beans;
 
@@ -30,13 +30,12 @@ import org.dynalang.dynalink.support.Guards;
  * @author Attila Szegedi
  * @version $Id: $
  */
-final class ClassString
-{
+final class ClassString {
     private final Class<?>[] classes;
     private int hashCode;
 
     ClassString(Class<?>[] classes) {
-	this.classes = classes;
+        this.classes = classes;
     }
 
     Class<?>[] getClasses() {
@@ -44,8 +43,7 @@ final class ClassString
     }
 
     @Override
-    public boolean equals(Object other)
-    {
+    public boolean equals(Object other) {
         if(!(other instanceof ClassString)) {
             return false;
         }
@@ -75,7 +73,8 @@ final class ClassString
 
     boolean isVisibleFrom(final ClassLoader classLoader) {
         for(int i = 0; i < classes.length; ++i) {
-            if(!Guards.canReferenceDirectly(classLoader, classes[i].getClassLoader())) {
+            if(!Guards.canReferenceDirectly(classLoader, classes[i]
+                    .getClassLoader())) {
                 return false;
             }
         }
@@ -83,17 +82,16 @@ final class ClassString
     }
 
     private static MaximallySpecific.TypeFunction<MethodHandle> TF =
-        new MaximallySpecific.TypeFunction<MethodHandle>() {
-            public MethodType type(MethodHandle mh) {
-                return mh.type();
+            new MaximallySpecific.TypeFunction<MethodHandle>() {
+                public MethodType type(MethodHandle mh) {
+                    return mh.type();
+                };
             };
-        };
 
-    MethodHandle getMostSpecific(List<MethodHandle> methods, boolean varArg)
-    {
+    MethodHandle getMostSpecific(List<MethodHandle> methods, boolean varArg) {
         final List<MethodHandle> maximals =
-            MaximallySpecific.getMaximallySpecificMethods(getApplicables(
-                    methods, varArg), TF, varArg);
+                MaximallySpecific.getMaximallySpecificMethods(getApplicables(
+                        methods, varArg), TF, varArg);
         switch(maximals.size()) {
             case 0: {
                 return OverloadedMethod.NO_SUCH_METHOD;
@@ -108,12 +106,13 @@ final class ClassString
     }
 
     /**
-     * Returns all methods that are applicable to actual
-     * parameter classes represented by this ClassString object.
+     * Returns all methods that are applicable to actual parameter classes
+     * represented by this ClassString object.
      */
-    LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods, boolean varArg) {
+    LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods,
+            boolean varArg) {
         final LinkedList<MethodHandle> list = new LinkedList<MethodHandle>();
-        for (final MethodHandle member : methods) {
+        for(final MethodHandle member: methods) {
             if(isApplicable(member, varArg)) {
                 list.add(member);
             }
@@ -122,8 +121,8 @@ final class ClassString
     }
 
     /**
-     * Returns true if the supplied method is applicable to actual
-     * parameter classes represented by this ClassString object.
+     * Returns true if the supplied method is applicable to actual parameter
+     * classes represented by this ClassString object.
      *
      */
     private boolean isApplicable(MethodHandle method, boolean varArg) {
@@ -132,25 +131,25 @@ final class ClassString
         final int fl = formalTypes.length - (varArg ? 1 : 0);
         if(varArg) {
             if(cl < fl) {
-        	return false;
+                return false;
             }
         } else {
             if(cl != fl) {
-        	return false;
+                return false;
             }
         }
         // Starting from 1 as we ignore the receiver type
         for(int i = 1; i < fl; ++i) {
-            if(!TypeUtilities.isMethodInvocationConvertible(
-                    classes[i], formalTypes[i])) {
+            if(!TypeUtilities.isMethodInvocationConvertible(classes[i],
+                    formalTypes[i])) {
                 return false;
             }
         }
         if(varArg) {
             Class<?> varArgType = formalTypes[fl].getComponentType();
             for(int i = fl; i < cl; ++i) {
-    		if(!TypeUtilities.isMethodInvocationConvertible(
-    		        classes[i], varArgType)) {
+                if(!TypeUtilities.isMethodInvocationConvertible(classes[i],
+                        varArgType)) {
                     return false;
                 }
             }

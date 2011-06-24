@@ -19,15 +19,18 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 /**
- * Modified from the code published by Remi Forax, as attachment to this blog post:
- * <http://weblogs.java.net/blog/forax/archive/2011/01/07/call-invokedynamic-java>
+ * Modified from the code published by Remi Forax, as attachment to this blog
+ * post:
+ * <http://weblogs.java.net/blog/forax/archive/2011/01/07/call-invokedynamic
+ * -java>
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public class DynamicIndy extends ClassLoader {
-  private int ID_GENERATOR = 0;
+    private int ID_GENERATOR = 0;
 
-  public MethodHandle invokeDynamic(String name, MethodType desc, Class<?> bsmClass, String bsmName, MethodType bsmType, Object... bsmArgs) {
+    public MethodHandle invokeDynamic(String name, MethodType desc, Class<?> bsmClass, String bsmName, MethodType bsmType, Object... bsmArgs) {
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
     cw.visit(V1_7, ACC_PUBLIC | ACC_SUPER, "Gen"+(ID_GENERATOR++), null, "java/lang/Object", null);
 

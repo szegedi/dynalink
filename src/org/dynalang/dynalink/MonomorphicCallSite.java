@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandle;
@@ -22,13 +23,14 @@ import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 
 /**
  * A relinkable call site that implements monomorphic inline caching strategy.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class MonomorphicCallSite extends AbstractRelinkableCallSite
-{
+public class MonomorphicCallSite extends AbstractRelinkableCallSite {
     /**
      * Creates a new call site with monomorphic inline caching strategy.
+     *
      * @param name the name of the method at the call site
      * @param type the method type of the call site
      */

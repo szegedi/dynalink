@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink.support;
 
 import org.dynalang.dynalink.GuardedInvocation;
@@ -24,17 +25,18 @@ import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
  * A linker that can't link any call site. Only used internally by
  * {@link CompositeTypeBasedGuardingDynamicLinker}. Can be used by other
  * language runtimes if they need it though.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class BottomGuardingDynamicLinker
-implements TypeBasedGuardingDynamicLinker {
+public class BottomGuardingDynamicLinker implements
+        TypeBasedGuardingDynamicLinker {
 
     /**
      * The sole instance of this stateless linker.
      */
     public static final BottomGuardingDynamicLinker INSTANCE =
-        new BottomGuardingDynamicLinker();
+            new BottomGuardingDynamicLinker();
 
     private BottomGuardingDynamicLinker() {
     }
@@ -44,8 +46,7 @@ implements TypeBasedGuardingDynamicLinker {
     }
 
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
-            LinkerServices linkerServices)
-    {
+            LinkerServices linkerServices) {
         return null;
     }
 }

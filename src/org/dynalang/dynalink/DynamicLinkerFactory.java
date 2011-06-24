@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 import java.util.ArrayList;
@@ -32,26 +33,28 @@ import org.dynalang.dynalink.support.TypeConverterFactory;
 
 /**
  * A factory class for creating master dynamic linkers. The most usual master
- * dynamic linker is a linker that is a composition of all {@link
- * GuardingDynamicLinker guarding dynamic linkers} known and precreated by the
- * caller as well as any {@link AutoDiscovery automatically discovered}
+ * dynamic linker is a linker that is a composition of all
+ * {@link GuardingDynamicLinker guarding dynamic linkers} known and precreated
+ * by the caller as well as any {@link AutoDiscovery automatically discovered}
  * guarding linkers and the standard fallback {@link BeansLinker}. See
  * {@link DynamicLinker} documentation for tips on how to use this class.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public class DynamicLinkerFactory {
 
     private ClassLoader classLoader =
-        Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().getContextClassLoader();
     private List<? extends GuardingDynamicLinker> prioritizedLinkers;
     private List<? extends GuardingDynamicLinker> fallbackLinkers;
     private int runtimeContextArgCount = 0;
 
     /**
-     * Sets the class loader for automatic discovery of available linkers.
-     * If not set explicitly, then the thread context class loader at the time
-     * of the constructor invocation will be used.
+     * Sets the class loader for automatic discovery of available linkers. If
+     * not set explicitly, then the thread context class loader at the time of
+     * the constructor invocation will be used.
+     *
      * @param classLoader the class loader used for the autodiscovery of
      * available linkers.
      */
@@ -60,32 +63,33 @@ public class DynamicLinkerFactory {
     }
 
     /**
-     * Sets the prioritized linkers. Language runtimes using this framework
-     * will usually precreate at least the linker for their own language.
-     * These linkers will be consulted first in the resulting master linker,
-     * before any autodiscovered linkers. If the framework also autodiscovers a
-     * linker of the same class as one of the prioritized linkers, it will be
-     * ignored and the explicit prioritized instance will be used.
+     * Sets the prioritized linkers. Language runtimes using this framework will
+     * usually precreate at least the linker for their own language. These
+     * linkers will be consulted first in the resulting master linker, before
+     * any autodiscovered linkers. If the framework also autodiscovers a linker
+     * of the same class as one of the prioritized linkers, it will be ignored
+     * and the explicit prioritized instance will be used.
+     *
      * @param prioritizedLinkers the list of prioritized linkers. Null can be
      * passed to indicate no prioritized linkers (this is also the default
      * value).
      */
     public void setPrioritizedLinkers(
-            List<? extends GuardingDynamicLinker> prioritizedLinkers)
-    {
-        this.prioritizedLinkers = prioritizedLinkers == null ? null :
-            new ArrayList<GuardingDynamicLinker>(prioritizedLinkers);
+            List<? extends GuardingDynamicLinker> prioritizedLinkers) {
+        this.prioritizedLinkers =
+                prioritizedLinkers == null ? null
+                        : new ArrayList<GuardingDynamicLinker>(
+                                prioritizedLinkers);
     }
 
     /**
      * Sets a single prioritized linker. Identical to calling
      * {@link #setPrioritizedLinkers(List)} with a single-element list.
-     * @param prioritizedLinker the single prioritized linker. Must not be
-     * null.
+     *
+     * @param prioritizedLinker the single prioritized linker. Must not be null.
      * @throws IllegalArgumentException if null is passed.
      */
-    public void setPrioritizedLinker(GuardingDynamicLinker prioritizedLinker)
-    {
+    public void setPrioritizedLinker(GuardingDynamicLinker prioritizedLinker) {
         if(prioritizedLinker == null) {
             throw new IllegalArgumentException("prioritizedLinker == null");
         }
@@ -93,20 +97,21 @@ public class DynamicLinkerFactory {
     }
 
     /**
-     * Sets the fallback linkers. These linkers will be consulted last in
-     * the resulting composite linker, after any autodiscovered linkers.
-     * If the framework also autodiscovers a linker of the same class as one
-     * of the fallback linkers, it will be ignored and the explicit fallback
-     * instance will be used.
+     * Sets the fallback linkers. These linkers will be consulted last in the
+     * resulting composite linker, after any autodiscovered linkers. If the
+     * framework also autodiscovers a linker of the same class as one of the
+     * fallback linkers, it will be ignored and the explicit fallback instance
+     * will be used.
+     *
      * @param fallbackLinkers the list of fallback linkers. Can be empty to
      * indicate the caller wishes to set no fallback linkers. If it is left as
      * null, the standard fallback {@link BeansLinker} will be used.
      */
     public void setFallbackLinkers(
-            List<? extends GuardingDynamicLinker> fallbackLinkers)
-    {
-        this.fallbackLinkers = fallbackLinkers == null ? null :
-            new ArrayList<GuardingDynamicLinker>(fallbackLinkers);
+            List<? extends GuardingDynamicLinker> fallbackLinkers) {
+        this.fallbackLinkers =
+                fallbackLinkers == null ? null
+                        : new ArrayList<GuardingDynamicLinker>(fallbackLinkers);
     }
 
     /**
@@ -114,19 +119,21 @@ public class DynamicLinkerFactory {
      * the stack context of the language runtime creating the linker. If the
      * language runtime uses no context information passed on stack, then it
      * should be zero (the default value).
+     *
      * @param runtimeContextArgCount the number of trailing language runtime
      * context arguments in call sites.
      */
     public void setRuntimeContextArgCount(int runtimeContextArgCount) {
-      if(runtimeContextArgCount < 0) {
-          throw new IllegalArgumentException("runtimeContextArgCount < 0");
-      }
-      this.runtimeContextArgCount = runtimeContextArgCount;
+        if(runtimeContextArgCount < 0) {
+            throw new IllegalArgumentException("runtimeContextArgCount < 0");
+        }
+        this.runtimeContextArgCount = runtimeContextArgCount;
     }
 
     /**
      * Creates a new master linker consisting of all the prioritized,
      * autodiscovered, and fallback linkers.
+     *
      * @return the new master DynamicLinker.
      */
     public DynamicLinker createLinker() {
@@ -141,20 +148,20 @@ public class DynamicLinkerFactory {
         // Gather classes of all precreated (prioritized and fallback) DIRs.
         // We'll filter out any discovered DIRs of the same class.
         final Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses =
-            new HashSet<Class<? extends GuardingDynamicLinker>>();
+                new HashSet<Class<? extends GuardingDynamicLinker>>();
         addClasses(knownLinkerClasses, prioritizedLinkers);
         addClasses(knownLinkerClasses, fallbackLinkers);
 
         final List<GuardingDynamicLinker> discovered =
-            AutoDiscovery.loadLinkers(classLoader);
+                AutoDiscovery.loadLinkers(classLoader);
         // Now, concatenate ...
         final List<GuardingDynamicLinker> linkers =
-            new ArrayList<GuardingDynamicLinker>(prioritizedLinkers.size() +
-                    discovered.size() + fallbackLinkers.size());
+                new ArrayList<GuardingDynamicLinker>(prioritizedLinkers.size()
+                        + discovered.size() + fallbackLinkers.size());
         // ... prioritized DIRs, ...
         linkers.addAll(prioritizedLinkers);
         // ... filtered discovered DIRs, ...
-        for (GuardingDynamicLinker linker : discovered) {
+        for(GuardingDynamicLinker linker: discovered) {
             if(!knownLinkerClasses.contains(linker.getClass())) {
                 linkers.add(linker);
             }
@@ -162,7 +169,7 @@ public class DynamicLinkerFactory {
         // ... and finally fallback linkers.
         linkers.addAll(fallbackLinkers);
         final List<GuardingDynamicLinker> optimized =
-            CompositeTypeBasedGuardingDynamicLinker.optimize(linkers);
+                CompositeTypeBasedGuardingDynamicLinker.optimize(linkers);
         final GuardingDynamicLinker composite;
         switch(linkers.size()) {
             case 0: {
@@ -180,21 +187,21 @@ public class DynamicLinkerFactory {
         }
 
         final List<GuardingTypeConverterFactory> typeConverters =
-            new LinkedList<GuardingTypeConverterFactory>();
-        for (GuardingDynamicLinker linker : linkers) {
+                new LinkedList<GuardingTypeConverterFactory>();
+        for(GuardingDynamicLinker linker: linkers) {
             if(linker instanceof GuardingTypeConverterFactory) {
                 typeConverters.add((GuardingTypeConverterFactory)linker);
             }
         }
         return new DynamicLinker(new LinkerServicesImpl(
-            new TypeConverterFactory(typeConverters), composite),
-            runtimeContextArgCount);
+                new TypeConverterFactory(typeConverters), composite),
+                runtimeContextArgCount);
     }
 
     private static void addClasses(
             Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses,
             List<? extends GuardingDynamicLinker> linkers) {
-        for (GuardingDynamicLinker linker : linkers) {
+        for(GuardingDynamicLinker linker: linkers) {
             knownLinkerClasses.add(linker.getClass());
         }
     }

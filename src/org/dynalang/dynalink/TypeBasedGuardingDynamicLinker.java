@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
-package org.dynalang.dynalink;
+ */
 
+package org.dynalang.dynalink;
 
 /**
  * A guarding dynamic linker that can determine whether it can link the call
@@ -23,12 +23,14 @@ package org.dynalang.dynalink;
  * this category, as they recognize their native objects as Java objects of
  * classes implementing a specific language-native interface. The linker
  * mechanism can optimize the dispatch for these linkers.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public interface TypeBasedGuardingDynamicLinker extends GuardingDynamicLinker {
     /**
      * Returns true if the linker can link an object of the specified type.
+     *
      * @param type the type to link
      * @return true if the linker can link the object, or false otherwise.
      */

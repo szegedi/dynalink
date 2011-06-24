@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodType;
@@ -30,17 +31,18 @@ import java.util.StringTokenizer;
  * guarding linkers so they aren't tempted to do nasty things to it; also it
  * carries the tokenized name of the method, which is not available in the call
  * site object itself.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class CallSiteDescriptor
-{
+public class CallSiteDescriptor {
     private final List<String> tokenizedName;
     private final String name;
     private final MethodType methodType;
 
     /**
      * Create a new call site descriptor from explicit information.
+     *
      * @param tokenizedName the tokenized name of the method
      * @param methodType the method type
      */
@@ -51,6 +53,7 @@ public class CallSiteDescriptor
 
     /**
      * Create a new call site descriptor from explicit information.
+     *
      * @param name the name of the method
      * @param methodType the method type
      */
@@ -67,6 +70,7 @@ public class CallSiteDescriptor
 
     /**
      * The type of the method at the call site.
+     *
      * @return type of the method at the call site.
      */
     public MethodType getMethodType() {
@@ -75,6 +79,7 @@ public class CallSiteDescriptor
 
     /**
      * Returns the tokenized name of the method at the call site.
+     *
      * @return name of the method at the call site. Returned is an unmodifiable
      * list of interned strings representing the name tokenized at colon ":"
      * characters.
@@ -85,6 +90,7 @@ public class CallSiteDescriptor
 
     /**
      * Returns the untokenized name of the method at the call site.
+     *
      * @return name of the method at the call site.
      */
     public String getName() {
@@ -94,13 +100,14 @@ public class CallSiteDescriptor
     /**
      * Checks that the method type has exactly the desired number of arguments,
      * throws an exception if it doesn't.
+     *
      * @param count the desired parameter count
      * @throws BootstrapMethodError if the parameter count doesn't match
      */
     public void assertParameterCount(int count) {
         if(methodType.parameterCount() != count) {
-            throw new BootstrapMethodError(tokenizedName + " must have exactly "
-                    + count + " parameters");
+            throw new BootstrapMethodError(tokenizedName
+                    + " must have exactly " + count + " parameters");
         }
     }
 
@@ -138,12 +145,18 @@ public class CallSiteDescriptor
      * Creates a new call site descriptor from this descriptor, which is
      * identical to this, except it drops few of the trailing arguments from the
      * method type
+     *
      * @param argCount the number of arguments to drop
      * @return a new call site descriptor with the arguments dropped.
      */
     public CallSiteDescriptor dropArguments(int argCount) {
-      final int paramCount = methodType.parameterCount();
-      return new CallSiteDescriptor(name, tokenizedName,
-          methodType.dropParameterTypes(paramCount - argCount, paramCount));
+        final int paramCount = methodType.parameterCount();
+        return new CallSiteDescriptor(name, tokenizedName, methodType
+                .dropParameterTypes(paramCount - argCount, paramCount));
+    }
+
+    public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
+        return new CallSiteDescriptor(name, tokenizedName, methodType
+                .changeParameterType(num, newType));
     }
 }

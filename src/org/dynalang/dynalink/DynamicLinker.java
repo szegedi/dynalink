@@ -1,5 +1,5 @@
 /*
-   Copyright 2009 Attila Szegedi
+   Copyright 2009-2011 Attila Szegedi
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
+
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandle;
@@ -27,16 +28,17 @@ import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
 
 /**
-/**
- * The linker for {@link RelinkableCallSite} objects. Users of Dynalink will
+ * /** The linker for {@link RelinkableCallSite} objects. Users of Dynalink will
  * normally obtain one through a {@link DynamicLinkerFactory} and invoke its
  * link method from their invokedynamic bootstrap method to set the target of
  * all its call sites. Usual usage would be to create one class per language
  * runtime to contain one linker instance as:
+ *
  * <pre>
  * class MyLanguageRuntime {
  *     private static final DynamicLinker dynamicLinker = createDynamicLinker();
- *     private static final GuardingDynamicLinker myLanguageLinker = new MyLanguageLinker();
+ *     private static final GuardingDynamicLinker myLanguageLinker =
+ *             new MyLanguageLinker();
  *
  *     private static DynamicLinker createDynamicLinker() {
  *         final DynamicLinkerFactory factory = new DynamicLinkerFactory();
@@ -44,18 +46,22 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  *         return factory.createLinker();
  *     }
  *
- *     public static CallSite bootstrap(MethodHandles.Lookup caller, String name, MethodType type) {
- *         final MonomorphicCallSite callSite = new MonomorphicCallSite(name, type);
+ *     public static CallSite bootstrap(MethodHandles.Lookup caller, String name,
+ *             MethodType type) {
+ *         final MonomorphicCallSite callSite =
+ *                 new MonomorphicCallSite(name, type);
  *         dynamicLinker.link(callSite);
  *         return callSite;
  *     }
  * }
  * </pre>
+ *
  * Note how you're expected to implement a {@link GuardingDynamicLinker} for
  * your own language. If your runtime doesn't have its own language and/or
  * object model (i.e. it's a generic scripting shell), you don't need to
  * implement a dynamic linker; you would simply not invoke the
  * <tt>setPrioritizedLinker</tt> on the factory.
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -69,12 +75,13 @@ public class DynamicLinker {
     /**
      * Creates a new master linker that delegates to a single guarding dynamic
      * linker (this is usually a {@link CompositeGuardingDynamicLinker} though.
+     *
      * @param linkerServices the linkerServices used by the linker
      * @param runtimeContextArgCount see
      * {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
     public DynamicLinker(final LinkerServices linkerServices,
-        final int runtimeContextArgCount) {
+            final int runtimeContextArgCount) {
         this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;
     }
@@ -83,6 +90,7 @@ public class DynamicLinker {
      * Links an invokedynamic call site. It will install a relink method handle
      * into the call site that hooks into the multi-language dispatch and
      * relinking mechanisms.
+     *
      * @param callSite the call site to link.
      */
     public void link(final RelinkableCallSite callSite) {
@@ -90,21 +98,23 @@ public class DynamicLinker {
     }
 
     private static final MethodHandle RELINK_AND_INVOKE =
-        new Lookup(MethodHandles.lookup()).findSpecial(DynamicLinker.class,
-                "_relinkAndInvoke", MethodType.methodType(Object.class,
-                        CallSiteDescriptor.class, RelinkableCallSite.class,
-                        Object[].class));
+            new Lookup(MethodHandles.lookup()).findSpecial(DynamicLinker.class,
+                    "_relinkAndInvoke", MethodType.methodType(Object.class,
+                            CallSiteDescriptor.class, RelinkableCallSite.class,
+                            Object[].class));
 
-    private MethodHandle createRelinkAndInvokeMethod(final RelinkableCallSite callSite) {
+    private MethodHandle createRelinkAndInvokeMethod(
+            final RelinkableCallSite callSite) {
         // Make a bound MH of invoke() for this linker and call site
         final CallSiteDescriptor descriptor = callSite.getCallSiteDescriptor();
-        final MethodHandle boundInvoker = MethodHandles.insertArguments(
-                RELINK_AND_INVOKE, 0, this, descriptor, callSite);
+        final MethodHandle boundInvoker =
+                MethodHandles.insertArguments(RELINK_AND_INVOKE, 0, this,
+                        descriptor, callSite);
         // Make a MH that gathers all arguments to the invocation into an
         // Object[]
         final MethodType type = descriptor.getMethodType();
-        final MethodHandle collectingInvoker = boundInvoker.asCollector(
-            Object[].class, type.parameterCount());
+        final MethodHandle collectingInvoker =
+                boundInvoker.asCollector(Object[].class, type.parameterCount());
         // Make a MH that converts all args to Object
         return collectingInvoker.asType(type);
     }
@@ -112,21 +122,24 @@ public class DynamicLinker {
     /**
      * Relinks a call site conforming to the invocation arguments, and then
      * invokes the newly linked method handle.
+     *
      * @param callSiteDescriptor the descriptor of the call site
      * @param callSite the call site itself
      * @param arguments arguments to the invocation
      * @return return value of the invocation
-    * @throws Throwable rethrown underlying method handle invocation throwable.
+     * @throws Throwable rethrown underlying method handle invocation throwable.
      */
-    private Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor,
+    private Object _relinkAndInvoke(
+            final CallSiteDescriptor callSiteDescriptor,
             RelinkableCallSite callSite, Object... arguments) throws Throwable {
-        final LinkRequest linkRequest = runtimeContextArgCount == 0 ?
-            new LinkRequestImpl(callSiteDescriptor, arguments) :
-            new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments,
-                runtimeContextArgCount);
+        final LinkRequest linkRequest =
+                runtimeContextArgCount == 0 ? new LinkRequestImpl(
+                        callSiteDescriptor, arguments)
+                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor,
+                                arguments, runtimeContextArgCount);
         // Find a suitable method handle with a guard
         GuardedInvocation guardedInvocation =
-            linkerServices.getGuardedInvocation(linkRequest);
+                linkerServices.getGuardedInvocation(linkRequest);
 
         // None found - throw an exception
         if(guardedInvocation == null) {
@@ -140,17 +153,18 @@ public class DynamicLinker {
             final MethodType origType = callSiteDescriptor.getMethodType();
             final int paramCount = origType.parameterCount();
             final int contextStart = paramCount - runtimeContextArgCount;
-            if(guardedInvocation.getInvocation().type().parameterCount() ==
-              contextStart) {
+            if(guardedInvocation.getInvocation().type().parameterCount() == contextStart) {
                 final List<Class<?>> prefix =
-                    origType.parameterList().subList(contextStart, paramCount);
+                        origType.parameterList().subList(contextStart,
+                                paramCount);
                 final MethodHandle guard = guardedInvocation.getGuard();
-                guardedInvocation = guardedInvocation.replaceMethods(
-                    MethodHandles.dropArguments(
-                        guardedInvocation.getInvocation(), contextStart,
-                        prefix), guard == null ? null :
-                          MethodHandles.dropArguments(guard, contextStart,
-                              prefix));
+                guardedInvocation =
+                        guardedInvocation
+                                .replaceMethods(MethodHandles.dropArguments(
+                                        guardedInvocation.getInvocation(),
+                                        contextStart, prefix), guard == null
+                                        ? null : MethodHandles.dropArguments(
+                                                guard, contextStart, prefix));
             }
         }
 
