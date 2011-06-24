@@ -28,7 +28,7 @@ public class NativeContextLinkRequestImpl extends LinkRequestImpl {
     }
 
     @Override
-    public LinkRequest getNonNativeRequest() {
+    public LinkRequest asNonNative() {
         if(nonNativeRequest == null) {
             nonNativeRequest = new LinkRequestImpl(
                 getCallSiteDescriptor().dropArguments(nativeContextArgCount),

@@ -36,7 +36,7 @@ public class LinkRequestImpl implements LinkRequest {
     }
 
     @Override
-    public LinkRequest getNonNativeRequest() {
+    public LinkRequest asNonNative() {
         return this;
     }
 }

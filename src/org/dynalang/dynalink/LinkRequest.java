@@ -31,5 +31,5 @@ public interface LinkRequest {
      * not have any language runtime specific context parameters, the same link
      * request is returned.
      */
-    public LinkRequest getNonNativeRequest();
+    public LinkRequest asNonNative();
 }
