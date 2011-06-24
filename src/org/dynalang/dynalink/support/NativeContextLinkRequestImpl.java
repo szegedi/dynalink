@@ -18,8 +18,8 @@ public class NativeContextLinkRequestImpl extends LinkRequestImpl {
      * Creates a new link request.
      * @param callSiteDescriptor the descriptor for the call site being linked
      * @param arguments the arguments for the invocation
-     * @param nativeContextArgCount the number of the initial arguments that
-     * represent the language runtime specific context arguments.
+     * @param nativeContextArgCount the number of the trailing arguments on the
+     * stack that represent the language runtime specific context arguments.
      */
     public NativeContextLinkRequestImpl(CallSiteDescriptor callSiteDescriptor,
         Object[] arguments, int nativeContextArgCount) {
@@ -40,7 +40,7 @@ public class NativeContextLinkRequestImpl extends LinkRequestImpl {
     private Object[] getTruncatedArguments() {
       final Object[] args = getArguments();
       final Object[] newargs = new Object[args.length - nativeContextArgCount];
-      System.arraycopy(args, nativeContextArgCount, newargs, 0, newargs.length);
+      System.arraycopy(args, 0, newargs, 0, newargs.length);
       return newargs;
     }
 }

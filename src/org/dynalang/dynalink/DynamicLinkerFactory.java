@@ -48,7 +48,6 @@ public class DynamicLinkerFactory {
         Thread.currentThread().getContextClassLoader();
     private List<? extends GuardingDynamicLinker> prioritizedLinkers;
     private List<? extends GuardingDynamicLinker> fallbackLinkers;
-    private MethodHandle beforeNonNativeInvocation;
     private int nativeContextArgCount = 0;
 
     /**
@@ -113,11 +112,11 @@ public class DynamicLinkerFactory {
     }
 
     /**
-     * Sets the number of leading arguments in the call sites that represent the
-     * native context of the language runtime creating the linker. If the
-     * language runtime uses no native context information passed on stack, then
-     * it should be zero (the default value).
-     * @param nativeContextArgCount the number of leading native context
+     * Sets the number of trailing arguments in the call sites that represent
+     * the native context of the language runtime creating the linker. If the
+     * language runtime uses no native context information passed on stack,
+     * then it should be zero (the default value).
+     * @param nativeContextArgCount the number of trailing native context
      * arguments in call sites.
      */
     public void setNativeContextArgCount(int nativeContextArgCount) {
@@ -125,23 +124,6 @@ public class DynamicLinkerFactory {
           throw new IllegalArgumentException("nativeContextArgCount < 0");
       }
       this.nativeContextArgCount = nativeContextArgCount;
-    }
-
-    /**
-     * Sets a method handle that will be linked before any non-native invocation
-     * (meaning, invocation linked by a linker that does not understand the
-     * first few arguments of the call site as the native context of the
-     * language runtime). The method must return void, and only accept the
-     * arguments that constitute the native language runtime context on the
-     * stack. If it is set, then {@link #setNativeContextArgCount(int)} is
-     * ignored, as it is assumed to be the same as the number of arguments this
-     * method receives
-     * @param beforeNonNativeInvocation the method that will be linked so as to
-     * be invoked before any non-native invocation. Language runtimes can use it
-     * i.e. to save their current context in a thread local.
-     */
-    public void setBeforeNonNativeInvocation(MethodHandle beforeNonNativeInvocation) {
-      this.beforeNonNativeInvocation = beforeNonNativeInvocation;
     }
 
     /**
@@ -208,7 +190,7 @@ public class DynamicLinkerFactory {
         }
         return new DynamicLinkerImpl(new LinkerServicesImpl(
             new TypeConverterFactory(typeConverters), composite),
-            beforeNonNativeInvocation, nativeContextArgCount);
+            nativeContextArgCount);
     }
 
     private static void addClasses(

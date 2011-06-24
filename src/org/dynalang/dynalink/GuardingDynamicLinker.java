@@ -41,8 +41,8 @@ public interface GuardingDynamicLinker {
      * guard in the return value can be null. If the linker does not recognize
      * any native language runtime contexts in arguments, or does recognize its
      * own, but receives a call site descriptor without its recognized context
-     * in the arguments, it should invoke {@link LinkRequest#getNonNativeRequest()}
-     * and link for that.
+     * in the arguments, it should invoke
+     * {@link LinkRequest#getNonNativeRequest()} and link for that.
      * @throws Exception if the operation fails for whatever reason
      */
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,

@@ -137,6 +137,7 @@ public class BeanLinker implements GuardingDynamicLinker
     public GuardedInvocation getGuardedInvocation(LinkRequest request,
         final LinkerServices linkerServices)
     {
+        request = request.getNonNativeRequest();
         // BeansLinker already checked that the name is at least 2 elements
         // long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor =

@@ -40,36 +40,18 @@ public class DynamicLinkerImpl implements DynamicLinker {
     private static final long serialVersionUID = 1L;
 
     private final LinkerServices linkerServices;
-    private final MethodHandle beforeNonNativeInvocation;
     private final int nativeContextArgCount;
 
     /**
      * Creates a new master linker that delegates to a single guarding dynamic
      * linker (this is usually a {@link CompositeGuardingDynamicLinker} though.
      * @param linkerServices the linkerServices used by the linker
-     * @param beforeNonNativeInvocation see
-     * {@link DynamicLinkerFactory#setBeforeNonNativeInvocation(MethodHandle)}
      * @param nativeContextArgCount see
      * {@link DynamicLinkerFactory#setNativeContextArgCount(int)}
      */
     public DynamicLinkerImpl(final LinkerServices linkerServices,
-        final MethodHandle beforeNonNativeInvocation,
         final int nativeContextArgCount) {
-        if(beforeNonNativeInvocation != null) {
-            final MethodType type = beforeNonNativeInvocation.type();
-            if(type.returnType() != Void.TYPE) {
-                throw new IllegalArgumentException(
-                    "beforeNonNativeInvocation must return void");
-            }
-            if(type.parameterCount() == 0) {
-                throw new IllegalArgumentException(
-                    "beforeNonNativeInvocation must receive at least one arg");
-            }
-            this.nativeContextArgCount = type.parameterCount();
-        } else {
-            this.nativeContextArgCount = nativeContextArgCount;
-        }
-        this.beforeNonNativeInvocation = beforeNonNativeInvocation;
+        this.nativeContextArgCount = nativeContextArgCount;
         this.linkerServices = linkerServices;
     }
 
@@ -127,20 +109,19 @@ public class DynamicLinkerImpl implements DynamicLinker {
         // invocation.
         if(nativeContextArgCount > 0) {
             final MethodType origType = callSiteDescriptor.getMethodType();
+            final int paramCount = origType.parameterCount();
+            final int contextStart = paramCount - nativeContextArgCount;
             if(guardedInvocation.getInvocation().type().parameterCount() ==
-              origType.parameterCount() - nativeContextArgCount) {
+              contextStart) {
                 final List<Class<?>> prefix =
-                    origType.parameterList().subList(0, nativeContextArgCount);
-                MethodHandle invocation = MethodHandles.dropArguments(
-                    guardedInvocation.getInvocation(), 0, prefix);
-                if(beforeNonNativeInvocation != null) {
-                    invocation = MethodHandles.foldArguments(invocation,
-                        beforeNonNativeInvocation);
-                }
+                    origType.parameterList().subList(contextStart, paramCount);
                 final MethodHandle guard = guardedInvocation.getGuard();
-                guardedInvocation = new GuardedInvocation(invocation,
-                    guard == null ? null : MethodHandles.dropArguments(guard, 0,
-                        prefix));
+                guardedInvocation = new GuardedInvocation(
+                    MethodHandles.dropArguments(
+                        guardedInvocation.getInvocation(), contextStart,
+                        prefix), guard == null ? null :
+                          MethodHandles.dropArguments(guard, contextStart,
+                              prefix));
             }
         }
 
