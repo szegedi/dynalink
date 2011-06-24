@@ -53,7 +53,6 @@ public class BeansLinker implements GuardingDynamicLinker {
     public GuardedInvocation getGuardedInvocation(LinkRequest request,
             final LinkerServices linkerServices) throws Exception
     {
-        request = request.getNonNativeRequest();
         final Object[] arguments = request.getArguments();
         if(arguments == null || arguments.length == 0) {
             // Can't handle static calls; must have a receiver

@@ -24,7 +24,7 @@ import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.Lookup;
-import org.dynalang.dynalink.support.NativeContextLinkRequestImpl;
+import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
 
 /**
 /**
@@ -64,18 +64,18 @@ public class DynamicLinker {
     private static final long serialVersionUID = 1L;
 
     private final LinkerServices linkerServices;
-    private final int nativeContextArgCount;
+    private final int runtimeContextArgCount;
 
     /**
      * Creates a new master linker that delegates to a single guarding dynamic
      * linker (this is usually a {@link CompositeGuardingDynamicLinker} though.
      * @param linkerServices the linkerServices used by the linker
-     * @param nativeContextArgCount see
-     * {@link DynamicLinkerFactory#setNativeContextArgCount(int)}
+     * @param runtimeContextArgCount see
+     * {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
     public DynamicLinker(final LinkerServices linkerServices,
-        final int nativeContextArgCount) {
-        this.nativeContextArgCount = nativeContextArgCount;
+        final int runtimeContextArgCount) {
+        this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;
     }
 
@@ -120,10 +120,10 @@ public class DynamicLinker {
      */
     private Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor,
             RelinkableCallSite callSite, Object... arguments) throws Throwable {
-        final LinkRequest linkRequest = nativeContextArgCount == 0 ?
+        final LinkRequest linkRequest = runtimeContextArgCount == 0 ?
             new LinkRequestImpl(callSiteDescriptor, arguments) :
-            new NativeContextLinkRequestImpl(callSiteDescriptor, arguments,
-                nativeContextArgCount);
+            new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments,
+                runtimeContextArgCount);
         // Find a suitable method handle with a guard
         GuardedInvocation guardedInvocation =
             linkerServices.getGuardedInvocation(linkRequest);
@@ -133,13 +133,13 @@ public class DynamicLinker {
             throw new NoSuchDynamicMethodException();
         }
 
-        // If our call sites have a native context, and the linker produced a
-        // non-native invocation, adapt the produced invocation into native
-        // invocation.
-        if(nativeContextArgCount > 0) {
+        // If our call sites have a runtime context, and the linker produced a
+        // context-stripped invocation, adapt the produced invocation into
+        // contextual invocation (that drops the context...)
+        if(runtimeContextArgCount > 0) {
             final MethodType origType = callSiteDescriptor.getMethodType();
             final int paramCount = origType.parameterCount();
-            final int contextStart = paramCount - nativeContextArgCount;
+            final int contextStart = paramCount - runtimeContextArgCount;
             if(guardedInvocation.getInvocation().type().parameterCount() ==
               contextStart) {
                 final List<Class<?>> prefix =

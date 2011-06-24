@@ -88,7 +88,7 @@ public class TestBeansLinker extends TestCase
                 new Object()));
     }
 
-    private GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker,
+    private static GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker,
         CallSiteDescriptor descriptor, LinkerServices linkerServices, Object... args) throws Exception {
         return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args), linkerServices);
     }

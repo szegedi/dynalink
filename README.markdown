@@ -370,19 +370,20 @@ invoke the `setNativeContextArgCount` method on the `DynamicLinkerFactory` to
 make it aware that the last few arguments in your call sites are runtime
 context.
 
-In your `GuardingDynamicLinker` implementations, you should prepare for 
+In your `GuardingDynamicLinker` implementations, you should prepare for
 encountering both expected and unexpected context arguments in the link
 requests. If your runtime has a runtime context in the call sites, check for it,
-and link accordingly when you see it. If your linker is asked to link against a 
-call site that does not expose your expected context (or your linker does not 
-expect any runtime contexts at all), invoke `LinkRequest.asNonNative()` to 
-obtain a request with all runtime context arguments stripped and link against 
-that. The `DynamicLinker` implementation is smart enough to notice that your 
-linker returned a guarded invocation for a context-stripped link request, and 
-will successfully link it into the call site by dropping the context arguments.
+and link accordingly when you see it. If your linker is asked to link against a
+call site that does not expose your expected context (or your linker does not
+expect any runtime contexts at all), invoke
+`LinkRequest.withoutRuntimeContext()` to obtain a request with all runtime
+context arguments stripped and link against that. The `DynamicLinker`
+implementation is smart enough to notice that your linker returned a guarded
+invocation for a context-stripped link request, and will successfully link it
+into the call site by dropping the context arguments.
 
 Also prepare for a situation when your linker is invoked for linking a call site
 that is not emitted by your own language runtime, and does not have the context
-arguments in the link request. You will have to make sure that your objects' 
+arguments in the link request. You will have to make sure that your objects'
 methods are correctly invokable even in absence of the context -- they should be
 able to reacquire the context from a thread local when needed.

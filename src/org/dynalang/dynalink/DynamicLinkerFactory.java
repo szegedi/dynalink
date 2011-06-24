@@ -46,7 +46,7 @@ public class DynamicLinkerFactory {
         Thread.currentThread().getContextClassLoader();
     private List<? extends GuardingDynamicLinker> prioritizedLinkers;
     private List<? extends GuardingDynamicLinker> fallbackLinkers;
-    private int nativeContextArgCount = 0;
+    private int runtimeContextArgCount = 0;
 
     /**
      * Sets the class loader for automatic discovery of available linkers.
@@ -111,17 +111,17 @@ public class DynamicLinkerFactory {
 
     /**
      * Sets the number of trailing arguments in the call sites that represent
-     * the native context of the language runtime creating the linker. If the
-     * language runtime uses no native context information passed on stack,
-     * then it should be zero (the default value).
-     * @param nativeContextArgCount the number of trailing native context
-     * arguments in call sites.
+     * the stack context of the language runtime creating the linker. If the
+     * language runtime uses no context information passed on stack, then it
+     * should be zero (the default value).
+     * @param runtimeContextArgCount the number of trailing language runtime
+     * context arguments in call sites.
      */
-    public void setNativeContextArgCount(int nativeContextArgCount) {
-      if(nativeContextArgCount < 0) {
-          throw new IllegalArgumentException("nativeContextArgCount < 0");
+    public void setRuntimeContextArgCount(int runtimeContextArgCount) {
+      if(runtimeContextArgCount < 0) {
+          throw new IllegalArgumentException("runtimeContextArgCount < 0");
       }
-      this.nativeContextArgCount = nativeContextArgCount;
+      this.runtimeContextArgCount = runtimeContextArgCount;
     }
 
     /**
@@ -188,7 +188,7 @@ public class DynamicLinkerFactory {
         }
         return new DynamicLinker(new LinkerServicesImpl(
             new TypeConverterFactory(typeConverters), composite),
-            nativeContextArgCount);
+            runtimeContextArgCount);
     }
 
     private static void addClasses(
