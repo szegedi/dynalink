@@ -71,8 +71,8 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
             Iterable<? extends TypeBasedGuardingDynamicLinker> linkers) {
         final List<TypeBasedGuardingDynamicLinker> l =
                 new LinkedList<TypeBasedGuardingDynamicLinker>();
-        for(TypeBasedGuardingDynamicLinker resolver: linkers) {
-            l.add(resolver);
+        for(TypeBasedGuardingDynamicLinker linker: linkers) {
+            l.add(linker);
         }
         this.classToLinker =
                 new ClassToLinker(l

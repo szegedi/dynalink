@@ -145,8 +145,8 @@ public class DynamicLinkerFactory {
             fallbackLinkers = Collections.singletonList(new BeansLinker());
         }
 
-        // Gather classes of all precreated (prioritized and fallback) DIRs.
-        // We'll filter out any discovered DIRs of the same class.
+        // Gather classes of all precreated (prioritized and fallback) linkers.
+        // We'll filter out any discovered linkers of the same class.
         final Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses =
                 new HashSet<Class<? extends GuardingDynamicLinker>>();
         addClasses(knownLinkerClasses, prioritizedLinkers);
@@ -158,9 +158,9 @@ public class DynamicLinkerFactory {
         final List<GuardingDynamicLinker> linkers =
                 new ArrayList<GuardingDynamicLinker>(prioritizedLinkers.size()
                         + discovered.size() + fallbackLinkers.size());
-        // ... prioritized DIRs, ...
+        // ... prioritized linkers, ...
         linkers.addAll(prioritizedLinkers);
-        // ... filtered discovered DIRs, ...
+        // ... filtered discovered linkers, ...
         for(GuardingDynamicLinker linker: discovered) {
             if(!knownLinkerClasses.contains(linker.getClass())) {
                 linkers.add(linker);

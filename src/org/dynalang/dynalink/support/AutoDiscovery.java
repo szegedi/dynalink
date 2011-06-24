@@ -44,11 +44,11 @@ public class AutoDiscovery {
     }
 
     /**
-     * Discovers all dynamic invocation resolvers listed in JAR files of the
+     * Discovers all guarding dynamic linkers listed in JAR files of the
      * specified class loader.
      *
      * @param cl the class loader to use
-     * @return a list of DIRs available through the specified class loader. Can
+     * @return a list of guarding dynamic linkers available through the specified class loader. Can
      * be zero-length list but not null.
      */
     public static List<GuardingDynamicLinker> loadLinkers(ClassLoader cl) {
