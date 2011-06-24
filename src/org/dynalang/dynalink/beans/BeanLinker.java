@@ -34,6 +34,7 @@ import java.util.Map;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.Results;
 import org.dynalang.dynalink.beans.support.AccessibleMethodsLookup;
@@ -133,18 +134,19 @@ public class BeanLinker implements GuardingDynamicLinker
         throw new AssertionError();
     }
 
-    public GuardedInvocation getGuardedInvocation(
-            final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices,
-            final Object... arguments)
+    public GuardedInvocation getGuardedInvocation(LinkRequest request,
+        final LinkerServices linkerServices)
     {
         // BeansLinker already checked that the name is at least 2 elements
         // long and the first element is "dyn".
+        final CallSiteDescriptor callSiteDescriptor =
+            request.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getTokenizedName().get(1);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
         if("getProp".equals(op)) {
             return getPropertyGetter(callSiteDescriptor);
         }
+        final Object[] arguments = request.getArguments();
         // Either dyn:setProp:name(this, value) or dyn:setProp(this, name, value)
         if("setProp".equals(op)) {
             return getPropertySetter(callSiteDescriptor, linkerServices,

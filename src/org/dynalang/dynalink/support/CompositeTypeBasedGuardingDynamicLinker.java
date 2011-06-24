@@ -15,14 +15,13 @@
 */
 package org.dynalang.dynalink.support;
 
-import java.lang.ClassValue;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
 
@@ -78,11 +77,11 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
         return classToLinker.get(type) != BottomGuardingDynamicLinker.INSTANCE;
     }
 
-    public GuardedInvocation getGuardedInvocation(
-            final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices, final Object... arguments)
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
+            final LinkerServices linkerServices)
     throws Exception
     {
+        final Object[] arguments = linkRequest.getArguments();
         if(arguments.length == 0) {
             return null;
         }
@@ -91,7 +90,7 @@ implements TypeBasedGuardingDynamicLinker, Serializable {
             return null;
         }
         return classToLinker.get(obj.getClass()).getGuardedInvocation(
-            callSiteDescriptor, linkerServices, arguments);
+            linkRequest, linkerServices);
     }
 
     /**

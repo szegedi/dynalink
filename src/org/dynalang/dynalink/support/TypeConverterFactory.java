@@ -15,7 +15,6 @@
 */
 package org.dynalang.dynalink.support;
 
-import java.lang.ClassValue;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -23,9 +22,7 @@ import java.lang.invoke.WrongMethodTypeException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
 import org.dynalang.dynalink.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.beans.support.TypeUtilities;
@@ -65,35 +62,6 @@ public class TypeConverterFactory {
         }
         this.factories = l.toArray(new GuardingTypeConverterFactory[l.size()]);
 
-    }
-
-    /**
-     * Creates an implementation of {@link LinkerServices} that relies on this
-     * type converter factory.
-     * @param linker the top-level linker exposed by this linker services.
-     * @return an implementation of {@link LinkerServices}.
-     */
-    public LinkerServices createLinkerServices(final GuardingDynamicLinker linker) {
-        return new LinkerServices() {
-
-            public boolean canConvert(Class<?> from, Class<?> to) {
-                return TypeConverterFactory.this.canConvert(from, to);
-            }
-
-            public MethodHandle convertArguments(MethodHandle handle,
-                    MethodType fromType)
-            {
-                return TypeConverterFactory.this.convertArguments(handle,
-                        fromType);
-            }
-
-            @Override
-            public GuardedInvocation getGuardedInvocation(CallSiteDescriptor callSiteDescriptor,
-              Object... arguments) throws Exception {
-              return linker.getGuardedInvocation(callSiteDescriptor, this, arguments);
-            }
-
-        };
     }
 
     /**

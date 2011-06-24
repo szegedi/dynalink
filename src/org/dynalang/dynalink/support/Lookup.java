@@ -8,8 +8,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * A wrapper around MethodHandles.Lookup; accounts for lack of findSpecial() in
- * the backport.
+ * A wrapper around MethodHandles.Lookup that masks checked exceptions in those
+ * cases when you're looking up methods within your own codebase (therefore it
+ * is an error if they are not present).
  * @author Attila Szegedi
  * @version $Id: $
  */

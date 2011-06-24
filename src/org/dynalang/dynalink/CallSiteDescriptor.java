@@ -133,4 +133,16 @@ public class CallSiteDescriptor
         }
         return b.toString();
     }
+
+    /**
+     * Creates a new call site descriptor from this descriptor, which is
+     * identical to this, except it drops few of the initial arguments from the
+     * method type
+     * @param argCount the number of arguments to drop
+     * @return a new call site descriptor with the arguments dropped.
+     */
+    public CallSiteDescriptor dropArguments(int argCount) {
+      return new CallSiteDescriptor(name, tokenizedName,
+          methodType.dropParameterTypes(0, argCount));
+    }
 }

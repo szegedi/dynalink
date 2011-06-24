@@ -15,8 +15,8 @@
 */
 package org.dynalang.dynalink.support;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
 
@@ -43,9 +43,8 @@ implements TypeBasedGuardingDynamicLinker {
         return false;
     }
 
-    public GuardedInvocation getGuardedInvocation(
-            final CallSiteDescriptor callSitedescriptor,
-            final LinkerServices linkerServices, final Object... arguments)
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
+            LinkerServices linkerServices)
     {
         return null;
     }

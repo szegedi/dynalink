@@ -16,6 +16,8 @@ import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.GuardedInvocation;
+import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.support.LinkRequestImpl;
 
 public class TestLengthGetter extends TestCase
 {
@@ -31,12 +33,17 @@ public class TestLengthGetter extends TestCase
         testEarlyBoundArrayLengthGetter(String[].class);
     }
 
+    private static GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker,
+        CallSiteDescriptor descriptor, Object... args) throws Exception {
+        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args), null);
+    }
+
     private void testEarlyBoundArrayLengthGetter(Class<?> arrayClass) throws Throwable {
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd = new CallSiteDescriptor("dyn:getLength",
                 MethodType.methodType(int.class, arrayClass));
         final Object array = Array.newInstance(arrayClass.getComponentType(), 2);
-        final GuardedInvocation inv = bl.getGuardedInvocation(csd, null, array);
+        final GuardedInvocation inv = getGuardedInvocation(bl, csd, array);
         // early bound, as call site guarantees we'll pass an array
         assertNull(inv.getGuard());
         final MethodHandle mh = inv.getInvocation();
@@ -49,7 +56,7 @@ public class TestLengthGetter extends TestCase
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd = new CallSiteDescriptor("dyn:getLength",
                 MethodType.methodType(int.class, List.class));
-        final GuardedInvocation inv = bl.getGuardedInvocation(csd, null, Collections.EMPTY_LIST);
+        final GuardedInvocation inv = getGuardedInvocation(bl, csd, Collections.EMPTY_LIST);
         assertNull(inv.getGuard());
         final MethodHandle mh = inv.getInvocation();
         assertNotNull(mh);
@@ -62,7 +69,7 @@ public class TestLengthGetter extends TestCase
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd = new CallSiteDescriptor("dyn:getLength",
                 MethodType.methodType(int.class, Map.class));
-        final GuardedInvocation inv = bl.getGuardedInvocation(csd, null, Collections.EMPTY_MAP);
+        final GuardedInvocation inv = getGuardedInvocation(bl, csd, Collections.EMPTY_MAP);
         assertNull(inv.getGuard());
         final MethodHandle mh = inv.getInvocation();
         assertNotNull(mh);

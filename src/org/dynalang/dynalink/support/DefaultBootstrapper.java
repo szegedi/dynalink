@@ -1,6 +1,7 @@
 package org.dynalang.dynalink.support;
 
 import java.lang.invoke.CallSite;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.DynamicLinker;
@@ -21,7 +22,16 @@ public class DefaultBootstrapper {
     private static final DynamicLinker dynamicLinker =
         new DynamicLinkerFactory().createLinker();
 
-    public static CallSite bootstrap(Object caller, String name,
+    /**
+     * Use this method as your bootstrap method (see the documentation of the
+     * java.lang.invoke package for how to do this).
+     * @param caller the caller's lookup
+     * @param name the name of the method at the call site
+     * @param type the method signature at the call site
+     * @return a new {@link MonomorphicCallSite} linked with the default dynamic
+     * linker.
+     */
+    public static CallSite bootstrap(MethodHandles.Lookup caller, String name,
             MethodType type)
     {
         final RelinkableCallSite callSite = new MonomorphicCallSite(name, type);

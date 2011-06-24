@@ -16,14 +16,13 @@
 package org.dynalang.dynalink.beans;
 
 import java.beans.IntrospectionException;
-import java.lang.BootstrapMethodError;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 
 /**
@@ -51,17 +50,17 @@ public class BeansLinker implements GuardingDynamicLinker {
     public BeansLinker() {
     }
 
-    public GuardedInvocation getGuardedInvocation(
-            final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices,
-            final Object... arguments) throws Exception
+    public GuardedInvocation getGuardedInvocation(LinkRequest request,
+            final LinkerServices linkerServices) throws Exception
     {
+        request = request.getNonNativeRequest();
+        final Object[] arguments = request.getArguments();
         if(arguments == null || arguments.length == 0) {
             // Can't handle static calls; must have a receiver
             return null;
         }
 
-        final List<String> name = callSiteDescriptor.getTokenizedName();
+        final List<String> name = request.getCallSiteDescriptor().getTokenizedName();
         final int l = name.size();
         // All names conforming to the dynalang MOP should be prefixed by "dyn:"
         if(l < 1 || !"dyn".equals(name.get(0))) {
@@ -79,7 +78,7 @@ public class BeansLinker implements GuardingDynamicLinker {
             return null;
         }
 
-        return linkers.get(receiver.getClass()).getGuardedInvocation(
-                callSiteDescriptor, linkerServices, arguments);
+        return linkers.get(receiver.getClass()).getGuardedInvocation(request,
+            linkerServices);
     }
 }

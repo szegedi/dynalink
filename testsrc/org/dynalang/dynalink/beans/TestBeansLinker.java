@@ -24,7 +24,10 @@ import junit.framework.TestCase;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
+import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.support.LinkRequestImpl;
 
 /**
  * Tests {@link BeansLinker} corner cases not exercised by other tests.
@@ -54,43 +57,47 @@ public class TestBeansLinker extends TestCase
                 throw new AssertionFailedError();
             }
 
-            public GuardedInvocation getGuardedInvocation(CallSiteDescriptor callSiteDescriptor,
-                Object... arguments) throws Exception {
+            public GuardedInvocation getGuardedInvocation(LinkRequest lreq) throws Exception {
                 throw new AssertionFailedError();
             }
 
         };
 
         // Can't link with null arguments
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE)), ls, (Object[])null));
 
         // Can't link with zero arguments
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE)), ls, new Object[0]));
 
         // Can't link with single null argument
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object[] { null }));
 
         // Can't link with name that has less than two components
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor("",
+        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor("",
                 MethodType.methodType(Void.TYPE, Object.class)), ls, new Object()));
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor("foo",
+        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor("foo",
                 MethodType.methodType(Void.TYPE, Object.class)), ls, new Object()));
 
         // Can't link with name that doesn't start with dyn:
-        assertNull(linker.getGuardedInvocation(new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
                 "dynx:foo", MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object()));
+    }
+
+    private GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker,
+        CallSiteDescriptor descriptor, LinkerServices linkerServices, Object... args) throws Exception {
+        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args), linkerServices);
     }
 
     public void testInvalidName() throws Exception
     {
         try
         {
-            new BeansLinker().getGuardedInvocation(new CallSiteDescriptor(
+            getGuardedInvocation(new BeansLinker(), new CallSiteDescriptor(
                     "dyn", MethodType.methodType(int.class)), null, new Object[1]);
             fail();
         }

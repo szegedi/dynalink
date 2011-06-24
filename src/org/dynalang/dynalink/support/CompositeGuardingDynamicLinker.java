@@ -19,9 +19,9 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 
 /**
@@ -52,14 +52,13 @@ implements GuardingDynamicLinker, Serializable {
         this.linkers = l.toArray(new GuardingDynamicLinker[l.size()]);
     }
 
-    public GuardedInvocation getGuardedInvocation(
-            final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices, final Object... arguments)
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
+            final LinkerServices linkerServices)
     throws Exception
     {
         for (final GuardingDynamicLinker linker : linkers) {
             final GuardedInvocation invocation = linker.getGuardedInvocation(
-                    callSiteDescriptor, linkerServices, arguments);
+                    linkRequest, linkerServices);
             if(invocation != null) {
                 return invocation;
             }

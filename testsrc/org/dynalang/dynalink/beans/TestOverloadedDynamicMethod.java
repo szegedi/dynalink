@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 
 /**
@@ -41,8 +42,8 @@ public class TestOverloadedDynamicMethod extends TestCase
     {
         super.setUp();
         linker = new BeanLinker(Test1.class);
-        linkerServices = new TypeConverterFactory(
-            new LinkedList<GuardingTypeConverterFactory>()).createLinkerServices(linker);
+        linkerServices = new LinkerServicesImpl(new TypeConverterFactory(
+            new LinkedList<GuardingTypeConverterFactory>()), linker);
     }
 
     public void testNoneMatchSignature()

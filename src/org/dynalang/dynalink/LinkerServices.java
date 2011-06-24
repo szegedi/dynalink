@@ -64,14 +64,12 @@ public interface LinkerServices {
      * Creates a guarded invocation using the top-level linker associated with
      * this linker services. Linkers can typically use them to delegate linking
      * of wrapped objects.
-     * @param callSiteDescriptor the descriptor of the call site
-     * @param arguments the arguments for the invocation
+     * @param linkRequest a request for linking the invocation
      * @return a guarded invocation linked by the top-level linker (or any of its
      * delegates). Can be null if no available linker is able to link the
      * invocation.
      * @throws Exception in case the top-level linker throws an exception
      */
-    public GuardedInvocation getGuardedInvocation(
-        CallSiteDescriptor callSiteDescriptor, Object... arguments)
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest)
     throws Exception;
 }

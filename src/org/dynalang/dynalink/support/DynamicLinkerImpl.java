@@ -18,12 +18,13 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.List;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.NoSuchDynamicMethodException;
 import org.dynalang.dynalink.RelinkableCallSite;
@@ -39,16 +40,37 @@ public class DynamicLinkerImpl implements DynamicLinker {
     private static final long serialVersionUID = 1L;
 
     private final LinkerServices linkerServices;
+    private final MethodHandle beforeNonNativeInvocation;
+    private final int nativeContextArgCount;
+
     /**
      * Creates a new master linker that delegates to a single guarding dynamic
      * linker (this is usually a {@link CompositeGuardingDynamicLinker} though.
-     * @param guardingDynamicLinker the delegate guarding linker.
-     * @param typeConverterFactory the type converter factory used for creating
-     * type converters.
+     * @param linkerServices the linkerServices used by the linker
+     * @param beforeNonNativeInvocation see
+     * {@link DynamicLinkerFactory#setBeforeNonNativeInvocation(MethodHandle)}
+     * @param nativeContextArgCount see
+     * {@link DynamicLinkerFactory#setNativeContextArgCount(int)}
      */
-    public DynamicLinkerImpl(GuardingDynamicLinker guardingDynamicLinker,
-            final TypeConverterFactory typeConverterFactory) {
-        linkerServices = typeConverterFactory.createLinkerServices(guardingDynamicLinker);
+    public DynamicLinkerImpl(final LinkerServices linkerServices,
+        final MethodHandle beforeNonNativeInvocation,
+        final int nativeContextArgCount) {
+        if(beforeNonNativeInvocation != null) {
+            final MethodType type = beforeNonNativeInvocation.type();
+            if(type.returnType() != Void.TYPE) {
+                throw new IllegalArgumentException(
+                    "beforeNonNativeInvocation must return void");
+            }
+            if(type.parameterCount() == 0) {
+                throw new IllegalArgumentException(
+                    "beforeNonNativeInvocation must receive at least one arg");
+            }
+            this.nativeContextArgCount = type.parameterCount();
+        } else {
+            this.nativeContextArgCount = nativeContextArgCount;
+        }
+        this.beforeNonNativeInvocation = beforeNonNativeInvocation;
+        this.linkerServices = linkerServices;
     }
 
     public void link(final RelinkableCallSite callSite) {
@@ -87,13 +109,39 @@ public class DynamicLinkerImpl implements DynamicLinker {
      */
     public Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor,
             RelinkableCallSite callSite, Object... arguments) throws Throwable {
+        final LinkRequest linkRequest = nativeContextArgCount == 0 ?
+            new LinkRequestImpl(callSiteDescriptor, arguments) :
+            new NativeContextLinkRequestImpl(callSiteDescriptor, arguments,
+                nativeContextArgCount);
         // Find a suitable method handle with a guard
-        final GuardedInvocation guardedInvocation =
-          linkerServices.getGuardedInvocation(callSiteDescriptor, arguments);
+        GuardedInvocation guardedInvocation =
+            linkerServices.getGuardedInvocation(linkRequest);
 
         // None found - throw an exception
         if(guardedInvocation == null) {
             throw new NoSuchDynamicMethodException();
+        }
+
+        // If our call sites have a native context, and the linker produced a
+        // non-native invocation, adapt the produced invocation into native
+        // invocation.
+        if(nativeContextArgCount > 0) {
+            final MethodType origType = callSiteDescriptor.getMethodType();
+            if(guardedInvocation.getInvocation().type().parameterCount() ==
+              origType.parameterCount() - nativeContextArgCount) {
+                final List<Class<?>> prefix =
+                    origType.parameterList().subList(0, nativeContextArgCount);
+                MethodHandle invocation = MethodHandles.dropArguments(
+                    guardedInvocation.getInvocation(), 0, prefix);
+                if(beforeNonNativeInvocation != null) {
+                    invocation = MethodHandles.foldArguments(invocation,
+                        beforeNonNativeInvocation);
+                }
+                final MethodHandle guard = guardedInvocation.getGuard();
+                guardedInvocation = new GuardedInvocation(invocation,
+                    guard == null ? null : MethodHandles.dropArguments(guard, 0,
+                        prefix));
+            }
         }
 
         // Allow the call site to relink and execute its inline caching

@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.GuardedInvocation;
+import org.dynalang.dynalink.LinkRequest;
 import org.dynalang.dynalink.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
 
@@ -77,8 +78,8 @@ public class TestSimpleDynamicMethod extends TestCase {
             return false;
         }
 
-        public GuardedInvocation getGuardedInvocation(CallSiteDescriptor callSiteDescriptor,
-            Object... arguments) throws Exception {
+        @Override
+        public GuardedInvocation getGuardedInvocation(LinkRequest lreq) throws Exception {
             fail(); // Not supposed to be called
             return null;
         }
