@@ -15,7 +15,6 @@
 */
 package org.dynalang.dynalink;
 
-import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,7 +27,6 @@ import org.dynalang.dynalink.support.AutoDiscovery;
 import org.dynalang.dynalink.support.BottomGuardingDynamicLinker;
 import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;
 import org.dynalang.dynalink.support.CompositeTypeBasedGuardingDynamicLinker;
-import org.dynalang.dynalink.support.DynamicLinkerImpl;
 import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 
@@ -188,7 +186,7 @@ public class DynamicLinkerFactory {
                 typeConverters.add((GuardingTypeConverterFactory)linker);
             }
         }
-        return new DynamicLinkerImpl(new LinkerServicesImpl(
+        return new DynamicLinker(new LinkerServicesImpl(
             new TypeConverterFactory(typeConverters), composite),
             nativeContextArgCount);
     }
