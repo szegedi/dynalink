@@ -379,8 +379,7 @@ public class BeanLinker implements GuardingDynamicLinker {
         if(dynaMethod == null) {
             return null;
         }
-        return dynaMethod == null ? null : dynaMethod.getInvocation(
-                callSiteDescriptor, linkerServices);
+        return dynaMethod.getInvocation(callSiteDescriptor, linkerServices);
     }
 
     private GuardedInvocation getPropertySetter(
