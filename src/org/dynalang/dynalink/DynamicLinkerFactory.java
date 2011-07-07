@@ -17,6 +17,7 @@
 package org.dynalang.dynalink;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -80,6 +81,20 @@ public class DynamicLinkerFactory {
                 prioritizedLinkers == null ? null
                         : new ArrayList<GuardingDynamicLinker>(
                                 prioritizedLinkers);
+    }
+
+    /**
+     * Sets the prioritized linkers. Language runtimes using this framework will
+     * usually precreate at least the linker for their own language. These
+     * linkers will be consulted first in the resulting master linker, before
+     * any autodiscovered linkers. If the framework also autodiscovers a linker
+     * of the same class as one of the prioritized linkers, it will be ignored
+     * and the explicit prioritized instance will be used.
+     *
+     * @param prioritizedLinkers a list of prioritized linkers.
+     */
+    public void setPrioritizedLinkers(GuardingDynamicLinker... prioritizedLinkers) {
+        setPrioritizedLinkers(Arrays.asList(prioritizedLinkers));
     }
 
     /**
