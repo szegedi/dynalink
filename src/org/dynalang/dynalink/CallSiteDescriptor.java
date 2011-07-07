@@ -30,6 +30,10 @@ import java.util.StringTokenizer;
  * @version $Id: $
  */
 public class CallSiteDescriptor {
+
+    private static final String TOKEN_DELIMITER = ":";
+    private static final char TOKEN_DELIMITER_CHAR = ':';
+
     private final String[] tokenizedName;
     private final MethodType methodType;
     private final Lookup lookup;
@@ -78,6 +82,22 @@ public class CallSiteDescriptor {
             throw new IllegalArgumentException(e.getMessage());
         }
     }
+
+    /**
+     * Returns the name of the method at the call site. Note that the object
+     * internally only stores the tokenized name, and has to reconstruct the
+     * full name from tokens on each invocation.
+     * @return the name of the method at the call site.
+     */
+    public String getName() {
+        final StringBuilder b = new StringBuilder(8*tokenizedName.length);
+        b.append(tokenizedName[0]);
+        for(int i = 1; i < tokenizedName.length; ++i) {
+            b.append(TOKEN_DELIMITER_CHAR).append(tokenizedName[i]);
+        }
+        return b.toString();
+    }
+
     /**
      * The type of the method at the call site.
      *
@@ -96,13 +116,13 @@ public class CallSiteDescriptor {
      */
     public void assertParameterCount(int count) {
         if(methodType.parameterCount() != count) {
-            throw new BootstrapMethodError(tokenizedName
-                    + " must have exactly " + count + " parameters");
+            throw new BootstrapMethodError(getName() + " must have exactly " +
+                    count + " parameters");
         }
     }
 
     private static String[] tokenizeName(String name) {
-        final StringTokenizer tok = new StringTokenizer(name, ":");
+        final StringTokenizer tok = new StringTokenizer(name, TOKEN_DELIMITER);
         final String[] tokens = new String[tok.countTokens()];
         for(int i = 0; i < tokens.length; ++i) {
             tokens[i] = tok.nextToken().intern();
