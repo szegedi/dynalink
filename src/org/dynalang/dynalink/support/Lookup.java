@@ -43,9 +43,6 @@ public class Lookup {
         this.lookup = lookup;
     }
 
-    static {
-        MethodHandles.lookup();
-    }
     public static final Lookup PUBLIC =
             new Lookup(MethodHandles.publicLookup());
 
