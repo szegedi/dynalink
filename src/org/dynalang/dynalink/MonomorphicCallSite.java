@@ -18,6 +18,7 @@ package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.MethodHandles.Lookup;
 
 import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 
@@ -30,12 +31,12 @@ import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 public class MonomorphicCallSite extends AbstractRelinkableCallSite {
     /**
      * Creates a new call site with monomorphic inline caching strategy.
-     *
+     * @param lookup the lookup for the caller class
      * @param name the name of the method at the call site
      * @param type the method type of the call site
      */
-    public MonomorphicCallSite(String name, MethodType type) {
-        super(name, type);
+    public MonomorphicCallSite(Lookup lookup, String name, MethodType type) {
+        super(lookup, name, type);
     }
 
     @Override

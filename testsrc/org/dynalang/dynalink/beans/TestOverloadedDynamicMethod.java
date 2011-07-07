@@ -16,6 +16,8 @@
 
 package org.dynalang.dynalink.beans;
 
+import static org.dynalang.dynalink.beans.TestBeansLinker.createCallSiteDescriptor;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.LinkedList;
@@ -51,12 +53,12 @@ public class TestOverloadedDynamicMethod extends TestCase {
         assertTrue(dm instanceof OverloadedDynamicMethod);
 
         // No zero-arg adds
-        assertNull(dm.getInvocation(new CallSiteDescriptor("add", MethodType
+        assertNull(dm.getInvocation(createCallSiteDescriptor("add", MethodType
                 .methodType(int.class, Object.class)), null));
 
         // No single-arg String add
         MethodHandle inv =
-                dm.getInvocation(new CallSiteDescriptor("add", MethodType
+                dm.getInvocation(createCallSiteDescriptor("add", MethodType
                         .methodType(String.class, Object.class, String.class)),
                         linkerServices);
         assertNull(String.valueOf(inv), inv);
@@ -66,7 +68,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
         final CallSiteDescriptor cs =
-                new CallSiteDescriptor("add", MethodType.methodType(
+                createCallSiteDescriptor("add", MethodType.methodType(
                         String.class, Object.class, String.class, String.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
@@ -84,7 +86,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
         final CallSiteDescriptor cs =
-                new CallSiteDescriptor("add", MethodType.methodType(
+                createCallSiteDescriptor("add", MethodType.methodType(
                         Object.class, Object.class, Object.class, Object.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);

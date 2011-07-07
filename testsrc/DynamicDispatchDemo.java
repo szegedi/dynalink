@@ -41,7 +41,7 @@ public class DynamicDispatchDemo {
 
     public static CallSite bootstrap(MethodHandles.Lookup lookup, String name,
             MethodType callSiteType) {
-        final CallSite cs = new MonomorphicCallSite(name, callSiteType);
+        final CallSite cs = new MonomorphicCallSite(lookup, name, callSiteType);
         MethodHandle boundInvoker =
                 MethodHandles.insertArguments(INVOKE_DYNAMICALLY, 0, cs);
         MethodHandle collectedArgsInvoker =

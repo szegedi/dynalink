@@ -2,6 +2,7 @@ package org.dynalang.dynalink.support;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.SwitchPoint;
@@ -13,7 +14,7 @@ import org.dynalang.dynalink.RelinkableCallSite;
 /**
  * A basic implementation of the {@link RelinkableCallSite} as a
  * {@link MutableCallSite} subclass.
- * 
+ *
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -24,15 +25,14 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite
 
     /**
      * Creates a new relinkable call site.
-     * 
-     * @param name
-     *            the name of the method at the call site
-     * @param type
-     *            the method type of the call site
+     * @param lookup the lookup for the caller class
+     * @param name the name of the method at the call site
+     * @param type the method type of the call site
      */
-    protected AbstractRelinkableCallSite(String name, MethodType type) {
+    protected AbstractRelinkableCallSite(Lookup lookup, String name,
+            MethodType type) {
         super(type);
-        callSiteDescriptor = new CallSiteDescriptor(name, type);
+        callSiteDescriptor = new CallSiteDescriptor(lookup, name, type);
     }
 
     @Override
@@ -50,7 +50,7 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite
 
     /**
      * Returns the relink method handle
-     * 
+     *
      * @return the method handle for relinking this call site.
      */
     protected MethodHandle getRelink() {
@@ -88,7 +88,7 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite
     /**
      * Implement this method to specify the fallback method handle when a guard
      * fails.
-     * 
+     *
      * @return the fallback method handle
      */
     protected abstract MethodHandle getGuardFallback();
@@ -96,7 +96,7 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite
     /**
      * Implement this method to specify the fallback method handle when a method
      * handle is invalidated by a switch point.
-     * 
+     *
      * @return the fallback method handle for switch point invalidation.
      */
     protected abstract MethodHandle getSwitchPointFallback();

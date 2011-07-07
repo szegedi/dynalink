@@ -1,5 +1,7 @@
 package org.dynalang.dynalink.beans;
 
+import static org.dynalang.dynalink.beans.TestBeansLinker.createCallSiteDescriptor;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
@@ -43,7 +45,7 @@ public class TestLengthGetter extends TestCase {
             throws Throwable {
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd =
-                new CallSiteDescriptor("dyn:getLength", MethodType.methodType(
+                createCallSiteDescriptor("dyn:getLength", MethodType.methodType(
                         int.class, arrayClass));
         final Object array =
                 Array.newInstance(arrayClass.getComponentType(), 2);
@@ -59,7 +61,7 @@ public class TestLengthGetter extends TestCase {
     public void testEarlyBoundCollectionLengthGetter() throws Throwable {
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd =
-                new CallSiteDescriptor("dyn:getLength", MethodType.methodType(
+                createCallSiteDescriptor("dyn:getLength", MethodType.methodType(
                         int.class, List.class));
         final GuardedInvocation inv =
                 getGuardedInvocation(bl, csd, Collections.EMPTY_LIST);
@@ -76,7 +78,7 @@ public class TestLengthGetter extends TestCase {
     public void testEarlyBoundMapLengthGetter() throws Throwable {
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd =
-                new CallSiteDescriptor("dyn:getLength", MethodType.methodType(
+                createCallSiteDescriptor("dyn:getLength", MethodType.methodType(
                         int.class, Map.class));
         final GuardedInvocation inv =
                 getGuardedInvocation(bl, csd, Collections.EMPTY_MAP);

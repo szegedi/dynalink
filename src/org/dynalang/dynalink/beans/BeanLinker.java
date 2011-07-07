@@ -157,7 +157,7 @@ public class BeanLinker implements GuardingDynamicLinker {
                     arguments);
         }
         // Either dyn:callPropWithThis:name(this[,args]) or
-        // dyn:callPropWithThis(name,this,[,args]).
+        // dyn:callPropWithThis(this,name[,args]).
         if("callPropWithThis".equals(op)) {
             return getCallPropWithThis(callSiteDescriptor, linkerServices,
                     arguments);
@@ -396,8 +396,7 @@ public class BeanLinker implements GuardingDynamicLinker {
                 // argument. This is used for embedded overloaded method
                 // lookup.
                 final CallSiteDescriptor newDescriptor =
-                        new CallSiteDescriptor(callSiteDescriptor.getName(),
-                                type.dropParameterTypes(1, 2));
+                    callSiteDescriptor.dropParameterTypes(1, 2);
                 return new GuardedInvocation(MethodHandles.insertArguments(
                         SET_PROPERTY_WITH_VARIABLE_ID, 0, newDescriptor,
                         linkerServices).asType(type), Guards.isOfClass(clazz,

@@ -36,8 +36,7 @@ public class TestRelinkableCallSite extends TestCase {
      */
     public void testNullRelink() {
         try {
-            new MonomorphicCallSite("", MethodType.methodType(Void.TYPE))
-                    .setRelink(null);
+            createCallSite(MethodType.methodType(Void.TYPE)).setRelink(null);
             fail();
         } catch(IllegalArgumentException e) {
             // This is expected
@@ -48,8 +47,8 @@ public class TestRelinkableCallSite extends TestCase {
      * Tests against allowing relink to be called twice.
      */
     public void testRelinkSetTwice() {
-        RelinkableCallSite cs =
-                new MonomorphicCallSite("", MethodType.methodType(Object.class));
+        RelinkableCallSite cs = createCallSite(MethodType.methodType(
+                Object.class));
         cs.setRelink(MethodHandles.constant(Object.class, new Object()));
         try {
             cs.setRelink(MethodHandles.constant(Object.class, new Object()));
@@ -57,5 +56,9 @@ public class TestRelinkableCallSite extends TestCase {
         } catch(IllegalStateException e) {
             // This is expected
         }
+    }
+
+    private static MonomorphicCallSite createCallSite(MethodType type) {
+        return new MonomorphicCallSite(null, "", type);
     }
 }

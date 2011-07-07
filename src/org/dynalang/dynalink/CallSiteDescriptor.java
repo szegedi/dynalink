@@ -17,6 +17,7 @@
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodType;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,21 +36,24 @@ public class CallSiteDescriptor {
     private final List<String> tokenizedName;
     private final String name;
     private final MethodType methodType;
+    private final Lookup lookup;
 
     /**
      * Create a new call site descriptor from explicit information.
+     * @param lookup the lookup for the class at the call site
      * @param name the name of the method
      * @param methodType the method type
      */
-    public CallSiteDescriptor(String name, MethodType methodType) {
-        this(name, tokenizeName(name), methodType);
+    public CallSiteDescriptor(Lookup lookup, String name, MethodType methodType) {
+        this(lookup, name, tokenizeName(name), methodType);
     }
 
-    private CallSiteDescriptor(String name, List<String> tokenizedName,
-            MethodType methodType) {
+    private CallSiteDescriptor(Lookup lookup, String name,
+            List<String> tokenizedName, MethodType methodType) {
         this.name = name;
         this.tokenizedName = Collections.unmodifiableList(tokenizedName);
         this.methodType = methodType;
+        this.lookup = lookup;
     }
 
     /**
@@ -107,20 +111,20 @@ public class CallSiteDescriptor {
 
     /**
      * Creates a new call site descriptor from this descriptor, which is
-     * identical to this, except it drops few of the trailing arguments from the
-     * method type
+     * identical to this, except it drops few of the arguments from the method
+     * type
      *
-     * @param argCount the number of arguments to drop
+     * @param from the index of the first arguments to drop
+     * @param to the index of the first arguments after "from" not to drop
      * @return a new call site descriptor with the arguments dropped.
      */
-    public CallSiteDescriptor dropArguments(int argCount) {
-        final int paramCount = methodType.parameterCount();
-        return new CallSiteDescriptor(name, tokenizedName, methodType
-                .dropParameterTypes(paramCount - argCount, paramCount));
+    public CallSiteDescriptor dropParameterTypes(int from, int to) {
+        return new CallSiteDescriptor(lookup, name, tokenizedName, methodType
+                        .dropParameterTypes(from, to));
     }
 
     public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return new CallSiteDescriptor(name, tokenizedName, methodType
-                .changeParameterType(num, newType));
+        return new CallSiteDescriptor(lookup, name, tokenizedName, methodType
+                        .changeParameterType(num, newType));
     }
 }

@@ -17,6 +17,7 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.BootstrapMethodError;
 
@@ -63,29 +64,29 @@ public class TestBeansLinker extends TestCase {
         };
 
         // Can't link with null arguments
-        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, createCallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE)), ls,
                 (Object[])null));
 
         // Can't link with zero arguments
-        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, createCallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE)), ls, new Object[0]));
 
         // Can't link with single null argument
-        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, createCallSiteDescriptor(
                 "dyn:foo", MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object[] { null }));
 
         // Can't link with name that has less than two components
-        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor("",
+        assertNull(getGuardedInvocation(linker, createCallSiteDescriptor("",
                 MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object()));
-        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor("foo",
+        assertNull(getGuardedInvocation(linker, createCallSiteDescriptor("foo",
                 MethodType.methodType(Void.TYPE, Object.class)), ls,
                 new Object()));
 
         // Can't link with name that doesn't start with dyn:
-        assertNull(getGuardedInvocation(linker, new CallSiteDescriptor(
+        assertNull(getGuardedInvocation(linker, createCallSiteDescriptor(
                 "dynx:foo", MethodType.methodType(Void.TYPE, Object.class)),
                 ls, new Object()));
     }
@@ -99,13 +100,18 @@ public class TestBeansLinker extends TestCase {
 
     public void testInvalidName() throws Exception {
         try {
-            getGuardedInvocation(new BeansLinker(), new CallSiteDescriptor(
+            getGuardedInvocation(new BeansLinker(), createCallSiteDescriptor(
                     "dyn", MethodType.methodType(int.class)), null,
                     new Object[1]);
             fail();
         } catch(BootstrapMethodError e) {
             // ignored - it is supposed to fail
         }
+    }
+
+    public static  CallSiteDescriptor createCallSiteDescriptor(String name,
+            MethodType methodType) {
+        return new CallSiteDescriptor(MethodHandles.publicLookup(), name, methodType);
     }
 
 }
