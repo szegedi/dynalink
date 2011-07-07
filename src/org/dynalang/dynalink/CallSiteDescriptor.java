@@ -17,13 +17,9 @@
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodType;
-import java.lang.BootstrapMethodError;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 /**
@@ -42,18 +38,6 @@ public class CallSiteDescriptor {
 
     /**
      * Create a new call site descriptor from explicit information.
-     *
-     * @param tokenizedName the tokenized name of the method
-     * @param methodType the method type
-     */
-    public CallSiteDescriptor(List<String> tokenizedName, MethodType methodType) {
-        this(untokenizeName(tokenizedName), internElements(tokenizedName),
-                methodType);
-    }
-
-    /**
-     * Create a new call site descriptor from explicit information.
-     *
      * @param name the name of the method
      * @param methodType the method type
      */
@@ -119,26 +103,6 @@ public class CallSiteDescriptor {
         }
         lname.trimToSize();
         return lname;
-    }
-
-    private static List<String> internElements(Collection<String> list) {
-        final List<String> l = new ArrayList<String>(list);
-        for(ListIterator<String> it = l.listIterator(); it.hasNext();) {
-            it.set(it.next().intern());
-        }
-        return l;
-    }
-
-    private static String untokenizeName(List<String> l) {
-        final StringBuilder b = new StringBuilder();
-        final Iterator<String> it = l.iterator();
-        if(it.hasNext()) {
-            b.append(it.next());
-            while(it.hasNext()) {
-                b.append(':').append(it.next());
-            }
-        }
-        return b.toString();
     }
 
     /**
