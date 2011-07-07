@@ -20,6 +20,7 @@ import java.beans.IntrospectionException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.GuardingDynamicLinker;
@@ -60,17 +61,13 @@ public class BeansLinker implements GuardingDynamicLinker {
             return null;
         }
 
-        final List<String> name =
-                request.getCallSiteDescriptor().getTokenizedName();
-        final int l = name.size();
-        // All names conforming to the dynalang MOP should be prefixed by "dyn:"
-        if(l < 1 || !"dyn".equals(name.get(0))) {
+        final CallSiteDescriptor callSiteDescriptor =
+            request.getCallSiteDescriptor();
+        final int l = callSiteDescriptor.getNameTokenCount();
+        // All names conforming to the dynalang MOP should have at least two
+        // tokens, the first one being "dyn"
+        if(l < 2 || !"dyn".equals(callSiteDescriptor.getNameToken(0))) {
             return null;
-        }
-
-        // Every name should be in at least the "dyn:<op>" form
-        if(l < 2) {
-            throw new BootstrapMethodError("Invalid name " + name);
         }
 
         final Object receiver = arguments[0];

@@ -18,9 +18,6 @@ package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodType;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -33,8 +30,7 @@ import java.util.StringTokenizer;
  * @version $Id: $
  */
 public class CallSiteDescriptor {
-    private final List<String> tokenizedName;
-    private final String name;
+    private final String[] tokenizedName;
     private final MethodType methodType;
     private final Lookup lookup;
 
@@ -45,17 +41,43 @@ public class CallSiteDescriptor {
      * @param methodType the method type
      */
     public CallSiteDescriptor(Lookup lookup, String name, MethodType methodType) {
-        this(lookup, name, tokenizeName(name), methodType);
+        this(lookup, tokenizeName(name), methodType);
     }
 
-    private CallSiteDescriptor(Lookup lookup, String name,
-            List<String> tokenizedName, MethodType methodType) {
-        this.name = name;
-        this.tokenizedName = Collections.unmodifiableList(tokenizedName);
+    private CallSiteDescriptor(Lookup lookup, String[] tokenizedName,
+            MethodType methodType) {
+        this.tokenizedName = tokenizedName;
         this.methodType = methodType;
         this.lookup = lookup;
     }
 
+    /**
+     * Returns the number of tokens in the name of the method at the call site.
+     * Method names are tokenized with the colon ":" character.
+     * @return the number of tokens in the name of the method at the call site.
+     */
+    public int getNameTokenCount() {
+        return tokenizedName.length;
+    }
+
+    /**
+     * Returns the <i>i<sup>th</sup></i> token in the method name at the call
+     * site. Method names are tokenized with the colon ":" character.
+     * @param i the index of the token. Must be between 0 (inclusive) and
+     * {@link #getNameTokenCount()} (exclusive)
+     * @throws IllegalArgumentException if the index is outside the allowed
+     * range.
+     * @return the <i>i<sup>th</sup></i> token in the method name at the call
+     * site.
+     */
+    public String getNameToken(int i) {
+        try {
+            return tokenizedName[i];
+        }
+        catch(ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
     /**
      * The type of the method at the call site.
      *
@@ -63,26 +85,6 @@ public class CallSiteDescriptor {
      */
     public MethodType getMethodType() {
         return methodType;
-    }
-
-    /**
-     * Returns the tokenized name of the method at the call site.
-     *
-     * @return name of the method at the call site. Returned is an unmodifiable
-     * list of interned strings representing the name tokenized at colon ":"
-     * characters.
-     */
-    public List<String> getTokenizedName() {
-        return tokenizedName;
-    }
-
-    /**
-     * Returns the untokenized name of the method at the call site.
-     *
-     * @return name of the method at the call site.
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -99,32 +101,41 @@ public class CallSiteDescriptor {
         }
     }
 
-    private static List<String> tokenizeName(String name) {
-        final ArrayList<String> lname = new ArrayList<String>(3);
+    private static String[] tokenizeName(String name) {
         final StringTokenizer tok = new StringTokenizer(name, ":");
-        while(tok.hasMoreTokens()) {
-            lname.add(tok.nextToken().intern());
+        final String[] tokens = new String[tok.countTokens()];
+        for(int i = 0; i < tokens.length; ++i) {
+            tokens[i] = tok.nextToken().intern();
         }
-        lname.trimToSize();
-        return lname;
+        return tokens;
     }
 
     /**
      * Creates a new call site descriptor from this descriptor, which is
-     * identical to this, except it drops few of the arguments from the method
-     * type
+     * identical to this, except it drops few of the parameters from the method
+     * type.
      *
-     * @param from the index of the first arguments to drop
-     * @param to the index of the first arguments after "from" not to drop
-     * @return a new call site descriptor with the arguments dropped.
+     * @param from the index of the first parameter to drop
+     * @param to the index of the first parameter after "from" not to drop
+     * @return a new call site descriptor with the parameter dropped.
      */
     public CallSiteDescriptor dropParameterTypes(int from, int to) {
-        return new CallSiteDescriptor(lookup, name, tokenizedName, methodType
+        return new CallSiteDescriptor(lookup, tokenizedName, methodType
                         .dropParameterTypes(from, to));
     }
 
+    /**
+     * Creates a new call site descriptor from this descriptor, which is
+     * identical to this, except it changes the type of one of the parameters
+     * in the method type.
+     *
+     * @param num the index of the parameter type to change
+     * @param newType the new type for the parameter
+     * @return a new call site descriptor, with the type of the parameter in the
+     * method type changed.
+     */
     public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return new CallSiteDescriptor(lookup, name, tokenizedName, methodType
+        return new CallSiteDescriptor(lookup, tokenizedName, methodType
                         .changeParameterType(num, newType));
     }
 }

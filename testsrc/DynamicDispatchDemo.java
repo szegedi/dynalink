@@ -81,7 +81,7 @@ public class DynamicDispatchDemo {
         System.arraycopy(signature, 1, reflectSignature, 0,
                 reflectSignature.length);
         final Method m =
-                receiverClass.getMethod(descriptor.getName(), reflectSignature);
+                receiverClass.getMethod(descriptor.getNameToken(0), reflectSignature);
         final MethodHandle unreflected = MethodHandles.lookup().unreflect(m);
         return unreflected.invokeWithArguments(args);
     }

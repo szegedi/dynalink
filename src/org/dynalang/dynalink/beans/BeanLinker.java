@@ -144,7 +144,7 @@ public class BeanLinker implements GuardingDynamicLinker {
         // long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor =
                 request.getCallSiteDescriptor();
-        final String op = callSiteDescriptor.getTokenizedName().get(1);
+        final String op = callSiteDescriptor.getNameToken(1);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
         if("getProp".equals(op)) {
             return getPropertyGetter(callSiteDescriptor);
@@ -350,11 +350,10 @@ public class BeanLinker implements GuardingDynamicLinker {
     private GuardedInvocation getCallPropWithThis(
             CallSiteDescriptor callSiteDescriptor,
             LinkerServices linkerServices, Object... args) {
-        final List<String> name = callSiteDescriptor.getTokenizedName();
-        switch(name.size()) {
+        switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
                 return getCallPropWithThis(callSiteDescriptor, linkerServices,
-                        name.get(2), args);
+                        callSiteDescriptor.getNameToken(2), args);
             }
             default: {
                 return null;
@@ -385,9 +384,8 @@ public class BeanLinker implements GuardingDynamicLinker {
     private GuardedInvocation getPropertySetter(
             CallSiteDescriptor callSiteDescriptor,
             LinkerServices linkerServices, Object... arguments) {
-        final List<String> name = callSiteDescriptor.getTokenizedName();
         final MethodType type = callSiteDescriptor.getMethodType();
-        switch(name.size()) {
+        switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
                 // Must have theee arguments: target object, property name, and
                 // property value.
@@ -408,7 +406,8 @@ public class BeanLinker implements GuardingDynamicLinker {
                 // Fixed name - change to a call of setXxx() to allow for
                 // overloaded setters
                 return getCallPropWithThis(callSiteDescriptor, linkerServices,
-                        getSetterMethodId(name.get(2)), arguments);
+                        getSetterMethodId(callSiteDescriptor.getNameToken(2)),
+                        arguments);
             }
             default: {
                 // More than two name components; don't know what to do with it.
@@ -424,10 +423,9 @@ public class BeanLinker implements GuardingDynamicLinker {
 
     private GuardedInvocation getPropertyGetter(
             CallSiteDescriptor callSiteDescriptor) {
-        final List<String> name = callSiteDescriptor.getTokenizedName();
         final MethodHandle getter;
         final MethodType type = callSiteDescriptor.getMethodType();
-        switch(name.size()) {
+        switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
                 // Must have exactly two arguments: receiver and name
                 callSiteDescriptor.assertParameterCount(2);
@@ -439,7 +437,7 @@ public class BeanLinker implements GuardingDynamicLinker {
                 callSiteDescriptor.assertParameterCount(1);
                 // Fixed name
                 final PropertyGetterDescriptor desc =
-                        properties.get(name.get(2));
+                        properties.get(callSiteDescriptor.getNameToken(2));
                 if(desc == null) {
                     // No such property
                     return null;
