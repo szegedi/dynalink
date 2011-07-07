@@ -18,7 +18,6 @@ package org.dynalang.dynalink.beans;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.List;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
