@@ -53,6 +53,15 @@ public interface LinkRequest {
      */
     public LinkRequest withoutRuntimeContext();
 
+    /**
+     * Returns a request identical to this one with call site descriptor and
+     * arguments replaced with the ones specified.
+     *
+     *@param callSiteDescriptor the new call site descriptor
+     *@param arguments the new arguments
+     * @return a new request identical to this one, except with the call site
+     * descriptor and arguments replaced with the specified ones.
+     */
     public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor,
             Object[] arguments);
 }
