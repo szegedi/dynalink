@@ -51,8 +51,6 @@ Using the linker facility
 -------------------------
 Have one class that creates a DynamicLinker and has a bootstrap method:
 ```java
-package org.mycompany.mylanguage;
-
 import java.lang.invoke.*;
 import org.dynalang.dynalink.*;
 
@@ -65,7 +63,7 @@ class MyLanguageRuntime {
     {
         final MonomorphicCallSite callSite = new MonomorphicCallSite(name, type);
         linker.link(callSite);
-             return callSite;
+        return callSite;
     }
 }
 ```
@@ -81,11 +79,27 @@ mv.visitIndyMethodInsn("dyn:getProp:color", "(Ljava/lang/Object;)Ljava/lang/Stri
         MethodHandles.Lookup.class, String.class, MethodType.class).toMethodDescriptorString()),
     new Object[0]);
 ```
-Note how you'll need to use a special subclass of CallSite named
-`RelinkableCallSite`. It's actually an abstract class that allows its
-implementations to use any inline caching strategy they choose. A concrete
-subclass named `MonomorphicCallSite` is provided with the library that
-implements a monomorphic inline cache.
+Note how you used `MonomorphicCallSite`, a special subclass of CallSite provided
+by the library that implements a monomorphic inline cache. It is actually a
+subclass of another library class, `RelinkableCallSite` that allows you to
+implement any inline caching strategy you wish.
+
+Even easier use of the linker facility
+--------------------------------------
+The above code for creating the bootstrap method and the default dynamic linker
+is so generic, that the library actually provides the class named
+`org.dynalang.dynalink.support.DefaultBootstrapper` as a convenience that
+actually implements the above functionality, so you can simply replace the name
+of your bootstrapper class in the above ASM 4 example for dynamically getting
+the property "color" of an object with the name of the default bootstrapper:
+```java
+mv.visitIndyMethodInsn("dyn:getProp:color", "(Ljava/lang/Object;)Ljava/lang/String;",
+    new MHandle(MHandle.REF_invokeStatic, "org/dynalang/dynalink/support/DefaultBootstrapper",
+    "bootstrap", MethodType.methodType(CallSite.class,
+        MethodHandles.Lookup.class, String.class, MethodType.class).toMethodDescriptorString()),
+    new Object[0]);
+```
+And you need not write your own bootstrap method.
 
 Having your own language linker
 -------------------------------
