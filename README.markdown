@@ -50,37 +50,37 @@ Here's what you need to do in detail:
 Using the linker facility
 -------------------------
 Have one class that creates a DynamicLinker and has a bootstrap method:
+```java
+package org.mycompany.mylanguage;
 
-    package org.mycompany.mylanguage;
+import java.lang.invoke.*;
+import org.dynalang.dynalink.*;
 
-    import java.lang.invoke.*;
-    import org.dynalang.dynalink.*;
+class MyLanguageRuntime {
+    private static final DynamicLinker linker =
+        new DynamicLinkerFactory().createLinker();
 
-    class MyLanguageRuntime {
-        private static final DynamicLinker linker =
-            new DynamicLinkerFactory().createLinker();
-
-        public static CallSite bootstrap(MethodHandles.Lookup lookup, String name,
-            MethodType type)
-        {
-            final MonomorphicCallSite callSite = new MonomorphicCallSite(name, type);
-            linker.link(callSite);
-            return callSite;
-        }
+    public static CallSite bootstrap(MethodHandles.Lookup lookup, String name,
+        MethodType type)
+    {
+        final MonomorphicCallSite callSite = new MonomorphicCallSite(name, type);
+        linker.link(callSite);
+             return callSite;
     }
-
+}
+```
 Now, from every class you emit that uses invokedynamic, you would need to emit
 an invokedynamic instruction that specifies this method as its bootstrap
 method. I.e. if you used the ASM 4 library and wanted to emit an invokedynamic
 call to a property getter "color" that you'd expect to return a string, you'd
 do:
-
-    mv.visitIndyMethodInsn("dyn:getProp:color", "(Ljava/lang/Object;)Ljava/lang/String;",
-        new MHandle(MHandle.REF_invokeStatic, "org/mycompany/mylanguage/MyLanguageRuntime",
-        "bootstrap", MethodType.methodType(CallSite.class,
-	        MethodHandles.Lookup.class, String.class, MethodType.class).toMethodDescriptorString()),
-        new Object[0]);
-
+```java
+mv.visitIndyMethodInsn("dyn:getProp:color", "(Ljava/lang/Object;)Ljava/lang/String;",
+    new MHandle(MHandle.REF_invokeStatic, "org/mycompany/mylanguage/MyLanguageRuntime",
+    "bootstrap", MethodType.methodType(CallSite.class,
+        MethodHandles.Lookup.class, String.class, MethodType.class).toMethodDescriptorString()),
+    new Object[0]);
+```
 Note how you'll need to use a special subclass of CallSite named
 `RelinkableCallSite`. It's actually an abstract class that allows its
 implementations to use any inline caching strategy they choose. A concrete
@@ -107,15 +107,15 @@ However, when you are creating a linker for your own use, you might want to
 explicitly create an instance of your guarding linker and make sure that the
 master linker gives it priority. You can do this by changing the code for
 creating the linker in `MyLanguageRuntime` to:
-
-    private static final DynamicLinker linker;
-    static {
-        final DynamicLinkerFactory factory = new DynamicLinkerFactory();
-        final GuardingDynamicLinker myLanguageLinker = new MyLanguageLinker();
-        factory.setPrioritizedLinker(myLanguageLinker);
-        linker = factory.createLinker();
-    }
-
+```java
+private static final DynamicLinker linker;
+static {
+    final DynamicLinkerFactory factory = new DynamicLinkerFactory();
+    final GuardingDynamicLinker myLanguageLinker = new MyLanguageLinker();
+    factory.setPrioritizedLinker(myLanguageLinker);
+    linker = factory.createLinker();
+}
+```
 The factory is smart enough that even if it discovers the `MyLanguageLinker`
 class through the JAR service mechanism, it will ignore it if you supplied a
 pre-created prioritized instance.
@@ -124,19 +124,19 @@ Guarding linker?
 ----------------
 Yes, the interface is named `GuardingDynamicLinker`. It has a sole method with
 this signature:
-
-    public GuardedInvocation getGuardedInvocation(LinkerRequest linkerRequest,
-        LinkerServices linkerServices);
-
+```java
+public GuardedInvocation getGuardedInvocation(LinkerRequest linkerRequest,
+    LinkerServices linkerServices);
+```
 It is invoked for a particular invocation at particular call site. It needs to
 inspect both the call site (mostly for its method name and types) and the
 actual arguments and figure out whether it can produce a MethodHandle as the
 target for the call site. The call site descriptor and the arguments are passed
 in the `LinkerRequest` object. In ordinary circumstances, you'll check something
 along the lines of:
-
-    if(arguments.length > 0 && arguments[0] instanceof IMyLanguageObject)
-
+```java
+if(arguments.length > 0 && arguments[0] instanceof IMyLanguageObject)
+```
 If not, return null -- the master linker will then ask the next (if any)
 guarding linker. This is the base requirement for cross-language
 interoperability; you only deal with what you know, and pass on what you don't.
