@@ -238,7 +238,7 @@
 		</junit>
 	</target>
 
-	<target name="test-run" depends="test-run-openjdk,test-run-backport"/>
+	<target name="test-run" depends="test-run-openjdk"/>
 
 	<target name="test" depends="test-run">
 		<mkdir dir="build/test/report"/>
