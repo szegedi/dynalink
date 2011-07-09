@@ -99,14 +99,9 @@ public class TestBeansLinker extends TestCase {
     }
 
     public void testInvalidName() throws Exception {
-        try {
-            getGuardedInvocation(new BeansLinker(), createCallSiteDescriptor(
+        assertNull(getGuardedInvocation(new BeansLinker(), createCallSiteDescriptor(
                     "dyn", MethodType.methodType(int.class)), null,
-                    new Object[1]);
-            fail();
-        } catch(BootstrapMethodError e) {
-            // ignored - it is supposed to fail
-        }
+                    new Object[1]));
     }
 
     public static  CallSiteDescriptor createCallSiteDescriptor(String name,
