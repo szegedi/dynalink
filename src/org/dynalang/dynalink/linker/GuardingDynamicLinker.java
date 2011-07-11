@@ -23,7 +23,7 @@ package org.dynalang.dynalink.linker;
  * very least, it depends on the receiver belonging to the language runtime of
  * the linker). Language runtime implementors will normally implement one for
  * their own language, and declare it in the
- * <tt>META-INF/services/org.dynalang.dynalink/GuardingDynamicLinker</tt> file
+ * <tt>META-INF/services/org.dynalang.dynalink.linker.GuardingDynamicLinker</tt> file
  * within their JAR file.
  *
  * @author Attila Szegedi
