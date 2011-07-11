@@ -23,7 +23,7 @@ package org.dynalang.dynalink;
  * very least, it depends on the receiver belonging to the language runtime of
  * the linker). Language runtime implementors will normally implement one for
  * their own language, and declare it in the
- * <tt>META-INF/services/org.dynalang.dynalink/GuardingDynamicLinker<tt> file
+ * <tt>META-INF/services/org.dynalang.dynalink/GuardingDynamicLinker</tt> file
  * within their JAR file.
  *
  * @author Attila Szegedi
@@ -41,10 +41,11 @@ public interface GuardingDynamicLinker {
      * arguments, as well as a guard condition that if fails should trigger
      * relinking. Must return null if it can't resolve the invocation. If the
      * returned invocation is unconditional (which is actually quite rare), the
-     * guard in the return value can be null. If the linker does not recognize
-     * any native language runtime contexts in arguments, or does recognize its
-     * own, but receives a call site descriptor without its recognized context
-     * in the arguments, it should invoke
+     * guard in the return value can be null. The invocation can also have a
+     * switch point for asynchronous invalidation of the linkage. If the linker
+     * does not recognize any native language runtime contexts in arguments, or
+     * does recognize its own, but receives a call site descriptor without its
+     * recognized context in the arguments, it should invoke
      * {@link LinkRequest#withoutRuntimeContext()} and link for that.
      * @throws Exception if the operation fails for whatever reason
      */

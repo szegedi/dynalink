@@ -24,6 +24,10 @@ import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 
 /**
  * A relinkable call site that implements monomorphic inline caching strategy.
+ * After it linked a method, it will keep it until either its guard evaluates to
+ * false, or its switchpoint is invalidated, at which time it will throw away
+ * the previous linkage, and trigger relinking with its associated
+ * {@link DynamicLinker}.
  *
  * @author Attila Szegedi
  * @version $Id: $

@@ -22,9 +22,9 @@ import java.util.StringTokenizer;
 
 /**
  * A descriptor of a call site. Used in place of passing a real call site to
- * guarding linkers so they aren't tempted to do nasty things to it; also it
- * carries the tokenized name of the method, which is not available in the call
- * site object itself.
+ * guarding linkers so they aren't tempted to directly manipulate them; also it
+ * carries the tokenized name of the method and the {@link Lookup} object
+ * for the class in which the call site is in.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -57,7 +57,9 @@ public class CallSiteDescriptor {
 
     /**
      * Returns the number of tokens in the name of the method at the call site.
-     * Method names are tokenized with the colon ":" character.
+     * Method names are tokenized with the colon ":" character, i.e.
+     * "dyn:getProp:color" would be the name used to describe a method that
+     * retrieves the property named "color" on the object it is invoked on.
      * @return the number of tokens in the name of the method at the call site.
      */
     public int getNameTokenCount() {

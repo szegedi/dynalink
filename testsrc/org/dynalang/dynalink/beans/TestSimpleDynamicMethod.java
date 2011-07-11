@@ -99,7 +99,7 @@ public class TestSimpleDynamicMethod extends TestCase {
         final boolean[] converterInvoked = new boolean[1];
 
         LinkerServices ls = new MockLinkerServices() {
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertSame(handle, mh);
                 assertEquals(type, fromType);
@@ -122,7 +122,7 @@ public class TestSimpleDynamicMethod extends TestCase {
         final boolean[] converterInvoked = new boolean[1];
 
         LinkerServices ls = new MockLinkerServices() {
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertEqualHandle(handle, mh.asFixedArity());
                 assertEquals(type, fromType);
@@ -159,7 +159,7 @@ public class TestSimpleDynamicMethod extends TestCase {
         final boolean[] converterInvoked = new boolean[1];
 
         LinkerServices ls = new MockLinkerServices() {
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(int.class, Test1.class,
@@ -189,7 +189,7 @@ public class TestSimpleDynamicMethod extends TestCase {
         final boolean[] converterInvoked = new boolean[1];
 
         LinkerServices ls = new MockLinkerServices() {
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(declaredType, handle.type());
@@ -224,7 +224,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(declaredType, handle.type());
@@ -256,7 +256,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                 return false;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(String.class, Test1.class,
@@ -283,7 +283,7 @@ public class TestSimpleDynamicMethod extends TestCase {
         final boolean[] converterInvoked = new boolean[1];
 
         LinkerServices ls = new MockLinkerServices() {
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertNotSame(handle, mh);
                 assertEquals(MethodType.methodType(String.class, Test1.class,
@@ -320,7 +320,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                 return true;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertEquals(callSiteType, fromType);
                 int c = ++converterInvoked[0];
@@ -370,7 +370,7 @@ public class TestSimpleDynamicMethod extends TestCase {
                 return true;
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 assertEquals(callSiteType, fromType);
                 int c = ++converterInvoked[0];

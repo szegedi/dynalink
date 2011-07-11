@@ -66,7 +66,7 @@ public class ApplicableOverloadedMethods {
     /**
      * Finds the maximally specific methods (per JLS 15.12.2.5).
      *
-     * @returns the list of maximally specific methods. The list can be empty,
+     * @return the list of maximally specific methods. The list can be empty,
      * but it will never be null.
      */
     public abstract static class ApplicabilityTest {

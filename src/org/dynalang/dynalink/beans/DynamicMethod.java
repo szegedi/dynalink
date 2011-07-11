@@ -34,7 +34,7 @@ import org.dynalang.dynalink.LinkerServices;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public interface DynamicMethod {
+interface DynamicMethod {
     /**
      * Creates an invocation for the dynamic method. If the method is
      * overloaded, it will perform overloaded method resolution based on the
@@ -53,6 +53,6 @@ public interface DynamicMethod {
      * @return an invocation suitable for calling the method from the specified
      * call site.
      */
-    public abstract MethodHandle getInvocation(
+    abstract MethodHandle getInvocation(
             CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices);
 }

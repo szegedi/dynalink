@@ -50,7 +50,7 @@ import org.dynalang.dynalink.support.Lookup;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class BeanLinker implements GuardingDynamicLinker {
+class BeanLinker implements GuardingDynamicLinker {
     private final Class<?> clazz;
 
     private final Map<String, PropertyGetterDescriptor> properties =
@@ -204,11 +204,11 @@ public class BeanLinker implements GuardingDynamicLinker {
                     declaredType).asType(callSiteType), null);
         }
         if(List.class.isAssignableFrom(declaredType)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     GET_LIST_ELEMENT, callSiteType), null);
         }
         if(Map.class.isAssignableFrom(declaredType)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     GET_MAP_ELEMENT, callSiteType), null);
         }
         // Otherwise, create a binding based on the actual type of the argument
@@ -216,17 +216,17 @@ public class BeanLinker implements GuardingDynamicLinker {
         final Object receiver = arguments[0];
         final Class<?> clazz = receiver.getClass();
         if(clazz.isArray()) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     MethodHandles.arrayElementGetter(clazz), callSiteType),
                     Guards.isOfClass(clazz, callSiteType));
         }
         if(List.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     GET_LIST_ELEMENT, callSiteType), Guards.isInstance(
                     List.class, callSiteType));
         }
         if(Map.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     GET_MAP_ELEMENT, callSiteType), Guards.isInstance(
                     Map.class, callSiteType));
         }
@@ -254,16 +254,16 @@ public class BeanLinker implements GuardingDynamicLinker {
         // call site creator to go though invokedynamic when it knows in
         // advance they're dealing with an array, or a list or map, but hey...
         if(declaredType.isArray()) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     MethodHandles.arrayElementSetter(declaredType),
                     callSiteType), null);
         }
         if(List.class.isAssignableFrom(declaredType)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     SET_LIST_ELEMENT, callSiteType), null);
         }
         if(Map.class.isAssignableFrom(declaredType)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     PUT_MAP_ELEMENT, callSiteType), null);
         }
         // Otherwise, create a binding based on the actual type of the argument
@@ -271,17 +271,17 @@ public class BeanLinker implements GuardingDynamicLinker {
         final Object receiver = arguments[0];
         final Class<?> clazz = receiver.getClass();
         if(clazz.isArray()) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     MethodHandles.arrayElementSetter(clazz), callSiteType),
                     Guards.isOfClass(clazz, callSiteType));
         }
         if(List.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     SET_LIST_ELEMENT, callSiteType), Guards.isInstance(
                     List.class, callSiteType));
         }
         if(Map.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.convertArguments(
+            return new GuardedInvocation(linkerServices.asType(
                     PUT_MAP_ELEMENT, callSiteType), Guards.isInstance(
                     Map.class, callSiteType));
         }

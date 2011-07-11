@@ -51,7 +51,7 @@ public class TestBeansLinker extends TestCase {
                 throw new AssertionFailedError();
             }
 
-            public MethodHandle convertArguments(MethodHandle handle,
+            public MethodHandle asType(MethodHandle handle,
                     MethodType fromType) {
                 throw new AssertionFailedError();
             }

@@ -25,12 +25,12 @@ import org.dynalang.dynalink.support.Guards;
 
 /**
  * A triple of an invocation method handle, a guard method handle that defines
- * the validity of the invocation, and a switchpoint that can be used for
+ * the validity of the invocation, and a switch point that can be used for
  * external invalidation of the linkage. The method handle is suitable for
  * invocation at a particular call site for particular arguments, and might be
  * used for subsequent invocations as long as the guard condition is fulfilled.
- * If the guard condition fails or the switchpoint is invalidated, the runtime
- * will relink the call site. Both the guard and the switchpoint are optional,
+ * If the guard condition fails or the switch point is invalidated, the runtime
+ * will relink the call site. Both the guard and the switch point are optional,
  * neither, one, or both can be present.
  *
  * @author Attila Szegedi
@@ -49,8 +49,7 @@ public class GuardedInvocation {
      * @param guard the method handle representing the guard. Must have the same
      * method type as the invocation, except it must return boolean. For some
      * useful guards, check out the {@link Guards} class. It can be null to
-     * represent an unconditional invocation, although this is not really
-     * expected to ever be the case.
+     * represent an unconditional invocation, although that is fairly unusual.
      * @throws IllegalArgumentException if invocation is null.
      */
     public GuardedInvocation(MethodHandle invocation, MethodHandle guard) {
@@ -65,8 +64,7 @@ public class GuardedInvocation {
      * @param guard the method handle representing the guard. Must have the same
      * method type as the invocation, except it must return boolean. For some
      * useful guards, check out the {@link Guards} class. It can be null to
-     * represent an unconditional invocation, although this is not really
-     * expected to ever be the case.
+     * represent an unconditional invocation, although that is fairly unusual.
      * @param switchPoint the optional switch point that can be used to
      * invalidate this linkage.
      * @throws IllegalArgumentException if invocation is null.

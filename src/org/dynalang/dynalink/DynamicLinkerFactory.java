@@ -33,8 +33,8 @@ import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 
 /**
- * A factory class for creating master dynamic linkers. The most usual master
- * dynamic linker is a linker that is a composition of all
+ * A factory class for creating dynamic linkers. The most usual dynamic linker
+ * is a linker that is a composition of all
  * {@link GuardingDynamicLinker guarding dynamic linkers} known and precreated
  * by the caller as well as any {@link AutoDiscovery automatically discovered}
  * guarding linkers and the standard fallback {@link BeansLinker}. See
@@ -66,7 +66,7 @@ public class DynamicLinkerFactory {
     /**
      * Sets the prioritized linkers. Language runtimes using this framework will
      * usually precreate at least the linker for their own language. These
-     * linkers will be consulted first in the resulting master linker, before
+     * linkers will be consulted first in the resulting dynamic linker, before
      * any autodiscovered linkers. If the framework also autodiscovers a linker
      * of the same class as one of the prioritized linkers, it will be ignored
      * and the explicit prioritized instance will be used.
@@ -86,7 +86,7 @@ public class DynamicLinkerFactory {
     /**
      * Sets the prioritized linkers. Language runtimes using this framework will
      * usually precreate at least the linker for their own language. These
-     * linkers will be consulted first in the resulting master linker, before
+     * linkers will be consulted first in the resulting dynamic linker, before
      * any autodiscovered linkers. If the framework also autodiscovers a linker
      * of the same class as one of the prioritized linkers, it will be ignored
      * and the explicit prioritized instance will be used.
@@ -146,10 +146,10 @@ public class DynamicLinkerFactory {
     }
 
     /**
-     * Creates a new master linker consisting of all the prioritized,
+     * Creates a new dynamic linker consisting of all the prioritized,
      * autodiscovered, and fallback linkers.
      *
-     * @return the new master DynamicLinker.
+     * @return the new dynamic Linker
      */
     public DynamicLinker createLinker() {
         // Treat nulls appropriately

@@ -158,6 +158,6 @@ public class SimpleDynamicMethod implements DynamicMethod {
     private static MethodHandle createConvertingInvocation(
             final MethodHandle sizedMethod,
             final LinkerServices linkerServices, final MethodType callSiteType) {
-        return linkerServices.convertArguments(sizedMethod, callSiteType);
+        return linkerServices.asType(sizedMethod, callSiteType);
     }
 }

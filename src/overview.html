@@ -1,120 +1,18 @@
 <html>
   <head>
-    <title>JVM Languages Dynamic Invocation Resolver Framework</title>
+    <title>Dynamic Linker Framework for Languages on the JVM</title>
   </head>
   <body>
-          <p>
-            This library aims to make it possible for objects created by a
-            runtime for one dynamic language to be passed to and manipulated by
-            a different dynamic language, running within the same JVM. More
-            generally, it aims to provide a facility where an arbitrary system
-            (usually a language runtime) can intuitively manipulate any
-            arbitrary object model built atop of Java objects (usually the 
-            native object model of some other language). 
-          </p><p>
-            Basically, it provides a unified mechanism that all dynamic
-            languages on the JVM can use to inter-operably manipulate their own
-            objects as well as objects from any other language that also uses
-            this mechanism.
-          </p><p>
-            It strives to achieve this goal not by defining "One True Object", a
-            single interface to be implemented by all Java objects that
-            represent objects of the dynamic languages in the JVM, but rather by
-            providing an extensible metaobject protocol (MOP) mechanism, as
-            first formulated in the <a
-            href="http://www.szegedi.org/articles/wrappersOrNavigators.html">
-            "In-process cross-language object interaction: adapters or
-            navigators?"</a> article. The idea is to completely throw away the
-            idea of a dedicated interface on objects themselves, and having to
-            wrap foreign objects into adapter objects that expose the expected
-            interface. Instead, the operations on objects themselves are
-            encapsulated behind MOP objects (you can also think about them as
-            being the "navigators" and "manipulators" for the objects they know
-            about), with usually only a single MOP required per language
-            implementation.
-          </p><p>
-            The implementation actually relies on the JSR-292 that brought
-            "invokedynamic" and method handles into the JVM. It provides a 
-            facility where different language runtimes can register resolvers
-            for method calls, and those same (and other) runtimes can rely on
-            these resolvers to find implementations of the actual 
-            functionality, such as a property lookup, or a method invocation.
-            Essentially, one resolver implements the MOP for one language.
-            The basic idea is that a dynamic language runtime will 
-            retrieve a property on an object <i>not</i> by using code like this:
-            <code>((MyDynamicInterface)obj).get("foo");</code>
-            but rather it will use a dynamic invocation in form:
-            <code>((InvokeDynamic)obj)getprop:foo();</code>
-          </p><p>
-            The real strength of the approach lies in extensibility and
-            pluggability of resolvers. Resolvers can be easily composed, so if
-            you compose your language's native resolver with other languages' 
-            resolvers, your code will be able to natively manipulate those 
-            other languages' objects. You can have a resolver for DOM objects 
-            as well to natively add XML manipulating abilities into your 
-            languages. Finally, a JavaBeans resolver is provided as standard 
-            component in the library - you can add it as the last element of 
-            your composite resolver so that your language can manipulate any 
-            POJO directly if no other resolver recognizes the object. Full 
-            range of Java amenities, including optimized runtime resolution
-            of overloaded methods and support for JDK 1.5 variable arguments
-            is available.
-          </p><p>
-            The secret of composability is resolvers ability to declare it can
-            not resolve the call. When a call site resolution is attempted in 
-            a composite resolver, all its element resolvers will be attempted
-            in turn until one can resolve the call site. Note that the 
-            resolution can be very fine-grained: it can be per call if the call
-            site does not get linked. It is therefore much more versatile than
-            the wrapper interfaces approach: when using interfaces, a wrapper 
-            class must decide up-front which interfaces to implement on the 
-            object. A resolver based MOP can decide based on the actual state 
-            of the object whether it can perform an operation. This can also 
-            be handily used to extend any objects with language specific 
-            meta-properties.
-          </p>
-          <h1>Getting started</h1>
-          <p>
-            The {@link org.dynalang.invoke.impl.DynamicInvocationResolverFactory}
-            is most likely all you need to get started using dynamic 
-            invocation resolvers. A suitable
-            code snippet for obtaining a MOP capable of handling all known 
-            object models in the current thread's class loader is:
-            <pre>import org.dynalang.invoke.*;
-import org.dynalang.mop.impl.*;
-...
-
-DynamicInvocationResolver resolver = 
-    new DynamicInvocationResolverFactory().createResolver();
-</pre>
-            In case you're developing a library that supplies its own native
-            resolver for some native object model (most likely, you
-            are developing a language runtime), then you'd create an instance
-            of your native resolver and pass it to be merged with other 
-            available resolvers into a single composite resolver as:
-            <pre>import org.dynalang.invoke.*;
-import org.dynalang.mop.impl.*;
-...
-                         
-DynamicInvocationResolver mylanguageResolver = ...
-DynamicInvocationResolverFactory factory = new DynamicInvocationResolverFactory();
-factory.setPrioritizedResolver(myLanguageResolver);
-DynamicInvocationResolver resolver = factory.createResolver();
-</pre>
-          </p>
-          <h1>Developer resources</h1>
-          <p>
-            The project is hosted at SourceForge, under <a
-            href="http://www.sf.net/projects/dynalang"
-            target="_top">http://www.sf.net/projects/dynalang</a>.
-          </p><p>
-            If you check out the latest version of "invoke" module from SVN, 
-            try running <code>ant test</code>. This produces both a JUnit test 
-            report at
-            <code>build/test/report/index.html</code> and test coverage report
-            at <code>build/coverage/report/index.html</code>. To build this
-            JavaDoc, use <code>ant doc</code>, and then open
-            <code>build/doc/index.html</code>.
-          </p>
+    <p>
+      This is an implementation of invokedynamic-based multi-language linking
+      and metaobject protocol framework. Such framework allows JVM classes
+      emitted by one language runtime to invoke methods, read and write
+      properties, and so forth, on objects from a different language runtime,
+      within a single JVM instance. As a special case, it can be conveniently
+      used to manipulate POJOs from non-Java language runtimes running on the
+      JVM.
+    </p>
+    <p>For detailed usage instructions, see the <a href="https://github.com/szegedi/dynalink/wiki">online documentation</a>.</p>
+    <p>This project is <a href="https://github.com/szegedi/dynalink">hosted on GitHub</a>.</p>
   </body>
 </html>

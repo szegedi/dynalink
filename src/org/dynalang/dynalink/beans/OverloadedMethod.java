@@ -124,7 +124,7 @@ class OverloadedMethod {
                 SimpleDynamicMethod.collectArguments(bound,
                         commonMethodTypeWithException.parameterCount());
         final MethodHandle converting =
-                linkerServices.convertArguments(collecting, callSiteType
+                linkerServices.asType(collecting, callSiteType
                         .insertParameterTypes(0, NoSuchMethodException.class));
         return converting;
     }
@@ -137,7 +137,7 @@ class OverloadedMethod {
                 SimpleDynamicMethod.collectArguments(bound, commonMethodType
                         .parameterCount());
         final MethodHandle converting =
-                linkerServices.convertArguments(collecting, callSiteType);
+                linkerServices.asType(collecting, callSiteType);
         return converting;
     }
 

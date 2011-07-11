@@ -21,7 +21,10 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
- * Interface for services provided to linkers.
+ * Interface for services provided to {@link GuardingDynamicLinker} instances by
+ * the {@link DynamicLinker} that owns them. You can think of it as the
+ * interface of the {@link DynamicLinker} that faces the
+ * {@link GuardingDynamicLinker}s.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -48,8 +51,7 @@ public interface LinkerServices {
      * with {@link GuardingTypeConverterFactory} produced type converters as
      * filters.
      */
-    public MethodHandle convertArguments(MethodHandle handle,
-            MethodType fromType);
+    public MethodHandle asType(MethodHandle handle, MethodType fromType);
 
     /**
      * Returns true if there might exist a conversion between the requested
@@ -67,9 +69,9 @@ public interface LinkerServices {
     public boolean canConvert(Class<?> from, Class<?> to);
 
     /**
-     * Creates a guarded invocation using the top-level linker associated with
-     * this linker services. Linkers can typically use them to delegate linking
-     * of wrapped objects.
+     * Creates a guarded invocation using the {@link DynamicLinker} that exposes
+     * this linker services interface. Linkers can typically use them to
+     * delegate linking of wrapped objects.
      *
      * @param linkRequest a request for linking the invocation
      * @return a guarded invocation linked by the top-level linker (or any of

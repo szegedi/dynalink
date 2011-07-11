@@ -23,22 +23,24 @@ import java.util.List;
 
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;
+import org.dynalang.dynalink.support.DefaultBootstrapper;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
 
 /**
- * /** The linker for {@link RelinkableCallSite} objects. Users of Dynalink will
- * normally obtain one through a {@link DynamicLinkerFactory} and invoke its
- * link method from their invokedynamic bootstrap method to set the target of
- * all its call sites. Usual usage would be to create one class per language
+ * The linker for {@link RelinkableCallSite} objects. Users of it (scripting
+ * frameworks and language runtimes) have to create a linker using the
+ * {@link DynamicLinkerFactory} and invoke its link method from the
+ * invokedynamic bootstrap methods to set the target of all the call sites in
+ * the code they generate. Usual usage would be to create one class per language
  * runtime to contain one linker instance as:
  *
  * <pre>
  * class MyLanguageRuntime {
- *     private static final DynamicLinker dynamicLinker = createDynamicLinker();
  *     private static final GuardingDynamicLinker myLanguageLinker =
  *             new MyLanguageLinker();
+ *     private static final DynamicLinker dynamicLinker = createDynamicLinker();
  *
  *     private static DynamicLinker createDynamicLinker() {
  *         final DynamicLinkerFactory factory = new DynamicLinkerFactory();
@@ -49,7 +51,7 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  *     public static CallSite bootstrap(MethodHandles.Lookup caller, String name,
  *             MethodType type) {
  *         final MonomorphicCallSite callSite =
- *                 new MonomorphicCallSite(name, type);
+ *                 new MonomorphicCallSite(lookup, name, type);
  *         dynamicLinker.link(callSite);
  *         return callSite;
  *     }
@@ -60,7 +62,8 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  * your own language. If your runtime doesn't have its own language and/or
  * object model (i.e. it's a generic scripting shell), you don't need to
  * implement a dynamic linker; you would simply not invoke the
- * <tt>setPrioritizedLinker</tt> on the factory.
+ * <tt>setPrioritizedLinker</tt> on the factory, or even better, you would
+ * simply use {@link DefaultBootstrapper}.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -73,14 +76,14 @@ public class DynamicLinker {
     private final int runtimeContextArgCount;
 
     /**
-     * Creates a new master linker that delegates to a single guarding dynamic
-     * linker (this is usually a {@link CompositeGuardingDynamicLinker} though.
+     * Creates a new dynamic linker.
      *
-     * @param linkerServices the linkerServices used by the linker
+     * @param linkerServices the linkerServices used by the linker, created by
+     * the factory.
      * @param runtimeContextArgCount see
      * {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
-    public DynamicLinker(final LinkerServices linkerServices,
+    DynamicLinker(final LinkerServices linkerServices,
             final int runtimeContextArgCount) {
         this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;

@@ -52,9 +52,9 @@ public class LinkerServicesImpl implements LinkerServices {
     }
 
     @Override
-    public MethodHandle convertArguments(MethodHandle handle,
+    public MethodHandle asType(MethodHandle handle,
             MethodType fromType) {
-        return typeConverterFactory.convertArguments(handle, fromType);
+        return typeConverterFactory.asType(handle, fromType);
     }
 
     @Override

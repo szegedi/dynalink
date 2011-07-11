@@ -16,9 +16,9 @@
 -->
 <!-- $Id: build.xml 74 2007-04-02 09:34:33Z szegedia $ -->
 
-	<property name="project.name" value="JVM Dynamic Languages Linker Framework"/>
+	<property name="project.name" value="Dynamic Linker Framework for Languages on the JVM"/>
 	<property name="artifact.name" value="dynalink"/>
-	<property name="revision" value="0.1"/>
+	<property name="revision" value="0.2"/>
 	<property name="build.dir" location="build"/>
 
 	<property file="build.properties" />
@@ -102,6 +102,7 @@
 			<fileset dir="${build.dir}/doc/javadoc" includes="**/*" />
 		</delete>
 		<javadoc author="true"
+			executable="${openjdk.dir}/bin/javadoc"
 			destdir="${build.dir}/doc/javadoc"
 			doctitle="${project.name} ${revision}"
 			packagenames="org.dynalang.*"
@@ -111,9 +112,6 @@
 			overview="src/overview.html"
 			use="true">
 		</javadoc>
-		<copy todir="${build.dir}/doc">
-			<fileset dir="src/doc" includes="**/*"/>
-		</copy>
 	</target>
 
 	<property name="test.lib.dir" location="${build.dir}/test/lib"/>

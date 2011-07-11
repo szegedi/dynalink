@@ -35,9 +35,9 @@ public class Lookup {
 
     /**
      * Creates a new instance, bound to an instance of
-     * {@link MethodHandles.Lookup}.
+     * {@link java.lang.invoke.MethodHandles.Lookup}.
      *
-     * @param lookup the {@link MethodHandles.Lookup} it delegates to.
+     * @param lookup the {@link java.lang.invoke.MethodHandles.Lookup} it delegates to.
      */
     public Lookup(MethodHandles.Lookup lookup) {
         this.lookup = lookup;
@@ -47,7 +47,7 @@ public class Lookup {
             new Lookup(MethodHandles.publicLookup());
 
     /**
-     * Performs a {@link MethodHandles.Lookup#unreflect(Method)}, converting any
+     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflect(Method)}, converting any
      * encountered {@link IllegalAccessException} into a
      * {@link BootstrapMethodError}.
      *
