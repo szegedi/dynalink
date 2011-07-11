@@ -88,7 +88,7 @@ Even easier use of the linker facility
 --------------------------------------
 The above code for creating the bootstrap method and the default dynamic linker
 is so generic, that the library actually provides the class named
-`org.dynalang.dynalink.support.DefaultBootstrapper` as a convenience that
+`org.dynalang.dynalink.DefaultBootstrapper` as a convenience that
 actually implements the above functionality, so you can simply replace the name
 of your bootstrapper class in the above ASM 4 example for dynamically getting
 the property "color" of an object with the name of the default bootstrapper:
@@ -106,11 +106,11 @@ Having your own language linker
 That's it, now every `invokedynamic` call will go through the linker. The
 linker created by the `DynamicLinkerFactory` actually manages a collection of
 instances of classes that all implement
-`org.dynalang.dynalink.GuardingDynamicLinker` interface. If your runtime has
+`org.dynalang.dynalink.linker.GuardingDynamicLinker` interface. If your runtime has
 its own object model, you need to create an implementation of this interface
 yourself to provide MOP functionality for your own language. The
 `DynamicLinkerFactory` uses the JAR service mechanism, and will look into a
-file named `META-INF/services/org.dynalang.dynalink.GuardingDynamicLinker` in
+file named `META-INF/services/org.dynalang.dynalink.linker.GuardingDynamicLinker` in
 every JAR file of the actual class loader. (By default, this is the thread
 context class loader. The factory has a method for setting a different class
 loader.) Therefore, if you wish for your language linker to be discovered by

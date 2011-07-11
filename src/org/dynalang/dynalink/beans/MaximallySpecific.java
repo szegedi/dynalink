@@ -1,9 +1,11 @@
-package org.dynalang.dynalink.beans.support;
+package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodType;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Utility class that encapsulates the algorithm for choosing the maximally
@@ -13,7 +15,7 @@ import java.util.List;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class MaximallySpecific {
+class MaximallySpecific {
     /**
      * Interface for a function that takes a method and returns its type.
      *
@@ -21,7 +23,7 @@ public class MaximallySpecific {
      * @version $Id: $
      * @param <M> the method representation
      */
-    public interface TypeFunction<M> {
+    interface TypeFunction<M> {
         /**
          * Takes a method, and returns its type.
          *
@@ -41,7 +43,7 @@ public class MaximallySpecific {
      * @param varArgs whether to assume the methods are varargs
      * @return the list of maximally specific methods.
      */
-    public static <M> List<M> getMaximallySpecificMethods(List<M> methods,
+    static <M> List<M> getMaximallySpecificMethods(List<M> methods,
             TypeFunction<M> typeFunction, boolean varArgs) {
         if(methods.size() < 2) {
             return methods;

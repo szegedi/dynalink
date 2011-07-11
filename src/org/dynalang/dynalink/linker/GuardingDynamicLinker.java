@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
 /**
  * The base interface for language-specific dynamic linkers. Such linkers always

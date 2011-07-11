@@ -7,9 +7,9 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.SwitchPoint;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.RelinkableCallSite;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
 
 /**
  * A basic implementation of the {@link RelinkableCallSite} as a

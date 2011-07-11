@@ -18,8 +18,8 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
  * Represents a single dynamic method. A "dynamic" method can be bound to a

@@ -21,9 +21,11 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.List;
 
-import org.dynalang.dynalink.DynamicLinker;
-import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;
-import org.dynalang.dynalink.support.DefaultBootstrapper;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;

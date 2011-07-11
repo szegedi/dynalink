@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.beans.support.TypeUtilities;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Represents a subset of overloaded methods for a certain method name on a

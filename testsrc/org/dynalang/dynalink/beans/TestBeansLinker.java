@@ -24,11 +24,11 @@ import java.lang.BootstrapMethodError;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 
 /**

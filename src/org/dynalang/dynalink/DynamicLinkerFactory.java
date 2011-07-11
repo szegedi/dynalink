@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.dynalang.dynalink.beans.BeansLinker;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.support.AutoDiscovery;
 import org.dynalang.dynalink.support.BottomGuardingDynamicLinker;
 import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;

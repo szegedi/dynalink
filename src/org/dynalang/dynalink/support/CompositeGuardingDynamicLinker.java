@@ -20,10 +20,10 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
  * A {@link GuardingDynamicLinker} that delegates sequentially to a list of

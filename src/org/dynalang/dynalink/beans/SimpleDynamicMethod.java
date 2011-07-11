@@ -21,8 +21,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
 
 /**
@@ -32,7 +32,7 @@ import org.dynalang.dynalink.support.Guards;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class SimpleDynamicMethod implements DynamicMethod {
+class SimpleDynamicMethod implements DynamicMethod {
     private final MethodHandle target;
 
     /**

@@ -14,11 +14,11 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 
 public class TestLengthGetter extends TestCase {

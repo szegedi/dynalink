@@ -3,8 +3,8 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.MonomorphicCallSite;
+import org.dynalang.dynalink.linker.GuardedInvocation;
 
 public class RelinkCountingCallSite extends MonomorphicCallSite {
     private int relinkCount;

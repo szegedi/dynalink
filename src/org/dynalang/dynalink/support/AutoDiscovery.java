@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import org.dynalang.dynalink.DynamicLinkerFactory;
-import org.dynalang.dynalink.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 
 /**
  * Provides methods for automatic discovery of all guarding dynamic linkers

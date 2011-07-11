@@ -20,18 +20,19 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 /**
  * A composite type-based guarding dynamic linker. When a receiver of a not yet
  * seen class is encountered, all linkers are invoked sequentially until one
- * returns a value other than null. This linker is then bound to the class, and
- * next time a receiver of same type is encountered, the linking is delegated to
- * that linker first, speeding up dispatch.
+ * returns <true> from {@link TypeBasedGuardingDynamicLinker#canLinkType(Class)}.
+ * This linker is then bound to the class, and next time a receiver of same type
+ * is encountered, the linking is delegated to that linker first, speeding up
+ * dispatch.
  *
  * @author Attila Szegedi
  * @version $Id: $

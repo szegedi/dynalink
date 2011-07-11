@@ -23,10 +23,9 @@ import java.lang.invoke.WrongMethodTypeException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingTypeConverterFactory;
-import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.beans.support.TypeUtilities;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
+import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
  * A factory for type converters. This class is the main implementation behind
@@ -91,7 +90,7 @@ public class TypeConverterFactory {
      * with {@link GuardingTypeConverterFactory} produced type converters as
      * filters.
      */
-    public MethodHandle convertArguments(MethodHandle handle,
+    public MethodHandle asType(MethodHandle handle,
             final MethodType fromType) {
         final MethodType toType = handle.type();
         final int l = toType.parameterCount();

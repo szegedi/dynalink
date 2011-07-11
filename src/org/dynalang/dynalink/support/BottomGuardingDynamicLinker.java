@@ -16,10 +16,10 @@
 
 package org.dynalang.dynalink.support;
 
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.TypeBasedGuardingDynamicLinker;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 /**
  * A linker that can't link any call site. Only used internally by

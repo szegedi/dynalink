@@ -16,6 +16,8 @@
 
 package org.dynalang.dynalink;
 
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+
 /**
  * Thrown at the invocation if the call site can not be linked by any available
  * {@link GuardingDynamicLinker}. (Maybe just use NoAccess?)

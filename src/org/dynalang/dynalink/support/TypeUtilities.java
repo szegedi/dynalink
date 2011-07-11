@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink.beans.support;
+package org.dynalang.dynalink.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -273,7 +273,7 @@ public class TypeUtilities {
      * @return true if subType is a proper (not identical to) primitive subtype
      * of the superType
      */
-    public static boolean isProperPrimitiveSubtype(Class<?> subType,
+    static boolean isProperPrimitiveSubtype(Class<?> subType,
             Class<?> superType) {
         if(superType == boolean.class || subType == boolean.class) {
             return false;
@@ -337,7 +337,7 @@ public class TypeUtilities {
      * Basically, it is true if the class is any primitive wrapper class, or a
      * superclass or superinterface of any primitive wrapper class.
      */
-    public static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
+    static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
         return PRIMITIVE_WRAPPER_TYPES.contains(clazz);
     }
 }

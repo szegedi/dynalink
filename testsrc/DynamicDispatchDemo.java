@@ -5,9 +5,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.RelinkableCallSite;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
 
 public class DynamicDispatchDemo {
     public static class English {

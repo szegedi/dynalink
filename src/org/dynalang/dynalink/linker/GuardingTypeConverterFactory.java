@@ -14,11 +14,11 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
 /**
  * Optional interface that can be implemented by {@link GuardingDynamicLinker}
- * implementations to provide language-runtime specific type conversion
+ * implementations to provide language-runtime specific implicit type conversion
  * capabilities.
  *
  * @author Attila Szegedi

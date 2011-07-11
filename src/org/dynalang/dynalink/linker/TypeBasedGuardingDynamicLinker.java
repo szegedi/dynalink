@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
 /**
  * A guarding dynamic linker that can determine whether it can link the call

@@ -19,6 +19,9 @@ package org.dynalang.dynalink;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
 
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+
 /**
  * Interface for relinkable call sites. Language runtimes wishing to use this
  * framework must use subclasses of {@link CallSite} that also implement this
@@ -51,11 +54,13 @@ public interface RelinkableCallSite {
     public CallSiteDescriptor getCallSiteDescriptor();
 
     /**
-     * Should be implemented by subclasses. Will be called once every time the
-     * call site is relinked.
+     * This method will be called once by the dynamic linker every time the call
+     * site is relinked.
      *
      * @param guardedInvocation the guarded invocation that the call site should
-     * set as its target.
+     * set as its current target. Note that the call sites are allowed to keep
+     * other non-invalidated invocations around for implementation of
+     * polymorphic inline caches.
      */
     public void setGuardedInvocation(GuardedInvocation guardedInvocation);
 }

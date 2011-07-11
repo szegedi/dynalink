@@ -22,8 +22,8 @@ import java.lang.invoke.MethodType;
 
 import junit.framework.TestCase;
 
-import org.dynalang.dynalink.GuardedInvocation;
 import org.dynalang.dynalink.MonomorphicCallSite;
+import org.dynalang.dynalink.linker.GuardedInvocation;
 
 /**
  * Tests for the {@link MonomorphicCallSite}.

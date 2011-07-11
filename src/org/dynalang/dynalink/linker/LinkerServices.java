@@ -14,11 +14,13 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+
+import org.dynalang.dynalink.DynamicLinker;
 
 /**
  * Interface for services provided to {@link GuardingDynamicLinker} instances by

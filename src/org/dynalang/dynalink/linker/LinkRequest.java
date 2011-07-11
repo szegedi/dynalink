@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
 /**
  * Represents a request to link a particular invocation at a particular call

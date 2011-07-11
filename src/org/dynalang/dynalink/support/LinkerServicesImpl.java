@@ -18,10 +18,10 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
  * Default implementation of the {@link LinkerServices} interface.

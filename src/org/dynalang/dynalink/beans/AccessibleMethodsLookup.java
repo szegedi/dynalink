@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink.beans.support;
+package org.dynalang.dynalink.beans;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -35,7 +35,7 @@ import java.util.Map;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class AccessibleMethodsLookup {
+class AccessibleMethodsLookup {
     private final Map<MethodSignature, Method> map;
 
     /**
@@ -43,7 +43,7 @@ public class AccessibleMethodsLookup {
      *
      * @param clazz the inspected class
      */
-    public AccessibleMethodsLookup(final Class<?> clazz) {
+    AccessibleMethodsLookup(final Class<?> clazz) {
         this.map = new HashMap<MethodSignature, Method>();
         lookupAccessibleMethods(clazz);
     }
@@ -55,7 +55,7 @@ public class AccessibleMethodsLookup {
      * @return the accessible equivalent for the method (can be the same as the
      * passed in method), or null if there is no accessible method equivalent.
      */
-    public Method getAccessibleMethod(final Method m) {
+    Method getAccessibleMethod(final Method m) {
         return m == null ? null : map.get(new MethodSignature(m));
     }
 
@@ -66,7 +66,7 @@ public class AccessibleMethodsLookup {
      * @author Attila Szegedi
      * @version $Id: $
      */
-    public static final class MethodSignature {
+    static final class MethodSignature {
         private final String name;
         private final Class<?>[] args;
 
@@ -76,7 +76,7 @@ public class AccessibleMethodsLookup {
          * @param name the name of the method this signature represents.
          * @param args the argument types of the method.
          */
-        public MethodSignature(String name, Class<?>[] args) {
+        MethodSignature(String name, Class<?>[] args) {
             this.name = name;
             this.args = args;
         }
@@ -86,7 +86,7 @@ public class AccessibleMethodsLookup {
          *
          * @param method the method for which a signature is created.
          */
-        public MethodSignature(final Method method) {
+        MethodSignature(final Method method) {
             this(method.getName(), method.getParameterTypes());
         }
 

@@ -19,16 +19,19 @@ package org.dynalang.dynalink.beans;
 import java.beans.IntrospectionException;
 import java.lang.reflect.UndeclaredThrowableException;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.GuardingDynamicLinker;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardingDynamicLinker;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
  * A linker for POJOs. Normally used as the ultimate fallback linker by the
- * {@link DynamicLinkerFactory}.
+ * {@link DynamicLinkerFactory} so it is given the chance to link calls to all
+ * objects that no other language runtimes recognize. Handles all intricacies
+ * and corner cases of overloaded method resolution and variable argument
+ * methods when linking to Java classes.
  *
  * @author Attila Szegedi
  * @version $Id: $

@@ -21,9 +21,8 @@ import java.lang.invoke.MethodType;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.beans.support.MaximallySpecific;
-import org.dynalang.dynalink.beans.support.TypeUtilities;
 import org.dynalang.dynalink.support.Guards;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  *

@@ -24,9 +24,9 @@ import java.util.LinkedList;
 
 import junit.framework.TestCase;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.GuardingTypeConverterFactory;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 

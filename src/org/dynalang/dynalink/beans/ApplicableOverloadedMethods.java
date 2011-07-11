@@ -1,9 +1,11 @@
-package org.dynalang.dynalink.beans.support;
+package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Represents overloaded methods applicable to a specific call site signature.
@@ -11,7 +13,7 @@ import java.util.List;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class ApplicableOverloadedMethods {
+class ApplicableOverloadedMethods {
     private final List<MethodHandle> methods;
     private final boolean varArgs;
 
@@ -25,7 +27,7 @@ public class ApplicableOverloadedMethods {
      * {@link #APPLICABLE_BY_METHOD_INVOCATION_CONVERSION}, or
      * {@link #APPLICABLE_BY_VARIABLE_ARITY}.
      */
-    public ApplicableOverloadedMethods(final List<MethodHandle> methods,
+    ApplicableOverloadedMethods(final List<MethodHandle> methods,
             final MethodType callSiteType, final ApplicabilityTest test) {
         this.methods = new LinkedList<MethodHandle>();
         for(MethodHandle m: methods) {
@@ -41,7 +43,7 @@ public class ApplicableOverloadedMethods {
      *
      * @return list of all methods.
      */
-    public List<MethodHandle> getMethods() {
+    List<MethodHandle> getMethods() {
         return methods;
     }
 
@@ -51,7 +53,7 @@ public class ApplicableOverloadedMethods {
      *
      * @return a list of maximally specific methods.
      */
-    public List<MethodHandle> findMaximallySpecificMethods() {
+    List<MethodHandle> findMaximallySpecificMethods() {
         return MaximallySpecific.getMaximallySpecificMethods(methods, TF,
                 varArgs);
     }
@@ -63,13 +65,7 @@ public class ApplicableOverloadedMethods {
                 };
             };
 
-    /**
-     * Finds the maximally specific methods (per JLS 15.12.2.5).
-     *
-     * @return the list of maximally specific methods. The list can be empty,
-     * but it will never be null.
-     */
-    public abstract static class ApplicabilityTest {
+    abstract static class ApplicabilityTest {
         abstract boolean isApplicable(MethodType callSiteType,
                 MethodHandle method);
     }
@@ -77,7 +73,7 @@ public class ApplicableOverloadedMethods {
     /**
      * Implements the applicability-by-subtyping test from JLS 15.12.2.2.
      */
-    public static final ApplicabilityTest APPLICABLE_BY_SUBTYPING =
+    static final ApplicabilityTest APPLICABLE_BY_SUBTYPING =
             new ApplicabilityTest() {
                 @Override
                 boolean isApplicable(MethodType callSiteType,
@@ -103,7 +99,7 @@ public class ApplicableOverloadedMethods {
      * Implements the applicability-by-method-invocation-conversion test from
      * JLS 15.12.2.3.
      */
-    public static final ApplicabilityTest APPLICABLE_BY_METHOD_INVOCATION_CONVERSION =
+    static final ApplicabilityTest APPLICABLE_BY_METHOD_INVOCATION_CONVERSION =
             new ApplicabilityTest() {
                 @Override
                 boolean isApplicable(MethodType callSiteType,
@@ -129,7 +125,7 @@ public class ApplicableOverloadedMethods {
     /**
      * Implements the applicability-by-variable-arity test from JLS 15.12.2.4.
      */
-    public static final ApplicabilityTest APPLICABLE_BY_VARIABLE_ARITY =
+    static final ApplicabilityTest APPLICABLE_BY_VARIABLE_ARITY =
             new ApplicabilityTest() {
                 @Override
                 boolean isApplicable(MethodType callSiteType,

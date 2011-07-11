@@ -24,11 +24,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.LinkerServices;
-import org.dynalang.dynalink.beans.support.ApplicableOverloadedMethods;
-import org.dynalang.dynalink.beans.support.TypeUtilities;
-import org.dynalang.dynalink.beans.support.ApplicableOverloadedMethods.ApplicabilityTest;
+import org.dynalang.dynalink.beans.ApplicableOverloadedMethods.ApplicabilityTest;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Represents an overloaded method.
@@ -36,7 +35,7 @@ import org.dynalang.dynalink.beans.support.ApplicableOverloadedMethods.Applicabi
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class OverloadedDynamicMethod implements DynamicMethod {
+class OverloadedDynamicMethod implements DynamicMethod {
     /**
      * Holds a list of all methods.
      */

@@ -15,8 +15,8 @@
  */
 package org.dynalang.dynalink.support;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
-import org.dynalang.dynalink.LinkRequest;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.LinkRequest;
 
 /**
  * Default implementation of the {@link LinkRequest}, representing a link

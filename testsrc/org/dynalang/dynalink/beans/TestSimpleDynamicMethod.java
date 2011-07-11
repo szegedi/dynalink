@@ -23,9 +23,9 @@ import java.lang.invoke.MethodType;
 
 import junit.framework.TestCase;
 
-import org.dynalang.dynalink.GuardedInvocation;
-import org.dynalang.dynalink.LinkRequest;
-import org.dynalang.dynalink.LinkerServices;
+import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.LinkRequest;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
 
 /**

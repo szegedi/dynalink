@@ -1,19 +1,16 @@
-package org.dynalang.dynalink.support;
+package org.dynalang.dynalink;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import org.dynalang.dynalink.DynamicLinker;
-import org.dynalang.dynalink.DynamicLinkerFactory;
-import org.dynalang.dynalink.MonomorphicCallSite;
 
 /**
  * A convenience default bootstrapper that exposes a static bootstrap method to
- * which language runtimes that need the very default behaviour can use with
+ * which language runtimes that need the very default behavior can use with
  * minimal setup. When first referenced, it will create a dynamic linker with
- * default settings for the {@link DynamicLinkerFactory}, and it will create
- * {@link MonomorphicCallSite} for all call sites.
+ * default settings for the {@link DynamicLinkerFactory}, and its bootstrap
+ * method will create {@link MonomorphicCallSite} for all call sites.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -21,6 +18,9 @@ import org.dynalang.dynalink.MonomorphicCallSite;
 public class DefaultBootstrapper {
     private static final DynamicLinker dynamicLinker =
             new DynamicLinkerFactory().createLinker();
+
+    private DefaultBootstrapper() {
+    }
 
     /**
      * Use this method as your bootstrap method (see the documentation of the
