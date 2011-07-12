@@ -28,7 +28,8 @@
 	<property file="build.properties" />
 	<property name="openjdk.rt.jar" location="${openjdk.dir}/jre/lib/rt.jar"/>
 	<property name="backport.agent.jar" location="${backport.dir}/lib/jsr292-backport.jar"/>
-
+	<property name="source.main.java" location="src/main/java"/>
+	<property name="source.test.java" location="src/test/java"/>
 	<condition property="isMac"><equals arg1="${os.name}" arg2="Mac OS X"/></condition>
 	<condition property="isLinux"><equals arg1="${os.name}" arg2="Linux"/></condition>
 
@@ -75,11 +76,11 @@
 	<target name="compile" depends="downloadOpenJdk">
 		<property name="classes.dir" location="${build.dir}/classes"/>
 		<mkdir dir="${classes.dir}"/>
-		<javac compiler="extJavac" executable="${openjdk.dir}/bin/javac" srcdir="src" destdir="${classes.dir}" deprecation="off" 
+		<javac compiler="extJavac" executable="${openjdk.dir}/bin/javac" srcdir="${source.main.java}" destdir="${classes.dir}" deprecation="off" 
 			debug="on" optimize="off" target="1.7" source="1.7"
 			bootclasspath="${openjdk.rt.jar}"/>
 		<copy toDir="${classes.dir}">
-			<fileset dir="src"
+			<fileset dir="${source.main.java}"
 			excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html,overview.html"/>
 		</copy>
 	</target>
@@ -106,7 +107,7 @@
 			destdir="${build.dir}/doc/javadoc"
 			doctitle="${project.name} ${revision}"
 			packagenames="org.dynalang.*"
-			sourcepath="src"
+			sourcepath="${source.main.java}"
 			version="true"
 			windowtitle="${project.name} ${revision} API"
 			overview="src/overview.html"
@@ -151,7 +152,7 @@
 		outfile="${coverage.instrumentationfile}" mode="copy"/>
 		</emma>
 		<copy todir="${coverage.classes.dir}">
-			<fileset dir="src" excludes="**/*.java"/>
+			<fileset dir="${source.main.java}" excludes="**/*.java"/>
 		</copy>
 		<copy todir="${coverage.classes.dir}">
 			<fileset dir="${classes.dir}"/>
@@ -163,7 +164,7 @@
 		<property name="test.classes.dir" location="${build.dir}/test/classes"/>
 		<mkdir dir="${test.classes.dir}"/>
 		<mkdir dir="${test.lib.dir}"/>
-		<javac compiler="extJavac" executable="${openjdk.dir}/bin/javac" srcdir="testsrc" destdir="${test.classes.dir}" deprecation="off" 
+		<javac compiler="extJavac" executable="${openjdk.dir}/bin/javac" srcdir="${source.test.java}" destdir="${test.classes.dir}" deprecation="off" 
 			debug="on" optimize="off" target="1.7" source="1.7" bootclasspath="${openjdk.rt.jar}">
 			<classpath>
 				<pathelement path="${classes.dir}"/>
@@ -172,7 +173,7 @@
 			</classpath>
 		</javac>
 		<copy toDir="${test.classes.dir}">
-			<fileset dir="testsrc"
+			<fileset dir="${source.test.java}"
 				excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html"/>
 		</copy>
 	</target>
@@ -256,7 +257,7 @@
 				</fileset>
 				<sourcepath>
 					<dirset dir="${basedir}">
-						<include name="src"/>
+						<include name="${source.main.java}"/>
 					</dirset>
 				</sourcepath>
 				<html outfile="${coverage.report.dir}/index.html"/>
