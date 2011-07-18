@@ -8,4 +8,7 @@ See the [User guide](https://github.com/szegedi/dynalink/wiki) and the
 [Javadoc](http://szegedi.github.com/dynalink/javadoc/index.html) for details.
 Both are fairly comprehensive and should get you started quickly.
 
+If you just want the binaries, you can get them from the 
+[Maven repository](http://search.maven.org/#browse%7C-362742625).
+
 Dynalink is Open Source software, licensed under the Apache 2.0 license.
