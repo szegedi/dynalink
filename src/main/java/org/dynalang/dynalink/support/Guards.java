@@ -19,6 +19,8 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility methods for creating typical guards. TODO: introduce reasonable
@@ -28,6 +30,7 @@ import java.lang.invoke.MethodType;
  * @version $Id: $
  */
 public class Guards {
+    private static final Logger LOG = Logger.getLogger(Guards.class.getName(), "org.dynalang.dynalink.support.messages");
     /**
      * Creates a guard method handle with arguments of a specified type, but
      * with boolean return value. When invoked, it returns true if the first
@@ -40,7 +43,18 @@ public class Guards {
      * specified class.
      */
     public static MethodHandle isOfClass(Class<?> clazz, MethodType type) {
-        return getMatchedHandle(IS_OF_CLASS, clazz, 0, type);
+        final Class<?> declaredType = type.parameterType(0);
+        if(clazz == declaredType) {
+            LOG.log(Level.WARNING, "isOfClassGuardAlwaysTrue",
+                    new Object[] { clazz.getName(), 0, type });
+            return constantTrue(type);
+        }
+        if(!declaredType.isAssignableFrom(clazz)) {
+            LOG.log(Level.WARNING, "isOfClassGuardAlwaysFalse",
+                    new Object[] { clazz.getName(), 0, type });
+            return constantFalse(type);
+        }
+        return getClassBoundArgumentTest(IS_OF_CLASS, clazz, 0, type);
     }
 
     /**
@@ -72,7 +86,18 @@ public class Guards {
      */
     public static MethodHandle isInstance(Class<?> clazz, int pos,
             MethodType type) {
-        return getMatchedHandle(IS_INSTANCE, clazz, pos, type);
+        final Class<?> declaredType = type.parameterType(pos);
+        if(clazz.isAssignableFrom(declaredType)) {
+            LOG.log(Level.WARNING, "isInstanceGuardAlwaysTrue",
+                    new Object[] { clazz.getName(), pos, type });
+            return constantTrue(type);
+        }
+        if(!declaredType.isAssignableFrom(clazz)) {
+            LOG.log(Level.WARNING, "isInstanceGuardAlwaysFalse",
+                    new Object[] { clazz.getName(), pos, type });
+            return constantFalse(type);
+        }
+        return getClassBoundArgumentTest(IS_INSTANCE, clazz, pos, type);
     }
 
     /**
@@ -86,8 +111,16 @@ public class Guards {
      * ignored.
      */
     public static MethodHandle isArray(int pos, MethodType type) {
-        return MethodHandles.permuteArguments(IS_ARRAY, type
-                .changeReturnType(Boolean.TYPE), new int[] { pos });
+        final Class<?> declaredType = type.parameterType(pos);
+        if(declaredType.isArray()) {
+            LOG.log(Level.WARNING, "isArrayGuardAlwaysTrue", new Object[] { pos, type });
+            return constantTrue(type);
+        }
+        if(!declaredType.isAssignableFrom(Object[].class)) {
+            LOG.log(Level.WARNING, "isArrayGuardAlwaysFalse", new Object[] { pos, type });
+            return constantFalse(type);
+        }
+        return getArgumentTest(IS_ARRAY, pos, type);
     }
 
     /**
@@ -120,19 +153,20 @@ public class Guards {
         return false;
     }
 
-    private static MethodHandle getMatchedHandle(MethodHandle test,
-            Object classOrRef, int pos, MethodType type) {
+    private static MethodHandle getClassBoundArgumentTest(MethodHandle test, Class<?> clazz,
+            int pos, MethodType type) {
+        // Bind the class to the first argument of the test
+        return getArgumentTest(MethodHandles.insertArguments(test, 0, clazz), pos, type);
+    }
+
+    private static MethodHandle getArgumentTest(MethodHandle test, int pos, MethodType type) {
         if(type.parameterCount() < 1) {
             throw new IllegalArgumentException(
                     "method type must specify at least one argument");
         }
-        final MethodHandle boundToClass =
-                MethodHandles.insertArguments(test, 0, classOrRef);
-        final MethodHandle narrowed =
-                MethodHandles.permuteArguments(boundToClass.asType(
-                        boundToClass.type().changeParameterType(0, type.parameterType(pos))),
-                        type.changeReturnType(Boolean.TYPE), new int[] { pos });
-        return narrowed;
+
+        return MethodHandles.permuteArguments(test.asType(test.type().changeParameterType(0,
+                type.parameterType(pos))), type.changeReturnType(Boolean.TYPE), new int[] { pos });
     }
 
     private static final MethodHandle IS_OF_CLASS =
@@ -168,5 +202,18 @@ public class Guards {
      */
     public static boolean _isOfClass(Class<?> c, Object o) {
         return o != null && o.getClass() == c;
+    }
+
+    private static MethodHandle constantTrue(MethodType type) {
+        return constantBoolean(Boolean.TRUE, type);
+    }
+
+    private static MethodHandle constantFalse(MethodType type) {
+        return constantBoolean(Boolean.FALSE, type);
+    }
+
+    private static MethodHandle constantBoolean(Boolean value, MethodType type) {
+        return MethodHandles.permuteArguments(MethodHandles.constant(Boolean.TYPE, value),
+                type.changeReturnType(Boolean.TYPE));
     }
 }
