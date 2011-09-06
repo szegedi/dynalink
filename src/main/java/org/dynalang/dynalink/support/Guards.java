@@ -129,8 +129,9 @@ public class Guards {
         final MethodHandle boundToClass =
                 MethodHandles.insertArguments(test, 0, classOrRef);
         final MethodHandle narrowed =
-                MethodHandles.permuteArguments(boundToClass, type
-                        .changeReturnType(Boolean.TYPE), new int[] { pos });
+                MethodHandles.permuteArguments(boundToClass.asType(
+                        boundToClass.type().changeParameterType(0, type.parameterType(pos))),
+                        type.changeReturnType(Boolean.TYPE), new int[] { pos });
         return narrowed;
     }
 
