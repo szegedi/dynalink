@@ -156,7 +156,7 @@ public class Guards {
     private static MethodHandle getClassBoundArgumentTest(MethodHandle test, Class<?> clazz,
             int pos, MethodType type) {
         // Bind the class to the first argument of the test
-        return getArgumentTest(MethodHandles.insertArguments(test, 0, clazz), pos, type);
+        return getArgumentTest(test.bindTo(clazz), pos, type);
     }
 
     private static MethodHandle getArgumentTest(MethodHandle test, int pos, MethodType type) {

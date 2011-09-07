@@ -465,10 +465,8 @@ class BeanLinker implements GuardingDynamicLinker {
             new Lookup(MethodHandles.lookup());
 
     private MethodHandle GET_PROPERTY_WITH_VARIABLE_ID =
-            MethodHandles.insertArguments(privateLookup.findSpecial(
-                    BeanLinker.class, "_getPropertyWithVariableId", MethodType
-                            .methodType(Object.class, Object.class,
-                                    Object.class)), 0, this);
+            privateLookup.findSpecial(BeanLinker.class, "_getPropertyWithVariableId",
+                    MethodType.methodType(Object.class, Object.class, Object.class)).bindTo(this);
 
     /**
      * This method is public for implementation reasons. Do not invoke it
@@ -496,12 +494,10 @@ class BeanLinker implements GuardingDynamicLinker {
     }
 
     private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID =
-            MethodHandles.insertArguments(privateLookup.findSpecial(
-                    BeanLinker.class, "_setPropertyWithVariableId", MethodType
-                            .methodType(Results.class,
-                                    CallSiteDescriptor.class,
-                                    LinkerServices.class, Object.class,
-                                    Object.class, Object.class)), 0, this);
+            privateLookup.findSpecial(BeanLinker.class, "_setPropertyWithVariableId",
+                    MethodType.methodType(Results.class, CallSiteDescriptor.class,
+                            LinkerServices.class, Object.class, Object.class,
+                            Object.class)).bindTo(this);
 
     /**
      * This method is public for implementation reasons. Do not invoke it
