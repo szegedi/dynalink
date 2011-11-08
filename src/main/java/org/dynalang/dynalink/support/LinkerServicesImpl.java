@@ -47,6 +47,7 @@ public class LinkerServicesImpl implements LinkerServices {
         this.topLevelLinker = topLevelLinker;
     }
 
+    @Override
     public boolean canConvert(Class<?> from, Class<?> to) {
         return typeConverterFactory.canConvert(from, to);
     }

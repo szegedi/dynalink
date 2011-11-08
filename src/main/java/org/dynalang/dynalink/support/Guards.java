@@ -144,12 +144,14 @@ public class Guards {
         }
         // Otherwise, can only refer directly to classes residing in same or
         // parent class loader.
+
+        ClassLoader referrer = referrerLoader;
         do {
-            if(referrerLoader == referredLoader) {
+            if(referrer == referredLoader) {
                 return true;
             }
-            referrerLoader = referrerLoader.getParent();
-        } while(referrerLoader != null);
+            referrer = referrer.getParent();
+        } while(referrer != null);
         return false;
     }
 

@@ -125,14 +125,14 @@ public class GuardedInvocation {
      * Creates a new guarded invocation with different methods, preserving the
      * switch point.
      *
-     * @param invocation the new invocation
-     * @param guard the new guard
+     * @param newInvocation the new invocation
+     * @param newGuard the new guard
      * @return a new guarded invocation with the replaced methods and the same
      * switch point as this invocation.
      */
-    public GuardedInvocation replaceMethods(MethodHandle invocation,
-            MethodHandle guard) {
-        return new GuardedInvocation(invocation, guard, switchPoint);
+    public GuardedInvocation replaceMethods(MethodHandle newInvocation,
+            MethodHandle newGuard) {
+        return new GuardedInvocation(newInvocation, newGuard, switchPoint);
     }
 
     private static void assertType(MethodHandle mh, MethodType type) {

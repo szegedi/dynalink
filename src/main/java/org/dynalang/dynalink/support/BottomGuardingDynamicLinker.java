@@ -41,10 +41,12 @@ public class BottomGuardingDynamicLinker implements
     private BottomGuardingDynamicLinker() {
     }
 
+    @Override
     public boolean canLinkType(Class<?> type) {
         return false;
     }
 
+    @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
             LinkerServices linkerServices) {
         return null;

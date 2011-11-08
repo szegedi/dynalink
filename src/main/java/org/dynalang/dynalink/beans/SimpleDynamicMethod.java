@@ -53,6 +53,7 @@ class SimpleDynamicMethod implements DynamicMethod {
         return target;
     }
 
+    @Override
     public MethodHandle getInvocation(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices) {

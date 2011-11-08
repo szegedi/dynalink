@@ -39,12 +39,14 @@ import org.dynalang.dynalink.linker.LinkerServices;
 public class TypeConverterFactory {
 
     private final GuardingTypeConverterFactory[] factories;
-    private final ClassValue<ClassMap<MethodHandle>> converters =
+    private final ClassValue<ClassMap<MethodHandle>> converterMap =
             new ClassValue<ClassMap<MethodHandle>>() {
+                @Override
                 protected ClassMap<MethodHandle> computeValue(
                         final Class<?> sourceType) {
                     return new ClassMap<MethodHandle>(sourceType
                             .getClassLoader()) {
+                        @Override
                         protected MethodHandle computeValue(Class<?> targetType) {
                             return createConverter(sourceType, targetType);
                         }
@@ -92,18 +94,19 @@ public class TypeConverterFactory {
      */
     public MethodHandle asType(MethodHandle handle,
             final MethodType fromType) {
-        final MethodType toType = handle.type();
+        MethodHandle newHandle = handle;
+        final MethodType toType = newHandle.type();
         final int l = toType.parameterCount();
         if(l != fromType.parameterCount()) {
             throw new WrongMethodTypeException("Parameter counts differ");
         }
         int pos = 0;
-        List<MethodHandle> converters = new LinkedList<MethodHandle>();
+        final List<MethodHandle> converters = new LinkedList<MethodHandle>();
         for(int i = 0; i < l; ++i) {
             final Class<?> fromParamType = fromType.parameterType(i);
             final Class<?> toParamType = toType.parameterType(i);
             if(canAutoConvert(fromParamType, toParamType)) {
-                handle = applyConverters(handle, pos, converters);
+                newHandle = applyConverters(newHandle, pos, converters);
             } else {
                 final MethodHandle converter =
                         getTypeConverter(fromParamType, toParamType);
@@ -113,22 +116,22 @@ public class TypeConverterFactory {
                     }
                     converters.add(converter);
                 } else {
-                    handle = applyConverters(handle, pos, converters);
+                    newHandle = applyConverters(newHandle, pos, converters);
                 }
             }
         }
-        return applyConverters(handle, pos, converters).asType(fromType);
+        return applyConverters(newHandle, pos, converters).asType(fromType);
     }
 
     private static MethodHandle applyConverters(MethodHandle handle, int pos,
             List<MethodHandle> converters) {
-        if(!converters.isEmpty()) {
-            handle =
-                    MethodHandles.filterArguments(handle, pos, converters
-                            .toArray(new MethodHandle[converters.size()]));
-            converters.clear();
+        if(converters.isEmpty()) {
+            return handle;
         }
-        return handle;
+        final MethodHandle newHandle = MethodHandles.filterArguments(handle,
+                pos, converters.toArray(new MethodHandle[converters.size()]));
+        converters.clear();
+        return newHandle;
     }
 
     /**
@@ -200,7 +203,7 @@ public class TypeConverterFactory {
     private MethodHandle getTypeConverter(Class<?> sourceType,
             Class<?> targetType) {
         final MethodHandle converter =
-                converters.get(sourceType).get(targetType);
+                converterMap.get(sourceType).get(targetType);
         return converter == IDENTITY_CONVERSION ? null : converter;
     }
 

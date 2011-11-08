@@ -59,8 +59,8 @@ public class LinkRequestImpl implements LinkRequest {
     }
 
     @Override
-    public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor,
-            Object[] arguments) {
-        return new LinkRequestImpl(callSiteDescriptor, arguments);
+    public LinkRequest replaceArguments(CallSiteDescriptor newCallSiteDescriptor,
+            Object[] newArguments) {
+        return new LinkRequestImpl(newCallSiteDescriptor, newArguments);
     }
 }

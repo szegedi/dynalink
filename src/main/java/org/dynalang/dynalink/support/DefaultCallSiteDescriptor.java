@@ -35,6 +35,7 @@ class DefaultCallSiteDescriptor extends CallSiteDescriptor {
      * retrieves the property named "color" on the object it is invoked on.
      * @return the number of tokens in the name of the method at the call site.
      */
+    @Override
     public int getNameTokenCount() {
         return tokenizedName.length;
     }
@@ -49,6 +50,7 @@ class DefaultCallSiteDescriptor extends CallSiteDescriptor {
      * @return the <i>i<sup>th</sup></i> token in the method name at the call
      * site.
      */
+    @Override
     public String getNameToken(int i) {
         try {
             return tokenizedName[i];
@@ -83,6 +85,7 @@ class DefaultCallSiteDescriptor extends CallSiteDescriptor {
      * full name from tokens on each invocation.
      * @return the name of the method at the call site.
      */
+    @Override
     public String getName() {
         final StringBuilder b = new StringBuilder(8*tokenizedName.length);
         b.append(tokenizedName[0]);
@@ -97,6 +100,7 @@ class DefaultCallSiteDescriptor extends CallSiteDescriptor {
      *
      * @return type of the method at the call site.
      */
+    @Override
     public MethodType getMethodType() {
         return methodType;
     }
@@ -124,6 +128,7 @@ class DefaultCallSiteDescriptor extends CallSiteDescriptor {
      * @param to the index of the first parameter after "from" not to drop
      * @return a new call site descriptor with the parameter dropped.
      */
+    @Override
     public CallSiteDescriptor dropParameterTypes(int from, int to) {
         return new DefaultCallSiteDescriptor(tokenizedName, methodType
                         .dropParameterTypes(from, to));
@@ -139,6 +144,7 @@ class DefaultCallSiteDescriptor extends CallSiteDescriptor {
      * @return a new call site descriptor, with the type of the parameter in the
      * method type changed.
      */
+    @Override
     public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
         return new DefaultCallSiteDescriptor(tokenizedName, methodType
                         .changeParameterType(num, newType));

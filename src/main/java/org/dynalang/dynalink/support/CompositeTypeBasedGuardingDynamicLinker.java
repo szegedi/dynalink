@@ -51,6 +51,7 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
             this.linkers = linkers;
         }
 
+        @Override
         protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
             for(TypeBasedGuardingDynamicLinker linker: linkers) {
                 if(linker.canLinkType(clazz)) {
@@ -80,10 +81,12 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
                         .toArray(new TypeBasedGuardingDynamicLinker[l.size()]));
     }
 
+    @Override
     public boolean canLinkType(Class<?> type) {
         return classToLinker.get(type) != BottomGuardingDynamicLinker.INSTANCE;
     }
 
+    @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
             final LinkerServices linkerServices) throws Exception {
         final Object[] arguments = linkRequest.getArguments();

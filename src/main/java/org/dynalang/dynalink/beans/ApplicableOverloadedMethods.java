@@ -60,6 +60,7 @@ class ApplicableOverloadedMethods {
 
     private static MaximallySpecific.TypeFunction<MethodHandle> TF =
             new MaximallySpecific.TypeFunction<MethodHandle>() {
+                @Override
                 public MethodType type(MethodHandle mh) {
                     return mh.type();
                 };

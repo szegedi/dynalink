@@ -97,6 +97,7 @@ class AccessibleMethodsLookup {
          * @return true if the other object is also a method signature with the
          * same name, same number of arguments, and same types of arguments.
          */
+        @Override
         public boolean equals(final Object o) {
             if(o instanceof MethodSignature) {
                 final MethodSignature ms = (MethodSignature)o;
@@ -109,6 +110,7 @@ class AccessibleMethodsLookup {
          * Returns a hash code, consistent with the overridden
          * {@link #equals(Object)}.
          */
+        @Override
         public int hashCode() {
             return name.hashCode() ^ Arrays.hashCode(args);
         }

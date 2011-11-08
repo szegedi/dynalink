@@ -49,30 +49,31 @@ public class TypeUtilities {
         if(c1 == c2) {
             return c1;
         }
-        if(c2.isPrimitive()) {
-            if(c2 == Byte.TYPE)
-                c2 = Byte.class;
+        Class<?> c3 = c2;
+        if(c3.isPrimitive()) {
+            if(c3 == Byte.TYPE)
+                c3 = Byte.class;
             else
-                if(c2 == Short.TYPE)
-                    c2 = Short.class;
+                if(c3 == Short.TYPE)
+                    c3 = Short.class;
                 else
-                    if(c2 == Character.TYPE)
-                        c2 = Character.class;
+                    if(c3 == Character.TYPE)
+                        c3 = Character.class;
                     else
-                        if(c2 == Integer.TYPE)
-                            c2 = Integer.class;
+                        if(c3 == Integer.TYPE)
+                            c3 = Integer.class;
                         else
-                            if(c2 == Float.TYPE)
-                                c2 = Float.class;
+                            if(c3 == Float.TYPE)
+                                c3 = Float.class;
                             else
-                                if(c2 == Long.TYPE)
-                                    c2 = Long.class;
+                                if(c3 == Long.TYPE)
+                                    c3 = Long.class;
                                 else
-                                    if(c2 == Double.TYPE)
-                                        c2 = Double.class;
+                                    if(c3 == Double.TYPE)
+                                        c3 = Double.class;
         }
-        Set<Class<?>> a1 = getAssignables(c1, c2);
-        Set<Class<?>> a2 = getAssignables(c2, c1);
+        Set<Class<?>> a1 = getAssignables(c1, c3);
+        Set<Class<?>> a2 = getAssignables(c3, c1);
         a1.retainAll(a2);
         if(a1.isEmpty()) {
             // Can happen when at least one of the arguments is an interface,

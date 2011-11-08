@@ -56,6 +56,7 @@ public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker,
         this.linkers = l.toArray(new GuardingDynamicLinker[l.size()]);
     }
 
+    @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
             final LinkerServices linkerServices) throws Exception {
         for(final GuardingDynamicLinker linker: linkers) {

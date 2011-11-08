@@ -55,6 +55,7 @@ public class BeansLinker implements GuardingDynamicLinker {
     public BeansLinker() {
     }
 
+    @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request,
             final LinkerServices linkerServices) throws Exception {
         final Object[] arguments = request.getArguments();

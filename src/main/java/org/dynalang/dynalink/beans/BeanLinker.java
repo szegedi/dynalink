@@ -136,19 +136,20 @@ class BeanLinker implements GuardingDynamicLinker {
         throw new AssertionError();
     }
 
+    @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request,
             final LinkerServices linkerServices) {
-        request = request.withoutRuntimeContext();
+        final LinkRequest ncrequest = request.withoutRuntimeContext();
         // BeansLinker already checked that the name is at least 2 elements
         // long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor =
-                request.getCallSiteDescriptor();
+                ncrequest.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getNameToken(1);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
         if("getProp".equals(op)) {
             return getPropertyGetter(callSiteDescriptor);
         }
-        final Object[] arguments = request.getArguments();
+        final Object[] arguments = ncrequest.getArguments();
         // Either dyn:setProp:name(this, value) or dyn:setProp(this, name,
         // value)
         if("setProp".equals(op)) {
@@ -188,7 +189,7 @@ class BeanLinker implements GuardingDynamicLinker {
             Lookup.PUBLIC.findVirtual(Map.class, "get", MethodType.methodType(
                     Object.class, Object.class));
 
-    private GuardedInvocation getElementGetter(
+    private static GuardedInvocation getElementGetter(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices, final Object... arguments) {
         assertParameterCount(callSiteDescriptor, 2);
@@ -242,7 +243,7 @@ class BeanLinker implements GuardingDynamicLinker {
             Lookup.PUBLIC.findVirtual(Map.class, "put", MethodType.methodType(
                     Object.class, Object.class, Object.class));
 
-    private GuardedInvocation getElementSetter(
+    private static GuardedInvocation getElementSetter(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices, final Object... arguments) {
         assertParameterCount(callSiteDescriptor, 3);
@@ -301,7 +302,7 @@ class BeanLinker implements GuardingDynamicLinker {
             Lookup.PUBLIC.findVirtual(Map.class, "size", MethodType
                     .methodType(int.class));
 
-    private GuardedInvocation getLengthGetter(
+    private static GuardedInvocation getLengthGetter(
             final CallSiteDescriptor callSiteDescriptor,
             final Object... arguments) {
         assertParameterCount(callSiteDescriptor, 1);
@@ -546,11 +547,11 @@ class BeanLinker implements GuardingDynamicLinker {
         private final MethodHandle getter;
 
         PropertyGetterDescriptor(Method getter) {
-            getter =
+            final Method mostGenericGetter =
                     getMostGenericGetter(getter.getName(), getter
                             .getReturnType(), getter.getDeclaringClass());
-            this.getter = Lookup.PUBLIC.unreflect(getter);
-            this.mostGenericClassForGetter = getter.getDeclaringClass();
+            this.getter = Lookup.PUBLIC.unreflect(mostGenericGetter);
+            this.mostGenericClassForGetter = mostGenericGetter.getDeclaringClass();
         }
 
         private static Method getMostGenericGetter(String name,

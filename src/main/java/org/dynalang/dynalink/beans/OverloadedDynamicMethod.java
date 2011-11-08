@@ -19,7 +19,6 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.BootstrapMethodError;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +51,7 @@ class OverloadedDynamicMethod implements DynamicMethod {
         this.classLoader = clazz.getClassLoader();
     }
 
+    @Override
     public MethodHandle getInvocation(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices) {

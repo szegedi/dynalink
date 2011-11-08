@@ -64,6 +64,9 @@ class MaximallySpecific {
                         lessSpecific = true;
                         break;
                     }
+                    case indeterminate: {
+                        // do nothing
+                    }
                 }
             }
             if(!lessSpecific) {
