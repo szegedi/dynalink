@@ -45,7 +45,7 @@ public class LinkRequestImpl implements LinkRequest {
 
     @Override
     public Object[] getArguments() {
-        return arguments.clone();
+        return arguments != null ? arguments.clone() : null;
     }
 
     @Override
