@@ -20,10 +20,10 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import junit.framework.TestCase;
-
-import org.dynalang.dynalink.MonomorphicCallSite;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
+
+import junit.framework.TestCase;
 
 /**
  * Tests for the {@link MonomorphicCallSite}.
@@ -39,7 +39,7 @@ public class TestMonomorphicCallSite extends TestCase {
     /**
      * Tests prohibition of setting null target.
      */
-    public void testSetNull() {
+    public static void testSetNull() {
         try {
             createCallSite(MethodType.methodType(Void.TYPE))
                 .setGuardedInvocation(null);
@@ -52,7 +52,7 @@ public class TestMonomorphicCallSite extends TestCase {
     /**
      * Tests setting a guardless target (it has to be linked directly).
      */
-    public void testSetGuardless() {
+    public static void testSetGuardless() {
         final MethodHandle mh = MethodHandles.identity(Object.class);
         final MonomorphicCallSite mcs = createCallSite(mh.type());
         mcs.setGuardedInvocation(new GuardedInvocation(mh, null));
@@ -60,6 +60,7 @@ public class TestMonomorphicCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(null, "", type);
+        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "",
+                type));
     }
 }

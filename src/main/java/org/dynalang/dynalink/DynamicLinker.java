@@ -111,7 +111,7 @@ public class DynamicLinker {
     private MethodHandle createRelinkAndInvokeMethod(
             final RelinkableCallSite callSite) {
         // Make a bound MH of invoke() for this linker and call site
-        final CallSiteDescriptor descriptor = callSite.getCallSiteDescriptor();
+        final CallSiteDescriptor descriptor = callSite.getDescriptor();
         final MethodHandle boundInvoker =
                 MethodHandles.insertArguments(RELINK_AND_INVOKE, 0, this,
                         descriptor, callSite);

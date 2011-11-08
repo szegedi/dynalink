@@ -191,7 +191,7 @@ class BeanLinker implements GuardingDynamicLinker {
     private GuardedInvocation getElementGetter(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices, final Object... arguments) {
-        callSiteDescriptor.assertParameterCount(2);
+        assertParameterCount(callSiteDescriptor, 2);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
         // If declared type of receiver at the call site is already an array, a
@@ -245,7 +245,7 @@ class BeanLinker implements GuardingDynamicLinker {
     private GuardedInvocation getElementSetter(
             final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices, final Object... arguments) {
-        callSiteDescriptor.assertParameterCount(3);
+        assertParameterCount(callSiteDescriptor, 3);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
         // If declared type of receiver at the call site is already an array, a
@@ -304,7 +304,7 @@ class BeanLinker implements GuardingDynamicLinker {
     private GuardedInvocation getLengthGetter(
             final CallSiteDescriptor callSiteDescriptor,
             final Object... arguments) {
-        callSiteDescriptor.assertParameterCount(1);
+        assertParameterCount(callSiteDescriptor, 1);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
         // If declared type of receiver at the call site is already an array,
@@ -388,7 +388,7 @@ class BeanLinker implements GuardingDynamicLinker {
             case 2: {
                 // Must have theee arguments: target object, property name, and
                 // property value.
-                callSiteDescriptor.assertParameterCount(3);
+                assertParameterCount(callSiteDescriptor, 3);
                 // Create a new call site descriptor that drops the ID
                 // argument. This is used for embedded overloaded method
                 // lookup.
@@ -401,7 +401,7 @@ class BeanLinker implements GuardingDynamicLinker {
             }
             case 3: {
                 // Must have two arguments: target object and property value
-                callSiteDescriptor.assertParameterCount(2);
+                assertParameterCount(callSiteDescriptor, 2);
                 // Fixed name - change to a call of setXxx() to allow for
                 // overloaded setters
                 return getCallPropWithThis(callSiteDescriptor, linkerServices,
@@ -427,13 +427,13 @@ class BeanLinker implements GuardingDynamicLinker {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
                 // Must have exactly two arguments: receiver and name
-                callSiteDescriptor.assertParameterCount(2);
+                assertParameterCount(callSiteDescriptor, 2);
                 return new GuardedInvocation(GET_PROPERTY_WITH_VARIABLE_ID
                         .asType(type), Guards.isOfClass(clazz, type));
             }
             case 3: {
                 // Must have exactly one argument: receiver
-                callSiteDescriptor.assertParameterCount(1);
+                assertParameterCount(callSiteDescriptor, 1);
                 // Fixed name
                 final PropertyGetterDescriptor desc =
                         properties.get(callSiteDescriptor.getNameToken(2));
@@ -458,6 +458,14 @@ class BeanLinker implements GuardingDynamicLinker {
                 // Can't do anything with more than 3 name components
                 return null;
             }
+        }
+    }
+
+    private static void assertParameterCount(CallSiteDescriptor descriptor,
+            int paramCount) {
+        if(descriptor.getMethodType().parameterCount() != paramCount) {
+            throw new BootstrapMethodError(descriptor.getName() +
+                    " must have exactly " + paramCount + " parameters.");
         }
     }
 

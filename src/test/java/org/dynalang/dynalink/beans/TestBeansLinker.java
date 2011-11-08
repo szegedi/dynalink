@@ -19,10 +19,6 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.BootstrapMethodError;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -30,6 +26,9 @@ import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.LinkRequestImpl;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 /**
  * Tests {@link BeansLinker} corner cases not exercised by other tests.
@@ -106,7 +105,7 @@ public class TestBeansLinker extends TestCase {
 
     public static  CallSiteDescriptor createCallSiteDescriptor(String name,
             MethodType methodType) {
-        return new CallSiteDescriptor(MethodHandles.publicLookup(), name, methodType);
+        return CallSiteDescriptor.create(MethodHandles.publicLookup(), name, methodType);
     }
 
 }

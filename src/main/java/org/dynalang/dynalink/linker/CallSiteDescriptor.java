@@ -16,9 +16,11 @@
 
 package org.dynalang.dynalink.linker;
 
-import java.lang.invoke.MethodType;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.util.StringTokenizer;
+import java.lang.invoke.MethodType;
+
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 /**
  * A descriptor of a call site. Used in place of passing a real call site to
@@ -29,30 +31,12 @@ import java.util.StringTokenizer;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class CallSiteDescriptor {
-
-    private static final String TOKEN_DELIMITER = ":";
-    private static final char TOKEN_DELIMITER_CHAR = ':';
-
-    private final String[] tokenizedName;
-    private final MethodType methodType;
-    private final Lookup lookup;
+public abstract class CallSiteDescriptor {
 
     /**
-     * Create a new call site descriptor from explicit information.
-     * @param lookup the lookup for the class at the call site
-     * @param name the name of the method
-     * @param methodType the method type
+     * Protected constructor for subclasses.
      */
-    public CallSiteDescriptor(Lookup lookup, String name, MethodType methodType) {
-        this(lookup, tokenizeName(name), methodType);
-    }
-
-    private CallSiteDescriptor(Lookup lookup, String[] tokenizedName,
-            MethodType methodType) {
-        this.tokenizedName = tokenizedName;
-        this.methodType = methodType;
-        this.lookup = lookup;
+    protected CallSiteDescriptor() {
     }
 
     /**
@@ -62,9 +46,7 @@ public class CallSiteDescriptor {
      * retrieves the property named "color" on the object it is invoked on.
      * @return the number of tokens in the name of the method at the call site.
      */
-    public int getNameTokenCount() {
-        return tokenizedName.length;
-    }
+    public abstract int getNameTokenCount();
 
     /**
      * Returns the <i>i<sup>th</sup></i> token in the method name at the call
@@ -76,14 +58,7 @@ public class CallSiteDescriptor {
      * @return the <i>i<sup>th</sup></i> token in the method name at the call
      * site.
      */
-    public String getNameToken(int i) {
-        try {
-            return tokenizedName[i];
-        }
-        catch(ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
+    public abstract String getNameToken(int i);
 
     /**
      * Returns the name of the method at the call site. Note that the object
@@ -91,46 +66,40 @@ public class CallSiteDescriptor {
      * full name from tokens on each invocation.
      * @return the name of the method at the call site.
      */
-    public String getName() {
-        final StringBuilder b = new StringBuilder(8*tokenizedName.length);
-        b.append(tokenizedName[0]);
-        for(int i = 1; i < tokenizedName.length; ++i) {
-            b.append(TOKEN_DELIMITER_CHAR).append(tokenizedName[i]);
-        }
-        return b.toString();
-    }
+    public abstract String getName();
 
     /**
      * The type of the method at the call site.
      *
      * @return type of the method at the call site.
      */
-    public MethodType getMethodType() {
-        return methodType;
-    }
+    public abstract MethodType getMethodType();
 
     /**
-     * Checks that the method type has exactly the desired number of arguments,
-     * throws an exception if it doesn't.
-     *
-     * @param count the desired parameter count
-     * @throws BootstrapMethodError if the parameter count doesn't match
+     * Returns the lookup passed to the bootstrap method.
+     * @return the lookup passed to the bootstrap method.
      */
-    public void assertParameterCount(int count) {
-        if(methodType.parameterCount() != count) {
-            throw new BootstrapMethodError(getName() + " must have exactly " +
-                    count + " parameters");
-        }
-    }
+    public abstract Lookup getLookup();
 
-    private static String[] tokenizeName(String name) {
-        final StringTokenizer tok = new StringTokenizer(name, TOKEN_DELIMITER);
-        final String[] tokens = new String[tok.countTokens()];
-        for(int i = 0; i < tokens.length; ++i) {
-            tokens[i] = tok.nextToken().intern();
-        }
-        return tokens;
-    }
+    /**
+     * Returns the number of additional static bootstrap arguments at the call
+     * site.
+     * @return the number of additional static bootstrap arguments at the call
+     * site; it can be between 0 and 251.
+     */
+    public abstract int getAdditionalBootstrapArgumentCount();
+
+    /**
+     * Returns the <i>i<sup>th</sup></i> additional static bootstrap argument at
+     * the call site.
+     * @param i the index of the argument. Must be between 0 (inclusive) and
+     * {@link #getAdditionalBootstrapArgumentCount()} (exclusive).
+     * @throws IllegalArgumentException if the index is outside the allowed
+     * range.
+     * @return the <i>i<sup>th</sup></i> additional static bootstrap argument at
+     * the call site.
+     */
+    public abstract Object getAdditionalBootstrapArgument(int i);
 
     /**
      * Creates a new call site descriptor from this descriptor, which is
@@ -141,10 +110,7 @@ public class CallSiteDescriptor {
      * @param to the index of the first parameter after "from" not to drop
      * @return a new call site descriptor with the parameter dropped.
      */
-    public CallSiteDescriptor dropParameterTypes(int from, int to) {
-        return new CallSiteDescriptor(lookup, tokenizedName, methodType
-                        .dropParameterTypes(from, to));
-    }
+    public abstract CallSiteDescriptor dropParameterTypes(int from, int to);
 
     /**
      * Creates a new call site descriptor from this descriptor, which is
@@ -156,8 +122,23 @@ public class CallSiteDescriptor {
      * @return a new call site descriptor, with the type of the parameter in the
      * method type changed.
      */
-    public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return new CallSiteDescriptor(lookup, tokenizedName, methodType
-                        .changeParameterType(num, newType));
+    public abstract CallSiteDescriptor changeParameterType(int num, Class<?> newType);
+
+    /**
+     * Creates a new call site descriptor instance. The actual underlying class of the instance is
+     * dependent on the passed arguments to be space efficient; i.e. if you don't use either a
+     * non-public lookup or static bootstrap arguments, you'll get back an implementation that
+     * doesn't waste space on storing them.
+     * @param lookup the lookup that determines access rights at the call site. If your language
+     * runtime doesn't have equivalents of Java access concepts, just use
+     * {@link MethodHandles#publicLookup()}. Must not be null.
+     * @param name the name of the method at the call site. Must not be null.
+     * @param methodType the type of the method at the call site. Must not be null.
+     * @param bootstrapArgs additional static bootstrap arguments. Can be null.
+     * @return a new call site descriptor.
+     */
+    public static CallSiteDescriptor create(Lookup lookup, String name, MethodType methodType,
+            Object... bootstrapArgs) {
+        return CallSiteDescriptorFactory.create(lookup, name, methodType, bootstrapArgs);
     }
 }

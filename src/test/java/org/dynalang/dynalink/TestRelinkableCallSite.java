@@ -19,10 +19,9 @@ package org.dynalang.dynalink;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import junit.framework.TestCase;
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
 
-import org.dynalang.dynalink.MonomorphicCallSite;
-import org.dynalang.dynalink.RelinkableCallSite;
+import junit.framework.TestCase;
 
 /**
  * Tests for the {@link RelinkableCallSite}.
@@ -34,7 +33,7 @@ public class TestRelinkableCallSite extends TestCase {
     /**
      * Tests against allowing setting null as the relink method.
      */
-    public void testNullRelink() {
+    public static void testNullRelink() {
         try {
             createCallSite(MethodType.methodType(Void.TYPE)).setRelink(null);
             fail();
@@ -46,7 +45,7 @@ public class TestRelinkableCallSite extends TestCase {
     /**
      * Tests against allowing relink to be called twice.
      */
-    public void testRelinkSetTwice() {
+    public static void testRelinkSetTwice() {
         RelinkableCallSite cs = createCallSite(MethodType.methodType(
                 Object.class));
         cs.setRelink(MethodHandles.constant(Object.class, new Object()));
@@ -59,6 +58,7 @@ public class TestRelinkableCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(null, "", type);
+        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "",
+                type));
     }
 }

@@ -2,8 +2,6 @@ package org.dynalang.dynalink.support;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.MethodType;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.SwitchPoint;
 
@@ -21,18 +19,15 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 public abstract class AbstractRelinkableCallSite extends MutableCallSite
         implements RelinkableCallSite {
     private MethodHandle relink;
-    private final CallSiteDescriptor callSiteDescriptor;
+    private final CallSiteDescriptor descriptor;
 
     /**
      * Creates a new relinkable call site.
-     * @param lookup the lookup for the caller class
-     * @param name the name of the method at the call site
-     * @param type the method type of the call site
+     * @param descriptor the descriptor for this call site
      */
-    protected AbstractRelinkableCallSite(Lookup lookup, String name,
-            MethodType type) {
-        super(type);
-        callSiteDescriptor = new CallSiteDescriptor(lookup, name, type);
+    protected AbstractRelinkableCallSite(CallSiteDescriptor descriptor) {
+        super(descriptor.getMethodType());
+        this.descriptor = descriptor;
     }
 
     @Override
@@ -58,8 +53,13 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite
     }
 
     @Override
+    public CallSiteDescriptor getDescriptor() {
+        return descriptor;
+    }
+
+    @Override
     public CallSiteDescriptor getCallSiteDescriptor() {
-        return callSiteDescriptor;
+        return getDescriptor();
     }
 
     @Override

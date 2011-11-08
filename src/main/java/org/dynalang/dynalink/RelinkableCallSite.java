@@ -51,6 +51,14 @@ public interface RelinkableCallSite {
      *
      * @return the descriptor for this call site.
      */
+    public CallSiteDescriptor getDescriptor();
+
+    /**
+     * Returns the descriptor for this call site.
+     * @deprecated use {@link #getDescriptor()} instead.
+     * @return the descriptor for this call site.
+     */
+    @Deprecated
     public CallSiteDescriptor getCallSiteDescriptor();
 
     /**
