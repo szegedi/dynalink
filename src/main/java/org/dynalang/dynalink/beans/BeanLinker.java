@@ -52,8 +52,8 @@ import org.dynalang.dynalink.support.Lookup;
 class BeanLinker implements GuardingDynamicLinker {
     private final Class<?> clazz;
 
-    private final Map<String, PropertyGetterDescriptor> properties =
-            new HashMap<String, PropertyGetterDescriptor>();
+    private final Map<String, MethodHandle> propertyGetters =
+            new HashMap<String, MethodHandle>();
     private final Map<String, DynamicMethod> methods =
             new HashMap<String, DynamicMethod>();
 
@@ -75,7 +75,7 @@ class BeanLinker implements GuardingDynamicLinker {
             if(accReadMethod == null) {
                 continue;
             }
-            properties.put(descriptor.getName(), new PropertyGetterDescriptor(
+            propertyGetters.put(descriptor.getName(), getMostGenericGetter(
                     readMethod));
         }
 
@@ -94,6 +94,7 @@ class BeanLinker implements GuardingDynamicLinker {
             }
             addMember(accMethod);
         }
+        Introspector.flushFromCaches(clazz);
     }
 
     /**
@@ -436,13 +437,7 @@ class BeanLinker implements GuardingDynamicLinker {
                 // Must have exactly one argument: receiver
                 assertParameterCount(callSiteDescriptor, 1);
                 // Fixed name
-                final PropertyGetterDescriptor desc =
-                        properties.get(callSiteDescriptor.getNameToken(2));
-                if(desc == null) {
-                    // No such property
-                    return null;
-                }
-                getter = desc.getter;
+                getter = propertyGetters.get(callSiteDescriptor.getNameToken(2));
                 if(getter == null) {
                     // Property has no getter
                     return null;
@@ -453,7 +448,7 @@ class BeanLinker implements GuardingDynamicLinker {
                 // method, and use that as the guard with Guards.isInstance()
                 // for a more stably linked call site.
                 return new GuardedInvocation(getter.asType(type), Guards
-                        .isInstance(desc.mostGenericClassForGetter, type));
+                        .isInstance(getter.type().parameterType(0), type));
             }
             default: {
                 // Can't do anything with more than 3 name components
@@ -490,12 +485,7 @@ class BeanLinker implements GuardingDynamicLinker {
      */
     public Object _getPropertyWithVariableId(Object obj, Object id)
             throws Throwable {
-        PropertyGetterDescriptor desc = properties.get(String.valueOf(id));
-        if(desc == null) {
-            // No such property
-            return Results.doesNotExist;
-        }
-        MethodHandle getter = desc.getter;
+        MethodHandle getter = propertyGetters.get(String.valueOf(id));
         if(getter == null) {
             return Results.notReadable;
         }
@@ -536,51 +526,39 @@ class BeanLinker implements GuardingDynamicLinker {
         return Results.notWritable;
     }
 
-    private static class PropertyGetterDescriptor {
-        // mostGenericClassForGetter is an optimization; since property getters
-        // are no-arg, they can't be overloaded with the same number of
-        // arguments. Therefore, it is safe to find the most generic superclass
-        // or superinterface that declares the getter method, and use it as the
-        // type guard, resulting in a more stable call site (one that'll be
-        // relinked less).
-        private final Class<?> mostGenericClassForGetter;
-        private final MethodHandle getter;
+    private static MethodHandle getMostGenericGetter(Method getter) {
+        final Method mostGenericGetter =
+                getMostGenericGetter(getter.getName(), getter
+                        .getReturnType(), getter.getDeclaringClass());
+        return Lookup.PUBLIC.unreflect(mostGenericGetter);
+    }
 
-        PropertyGetterDescriptor(Method getter) {
-            final Method mostGenericGetter =
-                    getMostGenericGetter(getter.getName(), getter
-                            .getReturnType(), getter.getDeclaringClass());
-            this.getter = Lookup.PUBLIC.unreflect(mostGenericGetter);
-            this.mostGenericClassForGetter = mostGenericGetter.getDeclaringClass();
-        }
-
-        private static Method getMostGenericGetter(String name,
-                Class<?> returnType, Class<?> declaringClass) {
-            if(declaringClass == null) {
-                return null;
-            }
-            // Prefer interfaces
-            for(Class<?> itf: declaringClass.getInterfaces()) {
-                final Method itfGetter =
-                        getMostGenericGetter(name, returnType, itf);
-                if(itfGetter != null) {
-                    return itfGetter;
-                }
-            }
-            final Method superGetter =
-                    getMostGenericGetter(name, returnType, declaringClass
-                            .getSuperclass());
-            if(superGetter != null) {
-                return superGetter;
-            }
-            if(Modifier.isPublic(declaringClass.getModifiers())) {
-                try {
-                    return declaringClass.getMethod(name);
-                } catch(NoSuchMethodException e) {
-                    // Intentionally ignored, meant to fall through
-                }
-            }
+    private static Method getMostGenericGetter(String name,
+            Class<?> returnType, Class<?> declaringClass) {
+        if(declaringClass == null) {
             return null;
         }
+        // Prefer interfaces
+        for(Class<?> itf: declaringClass.getInterfaces()) {
+            final Method itfGetter = getMostGenericGetter(name, returnType,
+                    itf);
+            if(itfGetter != null) {
+                return itfGetter;
+            }
+        }
+        final Method superGetter =
+                getMostGenericGetter(name, returnType,
+                        declaringClass.getSuperclass());
+        if(superGetter != null) {
+            return superGetter;
+        }
+        if(Modifier.isPublic(declaringClass.getModifiers())) {
+            try {
+                return declaringClass.getMethod(name);
+            } catch(NoSuchMethodException e) {
+                // Intentionally ignored, meant to fall through
+            }
+        }
+        return null;
     }
 }
