@@ -183,7 +183,11 @@ class OverloadedDynamicMethod implements DynamicMethod {
         final boolean varArgs = m.isVarargsCollector();
         final int fixedArgLen = methodType.parameterCount() - (varArgs ? 1 : 0);
         final int callSiteArgLen = callSiteType.parameterCount();
-        if(callSiteArgLen < fixedArgLen) {
+        if(varArgs) {
+            if(callSiteArgLen < fixedArgLen) {
+                return false;
+            }
+        } else if(callSiteArgLen != fixedArgLen) {
             return false;
         }
         // Starting from 1, as receiver type doesn't participate

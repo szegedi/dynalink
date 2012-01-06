@@ -38,7 +38,7 @@ public class LinkRequestImpl implements LinkRequest {
      * @param arguments the arguments for the invocation
      */
     public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor,
-            Object[] arguments) {
+            Object... arguments) {
         this.callSiteDescriptor = callSiteDescriptor;
         this.arguments = arguments;
     }

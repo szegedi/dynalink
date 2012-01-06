@@ -32,7 +32,7 @@ public class CallSiteDescriptorFactory {
      * @return a new call site descriptor.
      */
     public static CallSiteDescriptor create(Lookup lookup, String name, MethodType methodType,
-            Object[] bootstrapArgs) {
+            Object... bootstrapArgs) {
         if(name == null) {
             throw new IllegalArgumentException("name == null");
         }
