@@ -3,7 +3,7 @@
   <groupId>org.dynalang</groupId>
   <artifactId>dynalink</artifactId>
   <name>Dynamic Linker Framework for Languages on the JVM</name>
-  <version>0.2</version>
+  <version>0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>This is an implementation of invokedynamic-based multi-language linking and metaobject protocol framework. Such framework allows JVM classes emitted by one language runtime to invoke methods, read and write properties, and so forth, on objects from a different language runtime, within a single JVM instance.</description>
   <url>https://github.com/szegedi/dynalink</url>
