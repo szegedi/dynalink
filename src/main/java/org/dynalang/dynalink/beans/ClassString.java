@@ -72,8 +72,7 @@ final class ClassString {
 
     boolean isVisibleFrom(final ClassLoader classLoader) {
         for(int i = 0; i < classes.length; ++i) {
-            if(!Guards.canReferenceDirectly(classLoader, classes[i]
-                    .getClassLoader())) {
+            if(!Guards.canReferenceDirectly(classLoader, classes[i].getClassLoader())) {
                 return false;
             }
         }
@@ -90,8 +89,7 @@ final class ClassString {
 
     MethodHandle getMostSpecific(List<MethodHandle> methods, boolean varArg) {
         final List<MethodHandle> maximals =
-                MaximallySpecific.getMaximallySpecificMethods(getApplicables(
-                        methods, varArg), TF, varArg);
+                MaximallySpecific.getMaximallySpecificMethods(getApplicables(methods, varArg), TF, varArg);
         switch(maximals.size()) {
             case 0: {
                 return OverloadedMethod.NO_SUCH_METHOD;
@@ -106,11 +104,9 @@ final class ClassString {
     }
 
     /**
-     * Returns all methods that are applicable to actual parameter classes
-     * represented by this ClassString object.
+     * Returns all methods that are applicable to actual parameter classes represented by this ClassString object.
      */
-    LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods,
-            boolean varArg) {
+    LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods, boolean varArg) {
         final LinkedList<MethodHandle> list = new LinkedList<MethodHandle>();
         for(final MethodHandle member: methods) {
             if(isApplicable(member, varArg)) {
@@ -121,8 +117,8 @@ final class ClassString {
     }
 
     /**
-     * Returns true if the supplied method is applicable to actual parameter
-     * classes represented by this ClassString object.
+     * Returns true if the supplied method is applicable to actual parameter classes represented by this ClassString
+     * object.
      *
      */
     private boolean isApplicable(MethodHandle method, boolean varArg) {
@@ -140,16 +136,14 @@ final class ClassString {
         }
         // Starting from 1 as we ignore the receiver type
         for(int i = 1; i < fl; ++i) {
-            if(!TypeUtilities.isMethodInvocationConvertible(classes[i],
-                    formalTypes[i])) {
+            if(!TypeUtilities.isMethodInvocationConvertible(classes[i], formalTypes[i])) {
                 return false;
             }
         }
         if(varArg) {
             Class<?> varArgType = formalTypes[fl].getComponentType();
             for(int i = fl; i < cl; ++i) {
-                if(!TypeUtilities.isMethodInvocationConvertible(classes[i],
-                        varArgType)) {
+                if(!TypeUtilities.isMethodInvocationConvertible(classes[i], varArgType)) {
                     return false;
                 }
             }

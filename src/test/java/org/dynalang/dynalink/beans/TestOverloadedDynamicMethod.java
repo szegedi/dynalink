@@ -44,8 +44,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
         super.setUp();
         linker = new BeanLinker(Test1.class);
         linkerServices =
-                new LinkerServicesImpl(new TypeConverterFactory(
-                        new LinkedList<GuardingTypeConverterFactory>()), linker);
+                new LinkerServicesImpl(new TypeConverterFactory(new LinkedList<GuardingTypeConverterFactory>()), linker);
     }
 
     public void testNoneMatchSignature() {
@@ -53,13 +52,13 @@ public class TestOverloadedDynamicMethod extends TestCase {
         assertTrue(dm instanceof OverloadedDynamicMethod);
 
         // No zero-arg adds
-        assertNull(dm.getInvocation(createCallSiteDescriptor("add", MethodType
-                .methodType(int.class, Object.class)), null));
+        assertNull(dm.getInvocation(createCallSiteDescriptor("add", MethodType.methodType(int.class, Object.class)),
+                null));
 
         // No single-arg String add
         MethodHandle inv =
-                dm.getInvocation(createCallSiteDescriptor("add", MethodType
-                        .methodType(String.class, Object.class, String.class)),
+                dm.getInvocation(
+                        createCallSiteDescriptor("add", MethodType.methodType(String.class, Object.class, String.class)),
                         linkerServices);
         assertNull(String.valueOf(inv), inv);
     }
@@ -68,8 +67,8 @@ public class TestOverloadedDynamicMethod extends TestCase {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
         final CallSiteDescriptor cs =
-                createCallSiteDescriptor("add", MethodType.methodType(
-                        String.class, Object.class, String.class, String.class));
+                createCallSiteDescriptor("add",
+                        MethodType.methodType(String.class, Object.class, String.class, String.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two strings
@@ -86,8 +85,8 @@ public class TestOverloadedDynamicMethod extends TestCase {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
         final CallSiteDescriptor cs =
-                createCallSiteDescriptor("add", MethodType.methodType(
-                        Object.class, Object.class, Object.class, Object.class));
+                createCallSiteDescriptor("add",
+                        MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two Strings

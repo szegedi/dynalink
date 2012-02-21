@@ -23,22 +23,18 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 
 /**
- * Interface for relinkable call sites. Language runtimes wishing to use this
- * framework must use subclasses of {@link CallSite} that also implement this
- * interface as their call sites. There is a readily usable
- * {@link MonomorphicCallSite} subclass that implements monomorphic inline
- * caching strategy.
+ * Interface for relinkable call sites. Language runtimes wishing to use this framework must use subclasses of
+ * {@link CallSite} that also implement this interface as their call sites. There is a readily usable
+ * {@link MonomorphicCallSite} subclass that implements monomorphic inline caching strategy.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public interface RelinkableCallSite {
     /**
-     * Sets the relink method. This is a method matching the method type of the
-     * call site that will try to discover the adequate target for the
-     * invocation and then subsequently invoke
-     * {@link #setGuardedInvocation(GuardedInvocation)}. This method is normally
-     * only called by the {@link DynamicLinker} implementation.
+     * Sets the relink method. This is a method matching the method type of the call site that will try to discover the
+     * adequate target for the invocation and then subsequently invoke {@link #setGuardedInvocation(GuardedInvocation)}.
+     * This method is normally only called by the {@link DynamicLinker} implementation.
      *
      * @param relink the relink method handle.
      * @throws IllegalArgumentException if the relink is null
@@ -62,13 +58,11 @@ public interface RelinkableCallSite {
     public CallSiteDescriptor getCallSiteDescriptor();
 
     /**
-     * This method will be called once by the dynamic linker every time the call
-     * site is relinked.
+     * This method will be called once by the dynamic linker every time the call site is relinked.
      *
-     * @param guardedInvocation the guarded invocation that the call site should
-     * set as its current target. Note that the call sites are allowed to keep
-     * other non-invalidated invocations around for implementation of
-     * polymorphic inline caches.
+     * @param guardedInvocation the guarded invocation that the call site should set as its current target. Note that
+     * the call sites are allowed to keep other non-invalidated invocations around for implementation of polymorphic
+     * inline caches.
      */
     public void setGuardedInvocation(GuardedInvocation guardedInvocation);
 }

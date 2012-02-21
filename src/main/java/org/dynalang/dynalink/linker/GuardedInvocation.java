@@ -24,14 +24,11 @@ import java.lang.invoke.WrongMethodTypeException;
 import org.dynalang.dynalink.support.Guards;
 
 /**
- * A triple of an invocation method handle, a guard method handle that defines
- * the validity of the invocation, and a switch point that can be used for
- * external invalidation of the linkage. The method handle is suitable for
- * invocation at a particular call site for particular arguments, and might be
- * used for subsequent invocations as long as the guard condition is fulfilled.
- * If the guard condition fails or the switch point is invalidated, the runtime
- * will relink the call site. Both the guard and the switch point are optional,
- * neither, one, or both can be present.
+ * A triple of an invocation method handle, a guard method handle that defines the validity of the invocation, and a
+ * switch point that can be used for external invalidation of the linkage. The method handle is suitable for invocation
+ * at a particular call site for particular arguments, and might be used for subsequent invocations as long as the guard
+ * condition is fulfilled. If the guard condition fails or the switch point is invalidated, the runtime will relink the
+ * call site. Both the guard and the switch point are optional, neither, one, or both can be present.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -44,12 +41,10 @@ public class GuardedInvocation {
     /**
      * Creates a new guarded invocation.
      *
-     * @param invocation the method handle representing the invocation. Must not
-     * be null.
-     * @param guard the method handle representing the guard. Must have the same
-     * method type as the invocation, except it must return boolean. For some
-     * useful guards, check out the {@link Guards} class. It can be null to
-     * represent an unconditional invocation, although that is fairly unusual.
+     * @param invocation the method handle representing the invocation. Must not be null.
+     * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
+     * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null to represent
+     * an unconditional invocation, although that is fairly unusual.
      * @throws IllegalArgumentException if invocation is null.
      */
     public GuardedInvocation(MethodHandle invocation, MethodHandle guard) {
@@ -59,18 +54,14 @@ public class GuardedInvocation {
     /**
      * Creates a new guarded invocation.
      *
-     * @param invocation the method handle representing the invocation. Must not
-     * be null.
-     * @param guard the method handle representing the guard. Must have the same
-     * method type as the invocation, except it must return boolean. For some
-     * useful guards, check out the {@link Guards} class. It can be null to
-     * represent an unconditional invocation, although that is fairly unusual.
-     * @param switchPoint the optional switch point that can be used to
-     * invalidate this linkage.
+     * @param invocation the method handle representing the invocation. Must not be null.
+     * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
+     * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null to represent
+     * an unconditional invocation, although that is fairly unusual.
+     * @param switchPoint the optional switch point that can be used to invalidate this linkage.
      * @throws IllegalArgumentException if invocation is null.
      */
-    public GuardedInvocation(MethodHandle invocation, MethodHandle guard,
-            SwitchPoint switchPoint) {
+    public GuardedInvocation(MethodHandle invocation, MethodHandle guard, SwitchPoint switchPoint) {
         if(invocation == null) {
             throw new IllegalArgumentException("invocation == null");
         }
@@ -91,8 +82,7 @@ public class GuardedInvocation {
     /**
      * Returns the guard method handle.
      *
-     * @return the guard method handle. Can be null to signify an unconditional
-     * invocation.
+     * @return the guard method handle. Can be null to signify an unconditional invocation.
      */
     public MethodHandle getGuard() {
         return guard;
@@ -101,20 +91,18 @@ public class GuardedInvocation {
     /**
      * Returns the switch point that can be used to invalidate this linkage.
      *
-     * @return the switch point that can be used to invalidate this linkage. Can
-     * be null.
+     * @return the switch point that can be used to invalidate this linkage. Can be null.
      */
     public SwitchPoint getSwitchPoint() {
         return switchPoint;
     }
 
     /**
-     * Asserts that the invocation is of the specified type, and the guard (if
-     * present) is of the specified type with a boolean return type.
+     * Asserts that the invocation is of the specified type, and the guard (if present) is of the specified type with a
+     * boolean return type.
      *
      * @param type the asserted type
-     * @throws WrongMethodTypeException if the invocation and the guard are not
-     * of the expected method type.
+     * @throws WrongMethodTypeException if the invocation and the guard are not of the expected method type.
      */
     public void assertType(MethodType type) {
         assertType(invocation, type);
@@ -122,23 +110,19 @@ public class GuardedInvocation {
     }
 
     /**
-     * Creates a new guarded invocation with different methods, preserving the
-     * switch point.
+     * Creates a new guarded invocation with different methods, preserving the switch point.
      *
      * @param newInvocation the new invocation
      * @param newGuard the new guard
-     * @return a new guarded invocation with the replaced methods and the same
-     * switch point as this invocation.
+     * @return a new guarded invocation with the replaced methods and the same switch point as this invocation.
      */
-    public GuardedInvocation replaceMethods(MethodHandle newInvocation,
-            MethodHandle newGuard) {
+    public GuardedInvocation replaceMethods(MethodHandle newInvocation, MethodHandle newGuard) {
         return new GuardedInvocation(newInvocation, newGuard, switchPoint);
     }
 
     private static void assertType(MethodHandle mh, MethodType type) {
         if(!mh.type().equals(type)) {
-            throw new WrongMethodTypeException("Expected type: " + type
-                    + " actual type: " + mh.type());
+            throw new WrongMethodTypeException("Expected type: " + type + " actual type: " + mh.type());
         }
     }
 }

@@ -23,14 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class for discovering accessible methods. Normally, a public method
- * declared on a class is accessible (that is, it can be invoked from anywhere).
- * However, this is not the case if the class itself is not public. In that
- * case, it is required to lookup a method with the same signature in a public
- * superclass or implemented interface of the class, and use it instead of the
- * method discovered on the class. This can of course all be avoided by simply
- * using {@link Method#setAccessible(boolean)}, but this solution (which I call
- * "dynamic upcasting") works even in more constrained security environments.
+ * Utility class for discovering accessible methods. Normally, a public method declared on a class is accessible (that
+ * is, it can be invoked from anywhere). However, this is not the case if the class itself is not public. In that case,
+ * it is required to lookup a method with the same signature in a public superclass or implemented interface of the
+ * class, and use it instead of the method discovered on the class. This can of course all be avoided by simply using
+ * {@link Method#setAccessible(boolean)}, but this solution (which I call "dynamic upcasting") works even in more
+ * constrained security environments.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -52,16 +50,15 @@ class AccessibleMethodsLookup {
      * Returns an accessible method equivalent of a method.
      *
      * @param m the method whose accessible equivalent is requested.
-     * @return the accessible equivalent for the method (can be the same as the
-     * passed in method), or null if there is no accessible method equivalent.
+     * @return the accessible equivalent for the method (can be the same as the passed in method), or null if there is
+     * no accessible method equivalent.
      */
     Method getAccessibleMethod(final Method m) {
         return m == null ? null : map.get(new MethodSignature(m));
     }
 
     /**
-     * A helper class that represents a method signature - name and argument
-     * types.
+     * A helper class that represents a method signature - name and argument types.
      *
      * @author Attila Szegedi
      * @version $Id: $
@@ -94,8 +91,8 @@ class AccessibleMethodsLookup {
          * Compares this object to another object
          *
          * @param o the other object
-         * @return true if the other object is also a method signature with the
-         * same name, same number of arguments, and same types of arguments.
+         * @return true if the other object is also a method signature with the same name, same number of arguments, and
+         * same types of arguments.
          */
         @Override
         public boolean equals(final Object o) {
@@ -107,8 +104,7 @@ class AccessibleMethodsLookup {
         }
 
         /**
-         * Returns a hash code, consistent with the overridden
-         * {@link #equals(Object)}.
+         * Returns a hash code, consistent with the overridden {@link #equals(Object)}.
          */
         @Override
         public int hashCode() {
@@ -127,10 +123,8 @@ class AccessibleMethodsLookup {
                 }
                 return;
             } catch(final SecurityException e) {
-                System.err
-                        .println("Could not discover accessible methods of class "
-                                + clazz.getName()
-                                + ", attemping superclasses/interfaces.");
+                System.err.println("Could not discover accessible methods of class " + clazz.getName()
+                        + ", attemping superclasses/interfaces.");
                 e.printStackTrace();
                 // Fall through and attempt to discover superclass/interface
                 // methods

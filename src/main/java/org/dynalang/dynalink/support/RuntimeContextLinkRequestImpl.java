@@ -19,8 +19,7 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkRequest;
 
 /**
- * A link request implementation for call sites that pass language runtime
- * specific context arguments on the stack.
+ * A link request implementation for call sites that pass language runtime specific context arguments on the stack.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -35,11 +34,11 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
      *
      * @param callSiteDescriptor the descriptor for the call site being linked
      * @param arguments the arguments for the invocation
-     * @param runtimeContextArgCount the number of the trailing arguments on the
-     * stack that represent the language runtime specific context arguments.
+     * @param runtimeContextArgCount the number of the trailing arguments on the stack that represent the language
+     * runtime specific context arguments.
      */
-    public RuntimeContextLinkRequestImpl(CallSiteDescriptor callSiteDescriptor,
-            Object[] arguments, int runtimeContextArgCount) {
+    public RuntimeContextLinkRequestImpl(CallSiteDescriptor callSiteDescriptor, Object[] arguments,
+            int runtimeContextArgCount) {
         super(callSiteDescriptor, arguments);
         this.runtimeContextArgCount = runtimeContextArgCount;
     }
@@ -50,24 +49,20 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
             final CallSiteDescriptor callSiteDescriptor = getCallSiteDescriptor();
             final int argCount = callSiteDescriptor.getMethodType().parameterCount();
             contextStrippedRequest =
-                new LinkRequestImpl(callSiteDescriptor.dropParameterTypes(
-                        argCount - runtimeContextArgCount, argCount),
-                        getTruncatedArguments());
+                    new LinkRequestImpl(callSiteDescriptor.dropParameterTypes(argCount - runtimeContextArgCount,
+                            argCount), getTruncatedArguments());
         }
         return contextStrippedRequest;
     }
 
     @Override
-    public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor,
-            Object[] arguments) {
-        return new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments,
-                runtimeContextArgCount);
+    public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor, Object[] arguments) {
+        return new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments, runtimeContextArgCount);
     }
 
     private Object[] getTruncatedArguments() {
         final Object[] args = getArguments();
-        final Object[] newargs =
-            new Object[args.length - runtimeContextArgCount];
+        final Object[] newargs = new Object[args.length - runtimeContextArgCount];
         System.arraycopy(args, 0, newargs, 0, newargs.length);
         return newargs;
     }

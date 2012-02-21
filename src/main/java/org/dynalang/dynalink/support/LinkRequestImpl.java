@@ -19,9 +19,8 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkRequest;
 
 /**
- * Default implementation of the {@link LinkRequest}, representing a link
- * request to a call site that passes no language runtime specific native
- * context arguments on the stack.
+ * Default implementation of the {@link LinkRequest}, representing a link request to a call site that passes no language
+ * runtime specific native context arguments on the stack.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -37,8 +36,7 @@ public class LinkRequestImpl implements LinkRequest {
      * @param callSiteDescriptor the descriptor for the call site being linked
      * @param arguments the arguments for the invocation
      */
-    public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor,
-            Object... arguments) {
+    public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor, Object... arguments) {
         this.callSiteDescriptor = callSiteDescriptor;
         this.arguments = arguments;
     }
@@ -59,8 +57,7 @@ public class LinkRequestImpl implements LinkRequest {
     }
 
     @Override
-    public LinkRequest replaceArguments(CallSiteDescriptor newCallSiteDescriptor,
-            Object[] newArguments) {
+    public LinkRequest replaceArguments(CallSiteDescriptor newCallSiteDescriptor, Object[] newArguments) {
         return new LinkRequestImpl(newCallSiteDescriptor, newArguments);
     }
 }

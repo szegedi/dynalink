@@ -10,14 +10,12 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 
 /**
- * A basic implementation of the {@link RelinkableCallSite} as a
- * {@link MutableCallSite} subclass.
+ * A basic implementation of the {@link RelinkableCallSite} as a {@link MutableCallSite} subclass.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public abstract class AbstractRelinkableCallSite extends MutableCallSite
-        implements RelinkableCallSite {
+public abstract class AbstractRelinkableCallSite extends MutableCallSite implements RelinkableCallSite {
     private MethodHandle relink;
     private final CallSiteDescriptor descriptor;
 
@@ -71,31 +69,27 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite
         MethodHandle invocation = guardedInvocation.getInvocation();
         final SwitchPoint switchPoint = guardedInvocation.getSwitchPoint();
         if(switchPoint != null) {
-            invocation = switchPoint.guardWithTest(invocation,
-                    getSwitchPointFallback());
+            invocation = switchPoint.guardWithTest(invocation, getSwitchPointFallback());
         }
         try {
-            setTarget(guard == null ? invocation : MethodHandles.guardWithTest(
-                    guard, invocation, getGuardFallback()));
+            setTarget(guard == null ? invocation : MethodHandles.guardWithTest(guard, invocation, getGuardFallback()));
         } catch(IllegalArgumentException e) {
             // Provide more information than the default JDK implementation
-            throw new IllegalArgumentException("invocation and guard types "
-                    + "do not match. invocation=" + invocation.type()
-                    + " guard=" + guard.type(), e);
+            throw new IllegalArgumentException("invocation and guard types " + "do not match. invocation="
+                    + invocation.type() + " guard=" + guard.type(), e);
         }
     }
 
     /**
-     * Implement this method to specify the fallback method handle when a guard
-     * fails.
+     * Implement this method to specify the fallback method handle when a guard fails.
      *
      * @return the fallback method handle
      */
     protected abstract MethodHandle getGuardFallback();
 
     /**
-     * Implement this method to specify the fallback method handle when a method
-     * handle is invalidated by a switch point.
+     * Implement this method to specify the fallback method handle when a method handle is invalidated by a switch
+     * point.
      *
      * @return the fallback method handle for switch point invalidation.
      */

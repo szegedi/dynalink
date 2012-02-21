@@ -6,13 +6,13 @@ import java.lang.invoke.MethodType;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 
 /**
- * A call site descriptor that stores a specific {@link Lookup}. It does not, however, store static
- * bootstrap arguments.
+ * A call site descriptor that stores a specific {@link Lookup}. It does not, however, store static bootstrap arguments.
  * @author Attila Szegedi
  * @version $Id: $
  */
 class LookupCallSiteDescriptor extends DefaultCallSiteDescriptor {
     private Lookup lookup;
+
     /**
      * Create a new call site descriptor from explicit information.
      * @param tokenizedName the name of the method
@@ -31,13 +31,12 @@ class LookupCallSiteDescriptor extends DefaultCallSiteDescriptor {
 
     @Override
     public CallSiteDescriptor dropParameterTypes(int from, int to) {
-        return new LookupCallSiteDescriptor(getTokenizedName(), getMethodType().dropParameterTypes(
-                from, to), lookup);
+        return new LookupCallSiteDescriptor(getTokenizedName(), getMethodType().dropParameterTypes(from, to), lookup);
     }
 
     @Override
     public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return new LookupCallSiteDescriptor(getTokenizedName(), getMethodType().changeParameterType(
-                num, newType), lookup);
+        return new LookupCallSiteDescriptor(getTokenizedName(), getMethodType().changeParameterType(num, newType),
+                lookup);
     }
 }

@@ -35,15 +35,14 @@ public class TypeUtilities {
     static final Class<Object> OBJECT_CLASS = Object.class;
 
     /**
-     * Given two types represented by c1 and c2, returns a type that is their
-     * most specific common superclass or superinterface.
+     * Given two types represented by c1 and c2, returns a type that is their most specific common superclass or
+     * superinterface.
      *
      * @param c1 one type
      * @param c2 another type
-     * @return their most common superclass or superinterface. If they have
-     * several unrelated superinterfaces as their most specific common type, or
-     * the types themselves are completely unrelated interfaces,
-     * {@link java.lang.Object} is returned.
+     * @return their most common superclass or superinterface. If they have several unrelated superinterfaces as their
+     * most specific common type, or the types themselves are completely unrelated interfaces, {@link java.lang.Object}
+     * is returned.
      */
     public static Class<?> getMostSpecificCommonType(Class<?> c1, Class<?> c2) {
         if(c1 == c2) {
@@ -115,8 +114,7 @@ public class TypeUtilities {
         return s;
     }
 
-    private static void collectAssignables(Class<?> c1, Class<?> c2,
-            Set<Class<?>> s) {
+    private static void collectAssignables(Class<?> c1, Class<?> c2, Set<Class<?>> s) {
         if(c1.isAssignableFrom(c2)) {
             s.add(c1);
         }
@@ -130,14 +128,11 @@ public class TypeUtilities {
         }
     }
 
-    private static final Map<Class<?>, Class<?>> WRAPPER_TYPES =
-            createWrapperTypes();
-    private static final Map<Class<?>, Class<?>> PRIMITIVE_TYPES =
-            invertMap(WRAPPER_TYPES);
+    private static final Map<Class<?>, Class<?>> WRAPPER_TYPES = createWrapperTypes();
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TYPES = invertMap(WRAPPER_TYPES);
 
     private static Map<Class<?>, Class<?>> createWrapperTypes() {
-        final Map<Class<?>, Class<?>> wrapperTypes =
-                new IdentityHashMap<Class<?>, Class<?>>(8);
+        final Map<Class<?>, Class<?>> wrapperTypes = new IdentityHashMap<Class<?>, Class<?>>(8);
         wrapperTypes.put(Boolean.TYPE, Boolean.class);
         wrapperTypes.put(Byte.TYPE, Byte.class);
         wrapperTypes.put(Character.TYPE, Character.class);
@@ -158,21 +153,16 @@ public class TypeUtilities {
     }
 
     /**
-     * Determines whether one type can be converted to another type using a
-     * method invocation conversion, as per JLS 5.3 "Method Invocation
-     * Conversion". This is basically all conversions allowed by subtyping (see
-     * {@link #isSubtype(Class, Class)}) as well as boxing conversion (JLS
-     * 5.1.7) optionally followed by widening reference conversion and unboxing
-     * conversion (JLS 5.1.8) optionally followed by widening primitive
-     * conversion.
+     * Determines whether one type can be converted to another type using a method invocation conversion, as per JLS 5.3
+     * "Method Invocation Conversion". This is basically all conversions allowed by subtyping (see
+     * {@link #isSubtype(Class, Class)}) as well as boxing conversion (JLS 5.1.7) optionally followed by widening
+     * reference conversion and unboxing conversion (JLS 5.1.8) optionally followed by widening primitive conversion.
      *
      * @param callSiteType the parameter type at the call site
      * @param methodType the parameter type in the method declaration
-     * @return true if callSiteType is method invocation convertible to the
-     * methodType.
+     * @return true if callSiteType is method invocation convertible to the methodType.
      */
-    public static boolean isMethodInvocationConvertible(Class<?> callSiteType,
-            Class<?> methodType) {
+    public static boolean isMethodInvocationConvertible(Class<?> callSiteType, Class<?> methodType) {
         if(methodType.isAssignableFrom(callSiteType)) {
             return true;
         }
@@ -184,32 +174,25 @@ public class TypeUtilities {
             return methodType.isAssignableFrom(WRAPPER_TYPES.get(callSiteType));
         }
         if(methodType.isPrimitive()) {
-            final Class<?> unboxedCallSiteType =
-                    PRIMITIVE_TYPES.get(callSiteType);
+            final Class<?> unboxedCallSiteType = PRIMITIVE_TYPES.get(callSiteType);
             return unboxedCallSiteType != null
-                    && (unboxedCallSiteType == methodType || isProperPrimitiveSubtype(
-                            unboxedCallSiteType, methodType));
+                    && (unboxedCallSiteType == methodType || isProperPrimitiveSubtype(unboxedCallSiteType, methodType));
         }
         return false;
     }
 
     /**
-     * Determines whether one type can be potentially converted to another type
-     * at runtime. Allows a conversion between any subtype and supertype in
-     * either direction, and also allows a conversion between any two primitive
-     * types, as well as between any primitive type and any reference type that
-     * can hold a boxed primitive.
+     * Determines whether one type can be potentially converted to another type at runtime. Allows a conversion between
+     * any subtype and supertype in either direction, and also allows a conversion between any two primitive types, as
+     * well as between any primitive type and any reference type that can hold a boxed primitive.
      *
      * @param callSiteType the parameter type at the call site
      * @param methodType the parameter type in the method declaration
-     * @return true if callSiteType is potentially convertible to the
-     * methodType.
+     * @return true if callSiteType is potentially convertible to the methodType.
      */
-    public static boolean isPotentiallyConvertible(Class<?> callSiteType,
-            Class<?> methodType) {
+    public static boolean isPotentiallyConvertible(Class<?> callSiteType, Class<?> methodType) {
         // Widening or narrowing reference conversion
-        if(methodType.isAssignableFrom(callSiteType)
-                || callSiteType.isAssignableFrom(methodType)) {
+        if(methodType.isAssignableFrom(callSiteType) || callSiteType.isAssignableFrom(methodType)) {
             return true;
         }
         if(callSiteType.isPrimitive()) {
@@ -218,8 +201,7 @@ public class TypeUtilities {
             // TODO: narrow this a bit, i.e. allow, say, boolean to Character?
             // MethodHandles.convertArguments() allows it, so we might need to
             // too.
-            return methodType.isPrimitive()
-                    || isAssignableFromBoxedPrimitive(methodType);
+            return methodType.isPrimitive() || isAssignableFromBoxedPrimitive(methodType);
         }
         if(methodType.isPrimitive()) {
             // Allow conversion from any reference type that can contain a
@@ -231,16 +213,15 @@ public class TypeUtilities {
     }
 
     /**
-     * Determines whether one type is a subtype of another type, as per JLS 4.10
-     * "Subtyping". Note: this is not strict or proper subtype, therefore true
-     * is also returned for identical types; to be completely precise, it allows
-     * identity conversion (JLS 5.1.1), widening primitive conversion (JLS
-     * 5.1.2) and widening reference conversion (JLS 5.1.5).
+     * Determines whether one type is a subtype of another type, as per JLS 4.10 "Subtyping". Note: this is not strict
+     * or proper subtype, therefore true is also returned for identical types; to be completely precise, it allows
+     * identity conversion (JLS 5.1.1), widening primitive conversion (JLS 5.1.2) and widening reference conversion (JLS
+     * 5.1.5).
      *
      * @param subType the supposed subtype
      * @param superType the supposed supertype of the subtype
-     * @return true if subType can be converted by identity conversion, widening
-     * primitive conversion, or widening reference conversion to superType.
+     * @return true if subType can be converted by identity conversion, widening primitive conversion, or widening
+     * reference conversion to superType.
      */
     public static boolean isSubtype(Class<?> subType, Class<?> superType) {
         // Covers both JLS 4.10.2 "Subtyping among Class and Interface Types"
@@ -266,16 +247,14 @@ public class TypeUtilities {
     }
 
     /**
-     * Returns true if a supposed primitive subtype is a proper subtype (
-     * meaning, subtype and not identical) of the supposed primitive supertype
+     * Returns true if a supposed primitive subtype is a proper subtype ( meaning, subtype and not identical) of the
+     * supposed primitive supertype
      *
      * @param subType the supposed subtype
      * @param superType the supposed supertype
-     * @return true if subType is a proper (not identical to) primitive subtype
-     * of the superType
+     * @return true if subType is a proper (not identical to) primitive subtype of the superType
      */
-    static boolean isProperPrimitiveSubtype(Class<?> subType,
-            Class<?> superType) {
+    static boolean isProperPrimitiveSubtype(Class<?> subType, Class<?> superType) {
         if(superType == boolean.class || subType == boolean.class) {
             return false;
         }
@@ -289,8 +268,7 @@ public class TypeUtilities {
             return superType != char.class && superType != byte.class;
         }
         if(subType == int.class) {
-            return superType == long.class || superType == float.class
-                    || superType == double.class;
+            return superType == long.class || superType == float.class || superType == double.class;
         }
         if(subType == long.class) {
             return superType == float.class || superType == double.class;
@@ -301,12 +279,10 @@ public class TypeUtilities {
         return false;
     }
 
-    private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES =
-            createPrimitiveWrapperTypes();
+    private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES = createPrimitiveWrapperTypes();
 
     private static Set<Class<?>> createPrimitiveWrapperTypes() {
-        final Map<Class<?>, Class<?>> classes =
-                new IdentityHashMap<Class<?>, Class<?>>();
+        final Map<Class<?>, Class<?>> classes = new IdentityHashMap<Class<?>, Class<?>>();
         addClassHierarchy(classes, Boolean.class);
         addClassHierarchy(classes, Byte.class);
         addClassHierarchy(classes, Character.class);
@@ -318,8 +294,7 @@ public class TypeUtilities {
         return classes.keySet();
     }
 
-    private static void addClassHierarchy(Map<Class<?>, Class<?>> map,
-            Class<?> clazz) {
+    private static void addClassHierarchy(Map<Class<?>, Class<?>> map, Class<?> clazz) {
         if(clazz == null) {
             return;
         }
@@ -334,9 +309,8 @@ public class TypeUtilities {
      * Returns true if the class can be assigned from any boxed primitive.
      *
      * @param clazz the class
-     * @return true if the class can be assigned from any boxed primitive.
-     * Basically, it is true if the class is any primitive wrapper class, or a
-     * superclass or superinterface of any primitive wrapper class.
+     * @return true if the class can be assigned from any boxed primitive. Basically, it is true if the class is any
+     * primitive wrapper class, or a superclass or superinterface of any primitive wrapper class.
      */
     static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
         return PRIMITIVE_WRAPPER_TYPES.contains(clazz);

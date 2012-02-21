@@ -23,92 +23,80 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Utility methods for creating typical guards. TODO: introduce reasonable
- * caching of created guards.
+ * Utility methods for creating typical guards. TODO: introduce reasonable caching of created guards.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public class Guards {
-    private static final Logger LOG = Logger.getLogger(Guards.class.getName(), "org.dynalang.dynalink.support.messages");
+    private static final Logger LOG = Logger
+            .getLogger(Guards.class.getName(), "org.dynalang.dynalink.support.messages");
+
     /**
-     * Creates a guard method handle with arguments of a specified type, but
-     * with boolean return value. When invoked, it returns true if the first
-     * argument is of the specified class (exactly of it, not a subclass). The
-     * rest of the arguments will be ignored.
+     * Creates a guard method handle with arguments of a specified type, but with boolean return value. When invoked, it
+     * returns true if the first argument is of the specified class (exactly of it, not a subclass). The rest of the
+     * arguments will be ignored.
      *
      * @param clazz the class of the first argument to test for
      * @param type the method type
-     * @return a method handle testing whether its first argument is of the
-     * specified class.
+     * @return a method handle testing whether its first argument is of the specified class.
      */
     public static MethodHandle isOfClass(Class<?> clazz, MethodType type) {
         final Class<?> declaredType = type.parameterType(0);
         if(clazz == declaredType) {
-            LOG.log(Level.WARNING, "isOfClassGuardAlwaysTrue",
-                    new Object[] { clazz.getName(), 0, type });
+            LOG.log(Level.WARNING, "isOfClassGuardAlwaysTrue", new Object[] { clazz.getName(), 0, type });
             return constantTrue(type);
         }
         if(!declaredType.isAssignableFrom(clazz)) {
-            LOG.log(Level.WARNING, "isOfClassGuardAlwaysFalse",
-                    new Object[] { clazz.getName(), 0, type });
+            LOG.log(Level.WARNING, "isOfClassGuardAlwaysFalse", new Object[] { clazz.getName(), 0, type });
             return constantFalse(type);
         }
         return getClassBoundArgumentTest(IS_OF_CLASS, clazz, 0, type);
     }
 
     /**
-     * Creates a method handle with arguments of a specified type, but with
-     * boolean return value. When invoked, it returns true if the first argument
-     * is instance of the specified class or its subclass). The rest of the
-     * arguments will be ignored.
+     * Creates a method handle with arguments of a specified type, but with boolean return value. When invoked, it
+     * returns true if the first argument is instance of the specified class or its subclass). The rest of the arguments
+     * will be ignored.
      *
      * @param clazz the class of the first argument to test for
      * @param type the method type
-     * @return a method handle testing whether its first argument is of the
-     * specified class or subclass.
+     * @return a method handle testing whether its first argument is of the specified class or subclass.
      */
     public static MethodHandle isInstance(Class<?> clazz, MethodType type) {
         return isInstance(clazz, 0, type);
     }
 
     /**
-     * Creates a method handle with arguments of a specified type, but with
-     * boolean return value. When invoked, it returns true if the n'th argument
-     * is instance of the specified class or its subclass). The rest of the
-     * arguments will be ignored.
+     * Creates a method handle with arguments of a specified type, but with boolean return value. When invoked, it
+     * returns true if the n'th argument is instance of the specified class or its subclass). The rest of the arguments
+     * will be ignored.
      *
      * @param clazz the class of the first argument to test for
      * @param pos the position on the argument list to test
      * @param type the method type
-     * @return a method handle testing whether its first argument is of the
-     * specified class or subclass.
+     * @return a method handle testing whether its first argument is of the specified class or subclass.
      */
-    public static MethodHandle isInstance(Class<?> clazz, int pos,
-            MethodType type) {
+    public static MethodHandle isInstance(Class<?> clazz, int pos, MethodType type) {
         final Class<?> declaredType = type.parameterType(pos);
         if(clazz.isAssignableFrom(declaredType)) {
-            LOG.log(Level.WARNING, "isInstanceGuardAlwaysTrue",
-                    new Object[] { clazz.getName(), pos, type });
+            LOG.log(Level.WARNING, "isInstanceGuardAlwaysTrue", new Object[] { clazz.getName(), pos, type });
             return constantTrue(type);
         }
         if(!declaredType.isAssignableFrom(clazz)) {
-            LOG.log(Level.WARNING, "isInstanceGuardAlwaysFalse",
-                    new Object[] { clazz.getName(), pos, type });
+            LOG.log(Level.WARNING, "isInstanceGuardAlwaysFalse", new Object[] { clazz.getName(), pos, type });
             return constantFalse(type);
         }
         return getClassBoundArgumentTest(IS_INSTANCE, clazz, pos, type);
     }
 
     /**
-     * Creates a method handle that returns true if the argument in the
-     * specified position is a Java array.
+     * Creates a method handle that returns true if the argument in the specified position is a Java array.
      *
      * @param pos the position in the argument lit
      * @param type the method type of the handle
-     * @return a method handle that returns true if the argument in the
-     * specified position is a Java array; the rest of the arguments are
-     * ignored.
+     * @return a method handle that returns true if the argument in the specified position is a Java array; the rest of
+     * the arguments are ignored.
      */
     public static MethodHandle isArray(int pos, MethodType type) {
         final Class<?> declaredType = type.parameterType(pos);
@@ -124,16 +112,14 @@ public class Guards {
     }
 
     /**
-     * Return true if it is safe to strongly reference a class from the referred
-     * class loader from a class associated with the referring class loader
-     * without risking a class loader memory leak.
+     * Return true if it is safe to strongly reference a class from the referred class loader from a class associated
+     * with the referring class loader without risking a class loader memory leak.
      *
      * @param referrerLoader the referrer class loader
      * @param referredLoader the referred class loader
      * @return true if it is safe to strongly reference the class
      */
-    public static boolean canReferenceDirectly(ClassLoader referrerLoader,
-            final ClassLoader referredLoader) {
+    public static boolean canReferenceDirectly(ClassLoader referrerLoader, final ClassLoader referredLoader) {
         if(referredLoader == null) {
             // Can always refer directly to a system class
             return true;
@@ -155,37 +141,32 @@ public class Guards {
         return false;
     }
 
-    private static MethodHandle getClassBoundArgumentTest(MethodHandle test, Class<?> clazz,
-            int pos, MethodType type) {
+    private static MethodHandle getClassBoundArgumentTest(MethodHandle test, Class<?> clazz, int pos, MethodType type) {
         // Bind the class to the first argument of the test
         return getArgumentTest(test.bindTo(clazz), pos, type);
     }
 
     private static MethodHandle getArgumentTest(MethodHandle test, int pos, MethodType type) {
         if(type.parameterCount() < 1) {
-            throw new IllegalArgumentException(
-                    "method type must specify at least one argument");
+            throw new IllegalArgumentException("method type must specify at least one argument");
         }
 
-        return MethodHandles.permuteArguments(test.asType(test.type().changeParameterType(0,
-                type.parameterType(pos))), type.changeReturnType(Boolean.TYPE), new int[] { pos });
+        return MethodHandles.permuteArguments(test.asType(test.type().changeParameterType(0, type.parameterType(pos))),
+                type.changeReturnType(Boolean.TYPE), new int[] { pos });
     }
 
-    private static final MethodHandle IS_OF_CLASS =
-            Lookup.PUBLIC.findStatic(Guards.class, "_isOfClass", MethodType
-                    .methodType(Boolean.TYPE, Class.class, Object.class));
+    private static final MethodHandle IS_OF_CLASS = Lookup.PUBLIC.findStatic(Guards.class, "_isOfClass",
+            MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
 
-    private static final MethodHandle IS_INSTANCE =
-            Lookup.PUBLIC.findVirtual(Class.class, "isInstance", MethodType
-                    .methodType(Boolean.TYPE, Object.class));
+    private static final MethodHandle IS_INSTANCE = Lookup.PUBLIC.findVirtual(Class.class, "isInstance",
+            MethodType.methodType(Boolean.TYPE, Object.class));
 
-    private static final MethodHandle IS_ARRAY =
-            Lookup.PUBLIC.findStatic(Guards.class, "_isArray", MethodType
-                    .methodType(Boolean.TYPE, Object.class));
+    private static final MethodHandle IS_ARRAY = Lookup.PUBLIC.findStatic(Guards.class, "_isArray",
+            MethodType.methodType(Boolean.TYPE, Object.class));
 
     /**
-     * This method is public for implementation reasons. Do not invoke it
-     * directly. Determines whether the passed object is a Java array.
+     * This method is public for implementation reasons. Do not invoke it directly. Determines whether the passed object
+     * is a Java array.
      *
      * @param o an object
      * @return true if o is an instance of a Java array.
@@ -195,8 +176,8 @@ public class Guards {
     }
 
     /**
-     * This method public for implementation reasons. Do not invoke directly.
-     * Determines whether the class of the object is what's expected to be.
+     * This method public for implementation reasons. Do not invoke directly. Determines whether the class of the object
+     * is what's expected to be.
      *
      * @param c the class
      * @param o the object

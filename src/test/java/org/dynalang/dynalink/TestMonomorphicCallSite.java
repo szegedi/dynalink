@@ -41,8 +41,7 @@ public class TestMonomorphicCallSite extends TestCase {
      */
     public static void testSetNull() {
         try {
-            createCallSite(MethodType.methodType(Void.TYPE))
-                .setGuardedInvocation(null);
+            createCallSite(MethodType.methodType(Void.TYPE)).setGuardedInvocation(null);
             fail();
         } catch(IllegalArgumentException e) {
             // This is expected
@@ -60,7 +59,6 @@ public class TestMonomorphicCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "",
-                type));
+        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "", type));
     }
 }

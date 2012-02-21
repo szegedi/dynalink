@@ -46,8 +46,7 @@ public class TestRelinkableCallSite extends TestCase {
      * Tests against allowing relink to be called twice.
      */
     public static void testRelinkSetTwice() {
-        RelinkableCallSite cs = createCallSite(MethodType.methodType(
-                Object.class));
+        RelinkableCallSite cs = createCallSite(MethodType.methodType(Object.class));
         cs.setRelink(MethodHandles.constant(Object.class, new Object()));
         try {
             cs.setRelink(MethodHandles.constant(Object.class, new Object()));
@@ -58,7 +57,6 @@ public class TestRelinkableCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "",
-                type));
+        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "", type));
     }
 }

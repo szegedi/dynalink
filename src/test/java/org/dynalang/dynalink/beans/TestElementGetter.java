@@ -17,8 +17,7 @@ import org.dynalang.dynalink.DynamicLinkerFactory;
 public class TestElementGetter extends TestCase {
     public void testEarlyBoundPrimitiveArrayElementGetter() throws Throwable {
         final RelinkCountingCallSite cs =
-                new RelinkCountingCallSite("dyn:getElem", MethodType
-                        .methodType(Object.class, int[].class, int.class));
+                new RelinkCountingCallSite("dyn:getElem", MethodType.methodType(Object.class, int[].class, int.class));
         new DynamicLinkerFactory().createLinker().link(cs);
         final MethodHandle invoker = cs.dynamicInvoker();
         final int[] x = new int[] { 3, 2, 1 };
@@ -30,8 +29,8 @@ public class TestElementGetter extends TestCase {
 
     public void testEarlyBoundObjectArrayElementGetter() throws Throwable {
         final RelinkCountingCallSite cs =
-                new RelinkCountingCallSite("dyn:getElem", MethodType
-                        .methodType(Object.class, Object[].class, int.class));
+                new RelinkCountingCallSite("dyn:getElem",
+                        MethodType.methodType(Object.class, Object[].class, int.class));
         new DynamicLinkerFactory().createLinker().link(cs);
         final MethodHandle invoker = cs.dynamicInvoker();
         final Integer[] x = new Integer[] { 3, 2, 1 };
@@ -48,15 +47,11 @@ public class TestElementGetter extends TestCase {
 
     public void testEarlyBoundListElementGetter() throws Throwable {
         final RelinkCountingCallSite cs =
-                new RelinkCountingCallSite("dyn:getElem", MethodType
-                        .methodType(Object.class, List.class, int.class));
+                new RelinkCountingCallSite("dyn:getElem", MethodType.methodType(Object.class, List.class, int.class));
         new DynamicLinkerFactory().createLinker().link(cs);
         final MethodHandle invoker = cs.dynamicInvoker();
-        final List<Integer> x =
-                new ArrayList<Integer>(Arrays.asList(new Integer[] { 3, 2, 1 }));
-        final List<String> y =
-                new LinkedList<String>(Arrays.asList(new String[] { "a", "b",
-                        "c" }));
+        final List<Integer> x = new ArrayList<Integer>(Arrays.asList(new Integer[] { 3, 2, 1 }));
+        final List<String> y = new LinkedList<String>(Arrays.asList(new String[] { "a", "b", "c" }));
         assertEquals(3, invoker.invokeWithArguments(x, 0));
         assertEquals(2, invoker.invokeWithArguments(x, 1));
         assertEquals(1, invoker.invokeWithArguments(x, 2));
@@ -69,8 +64,7 @@ public class TestElementGetter extends TestCase {
 
     public void testEarlyBoundMapElementGetter() throws Throwable {
         final RelinkCountingCallSite cs =
-                new RelinkCountingCallSite("dyn:getElem", MethodType
-                        .methodType(Object.class, Map.class, Object.class));
+                new RelinkCountingCallSite("dyn:getElem", MethodType.methodType(Object.class, Map.class, Object.class));
         new DynamicLinkerFactory().createLinker().link(cs);
         final MethodHandle invoker = cs.dynamicInvoker();
         final Map<Integer, Integer> x = new HashMap<Integer, Integer>();
@@ -93,8 +87,8 @@ public class TestElementGetter extends TestCase {
 
     public void testLateBoundMapElementGetter() throws Throwable {
         final RelinkCountingCallSite cs =
-                new RelinkCountingCallSite("dyn:getElem", MethodType
-                        .methodType(Object.class, Object.class, Object.class));
+                new RelinkCountingCallSite("dyn:getElem", MethodType.methodType(Object.class, Object.class,
+                        Object.class));
         new DynamicLinkerFactory().createLinker().link(cs);
         final MethodHandle invoker = cs.dynamicInvoker();
         final Map<Integer, Integer> x = new HashMap<Integer, Integer>();
@@ -105,9 +99,7 @@ public class TestElementGetter extends TestCase {
         y.put("a", "x");
         y.put("b", "y");
         y.put("c", "z");
-        final List<String> z =
-                new LinkedList<String>(Arrays.asList(new String[] { "a", "b",
-                        "c" }));
+        final List<String> z = new LinkedList<String>(Arrays.asList(new String[] { "a", "b", "c" }));
         assertEquals(3, invoker.invokeWithArguments(x, 0));
         assertEquals(2, invoker.invokeWithArguments(x, 1));
         assertEquals(1, invoker.invokeWithArguments(x, 2));

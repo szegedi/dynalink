@@ -23,9 +23,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * A wrapper around MethodHandles.Lookup that masks checked exceptions in those
- * cases when you're looking up methods within your own codebase (therefore it
- * is an error if they are not present).
+ * A wrapper around MethodHandles.Lookup that masks checked exceptions in those cases when you're looking up methods
+ * within your own codebase (therefore it is an error if they are not present).
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -34,8 +33,7 @@ public class Lookup {
     private final MethodHandles.Lookup lookup;
 
     /**
-     * Creates a new instance, bound to an instance of
-     * {@link java.lang.invoke.MethodHandles.Lookup}.
+     * Creates a new instance, bound to an instance of {@link java.lang.invoke.MethodHandles.Lookup}.
      *
      * @param lookup the {@link java.lang.invoke.MethodHandles.Lookup} it delegates to.
      */
@@ -43,13 +41,11 @@ public class Lookup {
         this.lookup = lookup;
     }
 
-    public static final Lookup PUBLIC =
-            new Lookup(MethodHandles.publicLookup());
+    public static final Lookup PUBLIC = new Lookup(MethodHandles.publicLookup());
 
     /**
-     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflect(Method)}, converting any
-     * encountered {@link IllegalAccessException} into a
-     * {@link BootstrapMethodError}.
+     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflect(Method)}, converting any encountered
+     * {@link IllegalAccessException} into a {@link BootstrapMethodError}.
      *
      * @param m the method to unreflect
      * @return the unreflected method handle.
@@ -63,31 +59,24 @@ public class Lookup {
     }
 
     /**
-     * Performs a findSpecial on the underlying lookup, except for the backport
-     * where it rather uses unreflect.
+     * Performs a findSpecial on the underlying lookup, except for the backport where it rather uses unreflect.
      *
      * @param declaringClass class declaring the method
      * @param name the name of the method
      * @param type the type of the method
      * @return a method handle for the method
-     * @throws BootstrapMethodError if the method does not exist or is
-     * inaccessible.
+     * @throws BootstrapMethodError if the method does not exist or is inaccessible.
      */
-    public MethodHandle findSpecial(Class<?> declaringClass, String name,
-            MethodType type) {
+    public MethodHandle findSpecial(Class<?> declaringClass, String name, MethodType type) {
         try {
             if(Backport.inUse) {
-                final Method m =
-                        declaringClass.getDeclaredMethod(name, type
-                                .parameterArray());
-                if(!Modifier.isPublic(declaringClass.getModifiers())
-                        || !Modifier.isPublic(m.getModifiers())) {
+                final Method m = declaringClass.getDeclaredMethod(name, type.parameterArray());
+                if(!Modifier.isPublic(declaringClass.getModifiers()) || !Modifier.isPublic(m.getModifiers())) {
                     m.setAccessible(true);
                 }
                 return unreflect(m);
             } else {
-                return lookup.findSpecial(declaringClass, name, type,
-                        declaringClass);
+                return lookup.findSpecial(declaringClass, name, type, declaringClass);
             }
         } catch(IllegalAccessException e) {
             throw new BootstrapMethodError("Failed to find special method "
@@ -98,42 +87,31 @@ public class Lookup {
         }
     }
 
-    private static String methodDescription(Class<?> declaringClass,
-            String name, MethodType type) {
+    private static String methodDescription(Class<?> declaringClass, String name, MethodType type) {
         return declaringClass.getName() + "#" + name + type;
     }
 
-    public MethodHandle findStatic(Class<?> declaringClass, String methodName,
-            MethodType methodType) {
+    public MethodHandle findStatic(Class<?> declaringClass, String methodName, MethodType methodType) {
         try {
             return lookup.findStatic(declaringClass, methodName, methodType);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError(
-                    "Failed to find static method "
-                            + methodDescription(declaringClass, methodName,
-                                    methodType), e);
+            throw new BootstrapMethodError("Failed to find static method "
+                    + methodDescription(declaringClass, methodName, methodType), e);
         } catch(NoSuchMethodException e) {
-            throw new BootstrapMethodError(
-                    "Failed to find static method "
-                            + methodDescription(declaringClass, methodName,
-                                    methodType), e);
+            throw new BootstrapMethodError("Failed to find static method "
+                    + methodDescription(declaringClass, methodName, methodType), e);
         }
     }
 
-    public MethodHandle findVirtual(Class<?> declaringClass, String methodName,
-            MethodType methodType) {
+    public MethodHandle findVirtual(Class<?> declaringClass, String methodName, MethodType methodType) {
         try {
             return lookup.findVirtual(declaringClass, methodName, methodType);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError(
-                    "Failed to find virtual method "
-                            + methodDescription(declaringClass, methodName,
-                                    methodType), e);
+            throw new BootstrapMethodError("Failed to find virtual method "
+                    + methodDescription(declaringClass, methodName, methodType), e);
         } catch(NoSuchMethodException e) {
-            throw new BootstrapMethodError(
-                    "Failed to find virtual method "
-                            + methodDescription(declaringClass, methodName,
-                                    methodType), e);
+            throw new BootstrapMethodError("Failed to find virtual method "
+                    + methodDescription(declaringClass, methodName, methodType), e);
         }
     }
 

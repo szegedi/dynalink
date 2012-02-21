@@ -27,24 +27,20 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 /**
- * A composite type-based guarding dynamic linker. When a receiver of a not yet
- * seen class is encountered, all linkers are invoked sequentially until one
- * returns <true> from {@link TypeBasedGuardingDynamicLinker#canLinkType(Class)}.
- * This linker is then bound to the class, and next time a receiver of same type
- * is encountered, the linking is delegated to that linker first, speeding up
- * dispatch.
+ * A composite type-based guarding dynamic linker. When a receiver of a not yet seen class is encountered, all linkers
+ * are invoked sequentially until one returns <true> from {@link TypeBasedGuardingDynamicLinker#canLinkType(Class)} .
+ * This linker is then bound to the class, and next time a receiver of same type is encountered, the linking is
+ * delegated to that linker first, speeding up dispatch.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class CompositeTypeBasedGuardingDynamicLinker implements
-        TypeBasedGuardingDynamicLinker, Serializable {
+public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardingDynamicLinker, Serializable {
     private static final long serialVersionUID = 1L;
 
     // Using a separate static class instance so there's no strong reference
     // from the class value back to the composite linker.
-    private static class ClassToLinker extends
-            ClassValue<TypeBasedGuardingDynamicLinker> {
+    private static class ClassToLinker extends ClassValue<TypeBasedGuardingDynamicLinker> {
         private final TypeBasedGuardingDynamicLinker[] linkers;
 
         ClassToLinker(TypeBasedGuardingDynamicLinker[] linkers) {
@@ -69,16 +65,12 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
      *
      * @param linkers the component linkers
      */
-    public CompositeTypeBasedGuardingDynamicLinker(
-            Iterable<? extends TypeBasedGuardingDynamicLinker> linkers) {
-        final List<TypeBasedGuardingDynamicLinker> l =
-                new LinkedList<TypeBasedGuardingDynamicLinker>();
+    public CompositeTypeBasedGuardingDynamicLinker(Iterable<? extends TypeBasedGuardingDynamicLinker> linkers) {
+        final List<TypeBasedGuardingDynamicLinker> l = new LinkedList<TypeBasedGuardingDynamicLinker>();
         for(TypeBasedGuardingDynamicLinker linker: linkers) {
             l.add(linker);
         }
-        this.classToLinker =
-                new ClassToLinker(l
-                        .toArray(new TypeBasedGuardingDynamicLinker[l.size()]));
+        this.classToLinker = new ClassToLinker(l.toArray(new TypeBasedGuardingDynamicLinker[l.size()]));
     }
 
     @Override
@@ -87,8 +79,8 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
-            final LinkerServices linkerServices) throws Exception {
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, final LinkerServices linkerServices)
+            throws Exception {
         final Object[] arguments = linkRequest.getArguments();
         if(arguments.length == 0) {
             return null;
@@ -97,25 +89,20 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
         if(obj == null) {
             return null;
         }
-        return classToLinker.get(obj.getClass()).getGuardedInvocation(
-                linkRequest, linkerServices);
+        return classToLinker.get(obj.getClass()).getGuardedInvocation(linkRequest, linkerServices);
     }
 
     /**
-     * Optimizes a list of type-based linkers. If a group of adjacent linkers in
-     * the list all implement {@link TypeBasedGuardingDynamicLinker}, they will
-     * be replaced with a single instance of
+     * Optimizes a list of type-based linkers. If a group of adjacent linkers in the list all implement
+     * {@link TypeBasedGuardingDynamicLinker}, they will be replaced with a single instance of
      * {@link CompositeTypeBasedGuardingDynamicLinker} that contains them.
      *
      * @param linkers the list of linkers to optimize
      * @return the optimized list
      */
-    public static List<GuardingDynamicLinker> optimize(
-            Iterable<? extends GuardingDynamicLinker> linkers) {
-        final List<GuardingDynamicLinker> llinkers =
-                new LinkedList<GuardingDynamicLinker>();
-        final List<TypeBasedGuardingDynamicLinker> tblinkers =
-                new LinkedList<TypeBasedGuardingDynamicLinker>();
+    public static List<GuardingDynamicLinker> optimize(Iterable<? extends GuardingDynamicLinker> linkers) {
+        final List<GuardingDynamicLinker> llinkers = new LinkedList<GuardingDynamicLinker>();
+        final List<TypeBasedGuardingDynamicLinker> tblinkers = new LinkedList<TypeBasedGuardingDynamicLinker>();
         for(GuardingDynamicLinker linker: linkers) {
             if(linker instanceof TypeBasedGuardingDynamicLinker) {
                 tblinkers.add((TypeBasedGuardingDynamicLinker)linker);
@@ -140,8 +127,7 @@ public class CompositeTypeBasedGuardingDynamicLinker implements
                 break;
             }
             default: {
-                llinkers.add(new CompositeTypeBasedGuardingDynamicLinker(
-                        tblinkers));
+                llinkers.add(new CompositeTypeBasedGuardingDynamicLinker(tblinkers));
                 tblinkers.clear();
                 break;
             }

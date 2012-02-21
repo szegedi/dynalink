@@ -24,36 +24,31 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * A dual map that can either strongly or weakly reference a given class
- * depending on whether the class is visible from a class loader or not.
+ * A dual map that can either strongly or weakly reference a given class depending on whether the class is visible from
+ * a class loader or not.
  *
  * @author Attila Szegedi
  * @version $Id: $
  * @param <T> the type of the values in the map
  */
 public abstract class ClassMap<T> {
-    private final ConcurrentMap<Class<?>, T> map =
-            new ConcurrentHashMap<Class<?>, T>();
-    private final Map<Class<?>, Reference<T>> weakMap =
-            new WeakHashMap<Class<?>, Reference<T>>();
+    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<Class<?>, T>();
+    private final Map<Class<?>, Reference<T>> weakMap = new WeakHashMap<Class<?>, Reference<T>>();
     private final ClassLoader classLoader;
 
     /**
-     * Creates a new class map. It will use strong references for all keys and
-     * values where the key is a class visible from the class loader, and will
-     * use weak keys and soft values for all other classes.
+     * Creates a new class map. It will use strong references for all keys and values where the key is a class visible
+     * from the class loader, and will use weak keys and soft values for all other classes.
      *
-     * @param classLoader the classloader that determines strong
-     * referenceability.
+     * @param classLoader the classloader that determines strong referenceability.
      */
     protected ClassMap(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
     /**
-     * Compute the value associated with the given class. It is possible that
-     * the method will be invoked several times (or even concurrently) for the
-     * same class parameter.
+     * Compute the value associated with the given class. It is possible that the method will be invoked several times
+     * (or even concurrently) for the same class parameter.
      *
      * @param clazz the class to compute the value for
      * @return the return value. Must not be null.
@@ -61,11 +56,9 @@ public abstract class ClassMap<T> {
     protected abstract T computeValue(Class<?> clazz);
 
     /**
-     * Returns the class loader that governs the strong referenceability of this
-     * class map.
+     * Returns the class loader that governs the strong referenceability of this class map.
      *
-     * @return the class loader that governs the strong referenceability of this
-     * class map.
+     * @return the class loader that governs the strong referenceability of this class map.
      */
     public ClassLoader getClassLoader() {
         return classLoader;

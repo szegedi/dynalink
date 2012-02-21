@@ -37,8 +37,7 @@ public class LinkerServicesImpl implements LinkerServices {
     /**
      * Creates a new linker services object.
      *
-     * @param typeConverterFactory the type converter factory exposed by the
-     * services.
+     * @param typeConverterFactory the type converter factory exposed by the services.
      * @param topLevelLinker the top level linker used by the services.
      */
     public LinkerServicesImpl(final TypeConverterFactory typeConverterFactory,
@@ -53,14 +52,12 @@ public class LinkerServicesImpl implements LinkerServices {
     }
 
     @Override
-    public MethodHandle asType(MethodHandle handle,
-            MethodType fromType) {
+    public MethodHandle asType(MethodHandle handle, MethodType fromType) {
         return typeConverterFactory.asType(handle, fromType);
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest)
-            throws Exception {
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest) throws Exception {
         return topLevelLinker.getGuardedInvocation(linkRequest, this);
     }
 }

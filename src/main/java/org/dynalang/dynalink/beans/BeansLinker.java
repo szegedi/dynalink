@@ -27,27 +27,24 @@ import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
- * A linker for POJOs. Normally used as the ultimate fallback linker by the
- * {@link DynamicLinkerFactory} so it is given the chance to link calls to all
- * objects that no other language runtimes recognize. Handles all intricacies
- * and corner cases of overloaded method resolution and variable argument
- * methods when linking to Java classes.
+ * A linker for POJOs. Normally used as the ultimate fallback linker by the {@link DynamicLinkerFactory} so it is given
+ * the chance to link calls to all objects that no other language runtimes recognize. Handles all intricacies and corner
+ * cases of overloaded method resolution and variable argument methods when linking to Java classes.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
 public class BeansLinker implements GuardingDynamicLinker {
-    private static final ClassValue<BeanLinker> linkers =
-            new ClassValue<BeanLinker>() {
-                @Override
-                protected BeanLinker computeValue(Class<?> clazz) {
-                    try {
-                        return new BeanLinker(clazz);
-                    } catch(IntrospectionException e) {
-                        throw new UndeclaredThrowableException(e);
-                    }
-                }
-            };
+    private static final ClassValue<BeanLinker> linkers = new ClassValue<BeanLinker>() {
+        @Override
+        protected BeanLinker computeValue(Class<?> clazz) {
+            try {
+                return new BeanLinker(clazz);
+            } catch(IntrospectionException e) {
+                throw new UndeclaredThrowableException(e);
+            }
+        }
+    };
 
     /**
      * Creates a new POJO linker.
@@ -56,16 +53,15 @@ public class BeansLinker implements GuardingDynamicLinker {
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest request,
-            final LinkerServices linkerServices) throws Exception {
+    public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices)
+            throws Exception {
         final Object[] arguments = request.getArguments();
         if(arguments == null || arguments.length == 0) {
             // Can't handle static calls; must have a receiver
             return null;
         }
 
-        final CallSiteDescriptor callSiteDescriptor =
-            request.getCallSiteDescriptor();
+        final CallSiteDescriptor callSiteDescriptor = request.getCallSiteDescriptor();
         final int l = callSiteDescriptor.getNameTokenCount();
         // All names conforming to the dynalang MOP should have at least two
         // tokens, the first one being "dyn"
@@ -79,7 +75,6 @@ public class BeansLinker implements GuardingDynamicLinker {
             return null;
         }
 
-        return linkers.get(receiver.getClass()).getGuardedInvocation(request,
-                linkerServices);
+        return linkers.get(receiver.getClass()).getGuardedInvocation(request, linkerServices);
     }
 }

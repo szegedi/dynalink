@@ -28,10 +28,9 @@ import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
- * A factory for type converters. This class is the main implementation behind
- * the {@link LinkerServices#asType(MethodHandle, MethodType)}. It
- * manages the known {@link GuardingTypeConverterFactory} instances and creates
- * appropriate converters for method handles.
+ * A factory for type converters. This class is the main implementation behind the
+ * {@link LinkerServices#asType(MethodHandle, MethodType)}. It manages the known {@link GuardingTypeConverterFactory}
+ * instances and creates appropriate converters for method handles.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -39,31 +38,25 @@ import org.dynalang.dynalink.linker.LinkerServices;
 public class TypeConverterFactory {
 
     private final GuardingTypeConverterFactory[] factories;
-    private final ClassValue<ClassMap<MethodHandle>> converterMap =
-            new ClassValue<ClassMap<MethodHandle>>() {
+    private final ClassValue<ClassMap<MethodHandle>> converterMap = new ClassValue<ClassMap<MethodHandle>>() {
+        @Override
+        protected ClassMap<MethodHandle> computeValue(final Class<?> sourceType) {
+            return new ClassMap<MethodHandle>(sourceType.getClassLoader()) {
                 @Override
-                protected ClassMap<MethodHandle> computeValue(
-                        final Class<?> sourceType) {
-                    return new ClassMap<MethodHandle>(sourceType
-                            .getClassLoader()) {
-                        @Override
-                        protected MethodHandle computeValue(Class<?> targetType) {
-                            return createConverter(sourceType, targetType);
-                        }
-                    };
+                protected MethodHandle computeValue(Class<?> targetType) {
+                    return createConverter(sourceType, targetType);
                 }
             };
+        }
+    };
 
     /**
-     * Creates a new type converter factory from the available
-     * {@link GuardingTypeConverterFactory} instances.
+     * Creates a new type converter factory from the available {@link GuardingTypeConverterFactory} instances.
      *
-     * @param factories the {@link GuardingTypeConverterFactory} instances to
-     * compose.
+     * @param factories the {@link GuardingTypeConverterFactory} instances to compose.
      */
     public TypeConverterFactory(Iterable<GuardingTypeConverterFactory> factories) {
-        final List<GuardingTypeConverterFactory> l =
-                new LinkedList<GuardingTypeConverterFactory>();
+        final List<GuardingTypeConverterFactory> l = new LinkedList<GuardingTypeConverterFactory>();
         for(GuardingTypeConverterFactory factory: factories) {
             l.add(factory);
         }
@@ -72,28 +65,21 @@ public class TypeConverterFactory {
     }
 
     /**
-     * Similar to {@link MethodHandle#asType(MethodType)} except it also hooks
-     * in method handles produced by {@link GuardingTypeConverterFactory}
-     * implementations, providing for language-specific type coercing of
-     * parameters. It will apply {@link MethodHandle#asType(MethodType)} for all
-     * primitive-to-primitive, wrapper-to-primitive, primitive-to-wrapper
-     * conversions as well as for all upcasts. For all other conversions, it'll
-     * insert
-     * {@link MethodHandles#filterArguments(MethodHandle, int, MethodHandle...)}
-     * with composite filters provided by {@link GuardingTypeConverterFactory}
-     * implementations. It doesn't use language-specific conversions on the
-     * return type.
+     * Similar to {@link MethodHandle#asType(MethodType)} except it also hooks in method handles produced by
+     * {@link GuardingTypeConverterFactory} implementations, providing for language-specific type coercing of
+     * parameters. It will apply {@link MethodHandle#asType(MethodType)} for all primitive-to-primitive,
+     * wrapper-to-primitive, primitive-to-wrapper conversions as well as for all upcasts. For all other conversions,
+     * it'll insert {@link MethodHandles#filterArguments(MethodHandle, int, MethodHandle...)} with composite filters
+     * provided by {@link GuardingTypeConverterFactory} implementations. It doesn't use language-specific conversions on
+     * the return type.
      *
      * @param handle target method handle
      * @param fromType the types of source arguments
-     * @return a method handle that is a suitable combination of
-     * {@link MethodHandle#asType(MethodType)} and
-     * {@link MethodHandles#filterArguments(MethodHandle, int, MethodHandle...)}
-     * with {@link GuardingTypeConverterFactory} produced type converters as
-     * filters.
+     * @return a method handle that is a suitable combination of {@link MethodHandle#asType(MethodType)} and
+     * {@link MethodHandles#filterArguments(MethodHandle, int, MethodHandle...)} with
+     * {@link GuardingTypeConverterFactory} produced type converters as filters.
      */
-    public MethodHandle asType(MethodHandle handle,
-            final MethodType fromType) {
+    public MethodHandle asType(MethodHandle handle, final MethodType fromType) {
         MethodHandle newHandle = handle;
         final MethodType toType = newHandle.type();
         final int l = toType.parameterCount();
@@ -108,8 +94,7 @@ public class TypeConverterFactory {
             if(canAutoConvert(fromParamType, toParamType)) {
                 newHandle = applyConverters(newHandle, pos, converters);
             } else {
-                final MethodHandle converter =
-                        getTypeConverter(fromParamType, toParamType);
+                final MethodHandle converter = getTypeConverter(fromParamType, toParamType);
                 if(converter != null) {
                     if(converters.isEmpty()) {
                         pos = i;
@@ -123,25 +108,22 @@ public class TypeConverterFactory {
         return applyConverters(newHandle, pos, converters).asType(fromType);
     }
 
-    private static MethodHandle applyConverters(MethodHandle handle, int pos,
-            List<MethodHandle> converters) {
+    private static MethodHandle applyConverters(MethodHandle handle, int pos, List<MethodHandle> converters) {
         if(converters.isEmpty()) {
             return handle;
         }
-        final MethodHandle newHandle = MethodHandles.filterArguments(handle,
-                pos, converters.toArray(new MethodHandle[converters.size()]));
+        final MethodHandle newHandle =
+                MethodHandles.filterArguments(handle, pos, converters.toArray(new MethodHandle[converters.size()]));
         converters.clear();
         return newHandle;
     }
 
     /**
-     * Returns true if there might exist a conversion between the requested
-     * types (either an automatic JVM conversion, or one provided by any
-     * available {@link GuardingTypeConverterFactory}), or false if there
-     * definitely does not exist a conversion between the requested types. Note
-     * that returning true does not guarantee that the conversion will succeed
-     * at runtime (notably, if the "from" or "to" types are sufficiently
-     * generic), but returning false guarantees that it would fail.
+     * Returns true if there might exist a conversion between the requested types (either an automatic JVM conversion,
+     * or one provided by any available {@link GuardingTypeConverterFactory}), or false if there definitely does not
+     * exist a conversion between the requested types. Note that returning true does not guarantee that the conversion
+     * will succeed at runtime (notably, if the "from" or "to" types are sufficiently generic), but returning false
+     * guarantees that it would fail.
      *
      * @param from the source type for the conversion
      * @param to the target type for the conversion
@@ -152,16 +134,13 @@ public class TypeConverterFactory {
     }
 
     /**
-     * Determines whether it's safe to perform an automatic conversion between
-     * the source and target class.
+     * Determines whether it's safe to perform an automatic conversion between the source and target class.
      *
      * @param fromType convert from this class
      * @param toType convert to this class
-     * @return true if it's safe to let MethodHandles.convertArguments() to
-     * handle this conversion.
+     * @return true if it's safe to let MethodHandles.convertArguments() to handle this conversion.
      */
-    private static boolean canAutoConvert(final Class<?> fromType,
-            final Class<?> toType) {
+    private static boolean canAutoConvert(final Class<?> fromType, final Class<?> toType) {
         if(fromType.isPrimitive()) {
             if(fromType == Void.TYPE) {
                 return true;
@@ -185,54 +164,42 @@ public class TypeConverterFactory {
         return toType.isAssignableFrom(fromType);
     }
 
-    private static boolean canAutoConvertPrimitiveToReference(
-            final Class<?> primitiveType, final Class<?> refType) {
+    private static boolean canAutoConvertPrimitiveToReference(final Class<?> primitiveType, final Class<?> refType) {
         return TypeUtilities.isAssignableFromBoxedPrimitive(refType)
                 && ((primitiveType != Byte.TYPE && primitiveType != Boolean.TYPE) || refType != Character.class);
     }
 
-    private static boolean canAutoConvertPrimitives(Class<?> fromType,
-            Class<?> toType) {
+    private static boolean canAutoConvertPrimitives(Class<?> fromType, Class<?> toType) {
         // the only cast conversion not allowed between non-boolean primitives
         // is byte->char, all other narrowing and widening conversions are
         // allowed. boolean is converted to byte first, so same applies to it.
-        return (fromType != Byte.TYPE && fromType != Boolean.TYPE)
-                || toType != Character.TYPE;
+        return (fromType != Byte.TYPE && fromType != Boolean.TYPE) || toType != Character.TYPE;
     }
 
-    private MethodHandle getTypeConverter(Class<?> sourceType,
-            Class<?> targetType) {
-        final MethodHandle converter =
-                converterMap.get(sourceType).get(targetType);
+    private MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+        final MethodHandle converter = converterMap.get(sourceType).get(targetType);
         return converter == IDENTITY_CONVERSION ? null : converter;
     }
 
-    private MethodHandle createConverter(Class<?> sourceType,
-            Class<?> targetType) {
+    private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) {
         final MethodType type = MethodType.methodType(targetType, sourceType);
         final MethodHandle identity = IDENTITY_CONVERSION.asType(type);
         MethodHandle last = identity;
         for(int i = factories.length; i-- > 0;) {
-            final GuardedInvocation next =
-                    factories[i].convertToType(sourceType, targetType);
+            final GuardedInvocation next = factories[i].convertToType(sourceType, targetType);
             if(next != null) {
                 next.assertType(type);
-                last =
-                        MethodHandles.guardWithTest(next.getGuard(), next
-                                .getInvocation(), last);
+                last = MethodHandles.guardWithTest(next.getGuard(), next.getInvocation(), last);
             }
         }
         return last == identity ? IDENTITY_CONVERSION : last;
     }
 
-    private static final MethodHandle IDENTITY_CONVERSION =
-            new Lookup(MethodHandles.lookup()).findStatic(
-                    TypeConverterFactory.class, "_identityConversion",
-                    MethodType.methodType(Object.class, Object.class));
+    private static final MethodHandle IDENTITY_CONVERSION = new Lookup(MethodHandles.lookup()).findStatic(
+            TypeConverterFactory.class, "_identityConversion", MethodType.methodType(Object.class, Object.class));
 
     /**
-     * This method is public for implementation reasons. Do not invoke it
-     * directly. Returns the object passed in.
+     * This method is public for implementation reasons. Do not invoke it directly. Returns the object passed in.
      *
      * @param o the object
      * @return the object

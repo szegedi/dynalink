@@ -8,16 +8,15 @@ public class TestCatchException {
     public static void main(String[] args) throws Throwable {
         MethodHandle throwing = findStatic("throwing");
         MethodHandle catching = findStatic("catching");
-        MethodHandles.catchException(throwing, MyException.class, MethodHandles
-                .dropArguments(catching, 0, MyException.class));
+        MethodHandles.catchException(throwing, MyException.class,
+                MethodHandles.dropArguments(catching, 0, MyException.class));
     }
 
     private static class MyException extends RuntimeException {
     }
 
     private static MethodHandle findStatic(String name) {
-        return Lookup.PUBLIC.findStatic(TestCatchException.class, name,
-                MethodType.methodType(int.class, Object.class));
+        return Lookup.PUBLIC.findStatic(TestCatchException.class, name, MethodType.methodType(int.class, Object.class));
     }
 
     public static int throwing(Object o) {

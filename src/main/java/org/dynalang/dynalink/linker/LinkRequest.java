@@ -17,9 +17,8 @@
 package org.dynalang.dynalink.linker;
 
 /**
- * Represents a request to link a particular invocation at a particular call
- * site. Instances of these requests are being passed to
- * {@link GuardingDynamicLinker}.
+ * Represents a request to link a particular invocation at a particular call site. Instances of these requests are being
+ * passed to {@link GuardingDynamicLinker}.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -40,28 +39,23 @@ public interface LinkRequest {
     public Object[] getArguments();
 
     /**
-     * Returns a request stripped from runtime context arguments. Some language
-     * runtimes will include runtime-specific context parameters in their call
-     * sites as the last few arguments. If a linker does not recognize such
-     * contexts at all, or does not recognize the call site as one with its own
-     * context, it can ask for the alternative link request with context
-     * parameters and arguments removed, and link against it instead.
+     * Returns a request stripped from runtime context arguments. Some language runtimes will include runtime-specific
+     * context parameters in their call sites as the last few arguments. If a linker does not recognize such contexts at
+     * all, or does not recognize the call site as one with its own context, it can ask for the alternative link request
+     * with context parameters and arguments removed, and link against it instead.
      *
-     * @return the context-stripped request. If the link request does not have
-     * any language runtime specific context parameters, the same link request
-     * is returned.
+     * @return the context-stripped request. If the link request does not have any language runtime specific context
+     * parameters, the same link request is returned.
      */
     public LinkRequest withoutRuntimeContext();
 
     /**
-     * Returns a request identical to this one with call site descriptor and
-     * arguments replaced with the ones specified.
+     * Returns a request identical to this one with call site descriptor and arguments replaced with the ones specified.
      *
-     *@param callSiteDescriptor the new call site descriptor
-     *@param arguments the new arguments
-     * @return a new request identical to this one, except with the call site
-     * descriptor and arguments replaced with the specified ones.
+     * @param callSiteDescriptor the new call site descriptor
+     * @param arguments the new arguments
+     * @return a new request identical to this one, except with the call site descriptor and arguments replaced with the
+     * specified ones.
      */
-    public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor,
-            Object[] arguments);
+    public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor, Object[] arguments);
 }

@@ -8,9 +8,8 @@ import java.util.List;
 import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
- * Utility class that encapsulates the algorithm for choosing the maximally
- * specific methods. It is generic and can thus work with an arbitrary
- * representation of a method.
+ * Utility class that encapsulates the algorithm for choosing the maximally specific methods. It is generic and can thus
+ * work with an arbitrary representation of a method.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -34,8 +33,7 @@ class MaximallySpecific {
     }
 
     /**
-     * Given a list of methods and a function for retrieving their type, returns
-     * a list of maximally specific methods.
+     * Given a list of methods and a function for retrieving their type, returns a list of maximally specific methods.
      *
      * @param <M> the method representation class
      * @param methods the list of methods
@@ -43,8 +41,7 @@ class MaximallySpecific {
      * @param varArgs whether to assume the methods are varargs
      * @return the list of maximally specific methods.
      */
-    static <M> List<M> getMaximallySpecificMethods(List<M> methods,
-            TypeFunction<M> typeFunction, boolean varArgs) {
+    static <M> List<M> getMaximallySpecificMethods(List<M> methods, TypeFunction<M> typeFunction, boolean varArgs) {
         if(methods.size() < 2) {
             return methods;
         }
@@ -54,8 +51,7 @@ class MaximallySpecific {
             boolean lessSpecific = false;
             for(Iterator<M> maximal = maximals.iterator(); maximal.hasNext();) {
                 final M max = maximal.next();
-                switch(isMoreSpecific(methodType, typeFunction.type(max),
-                        varArgs)) {
+                switch(isMoreSpecific(methodType, typeFunction.type(max), varArgs)) {
                     case moreSpecific: {
                         maximal.remove();
                         break;
@@ -80,8 +76,7 @@ class MaximallySpecific {
         moreSpecific, lessSpecific, indeterminate
     }
 
-    private static Specificity isMoreSpecific(MethodType t1, MethodType t2,
-            boolean varArgs) {
+    private static Specificity isMoreSpecific(MethodType t1, MethodType t2, boolean varArgs) {
         final int pc1 = t1.parameterCount();
         final int pc2 = t2.parameterCount();
         assert varArgs || pc1 == pc2;
@@ -120,10 +115,8 @@ class MaximallySpecific {
         return Specificity.indeterminate;
     }
 
-    private static Class<?> getParameterClass(MethodType t, int l, int i,
-            boolean varArgs) {
-        return varArgs && i >= l - 1 ? t.parameterType(l - 1)
-                .getComponentType() : t.parameterType(i);
+    private static Class<?> getParameterClass(MethodType t, int l, int i, boolean varArgs) {
+        return varArgs && i >= l - 1 ? t.parameterType(l - 1).getComponentType() : t.parameterType(i);
     }
 
 }

@@ -26,16 +26,14 @@ import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
- * A {@link GuardingDynamicLinker} that delegates sequentially to a list of
- * other guarding dynamic linkers. The first value returned from a component
- * linker other than null is returned. If no component linker returns an
- * invocation, null is returned.
+ * A {@link GuardingDynamicLinker} that delegates sequentially to a list of other guarding dynamic linkers. The first
+ * value returned from a component linker other than null is returned. If no component linker returns an invocation,
+ * null is returned.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker,
-        Serializable {
+public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,10 +44,8 @@ public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker,
      *
      * @param linkers a list of component linkers.
      */
-    public CompositeGuardingDynamicLinker(
-            Iterable<? extends GuardingDynamicLinker> linkers) {
-        final List<GuardingDynamicLinker> l =
-                new LinkedList<GuardingDynamicLinker>();
+    public CompositeGuardingDynamicLinker(Iterable<? extends GuardingDynamicLinker> linkers) {
+        final List<GuardingDynamicLinker> l = new LinkedList<GuardingDynamicLinker>();
         for(GuardingDynamicLinker linker: linkers) {
             l.add(linker);
         }
@@ -57,11 +53,10 @@ public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker,
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest,
-            final LinkerServices linkerServices) throws Exception {
+    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, final LinkerServices linkerServices)
+            throws Exception {
         for(final GuardingDynamicLinker linker: linkers) {
-            final GuardedInvocation invocation =
-                    linker.getGuardedInvocation(linkRequest, linkerServices);
+            final GuardedInvocation invocation = linker.getGuardedInvocation(linkRequest, linkerServices);
             if(invocation != null) {
                 return invocation;
             }

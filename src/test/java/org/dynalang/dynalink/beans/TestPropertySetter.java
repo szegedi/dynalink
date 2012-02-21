@@ -10,8 +10,8 @@ import org.dynalang.dynalink.DynamicLinkerFactory;
 public class TestPropertySetter extends TestCase {
     public void testFixedNamePropertySetter() throws Throwable {
         final RelinkCountingCallSite callSite =
-                new RelinkCountingCallSite("dyn:setProp:foo", MethodType
-                        .methodType(Void.TYPE, Object.class, Object.class));
+                new RelinkCountingCallSite("dyn:setProp:foo", MethodType.methodType(Void.TYPE, Object.class,
+                        Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
         final T1 t1 = new T1();
@@ -30,9 +30,8 @@ public class TestPropertySetter extends TestCase {
 
     public void testVariableNamePropertySetter() throws Throwable {
         final RelinkCountingCallSite callSite =
-                new RelinkCountingCallSite("dyn:setProp", MethodType
-                        .methodType(Void.TYPE, Object.class, String.class,
-                                Object.class));
+                new RelinkCountingCallSite("dyn:setProp", MethodType.methodType(Void.TYPE, Object.class, String.class,
+                        Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
         final T1 t1 = new T1();
