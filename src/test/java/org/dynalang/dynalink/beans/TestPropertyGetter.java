@@ -17,6 +17,7 @@ public class TestPropertyGetter extends TestCase {
                 new RelinkCountingCallSite("dyn:getProp:foo", MethodType.methodType(Object.class, Object.class));
         new DynamicLinkerFactory().createLinker().link(callSite);
         final MethodHandle invoker = callSite.dynamicInvoker();
+
         final T1 t1 = new T1();
         t1.setFoo("abc");
         assertSame("abc", invoker.invokeWithArguments(t1));
@@ -33,6 +34,17 @@ public class TestPropertyGetter extends TestCase {
         t2.setFoo("ghi");
         assertSame("ghi", invoker.invokeWithArguments(t2));
         assertEquals(2, callSite.getRelinkCount());
+
+        final T4 t4 = new T4();
+        t4.foo = "jkl";
+        assertSame("jkl", invoker.invokeWithArguments(t4));
+        assertEquals(3, callSite.getRelinkCount());
+
+        final T5 t5 = new T5();
+        t5.foo = "mno";
+        assertSame("mno", invoker.invokeWithArguments(t5));
+        // Must relink - T5 is a subclass of T4, but field getters can be overloaded with a property getter.
+        assertEquals(4, callSite.getRelinkCount());
     }
 
     public void testVariableNamePropertyGetter() throws Throwable {
@@ -107,5 +119,13 @@ public class TestPropertyGetter extends TestCase {
         public Object getBar() {
             return bar;
         }
+    }
+
+    public static class T4 {
+        public String foo;
+    }
+
+    public static class T5 {
+        public String foo;
     }
 }

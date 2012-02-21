@@ -25,6 +25,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -50,8 +51,8 @@ import org.dynalang.dynalink.support.Lookup;
  */
 class BeanLinker implements GuardingDynamicLinker {
     private final Class<?> clazz;
-
-    private final Map<String, MethodHandle> propertyGetters = new HashMap<String, MethodHandle>();
+    private final Map<String, AnnotatedMethodHandle> propertyGetters = new HashMap<String, AnnotatedMethodHandle>();
+    private final Map<String, DynamicMethod> propertySetters = new HashMap<String, DynamicMethod>();
     private final Map<String, DynamicMethod> methods = new HashMap<String, DynamicMethod>();
 
     BeanLinker(Class<?> clazz) throws IntrospectionException {
@@ -61,15 +62,32 @@ class BeanLinker implements GuardingDynamicLinker {
         final PropertyDescriptor[] propDescs = beanInfo.getPropertyDescriptors();
         for(int i = 0; i < propDescs.length; i++) {
             final PropertyDescriptor descriptor = propDescs[i];
-            final Method readMethod = descriptor.getReadMethod();
-            if(readMethod == null) {
+            final Method accReadMethod = accessibleLookup.getAccessibleMethod(descriptor.getReadMethod());
+            final String name = descriptor.getName();
+            if(accReadMethod != null) {
+                // getMostGenericGetter() will look for the most generic superclass that declares this getter. Since
+                // getters have zero args (aside from the receiver), they can't be overloaded, so we're free to link
+                // with an instanceof guard for the most generic one, creating more stable call sites.
+                propertyGetters.put(name, getMostGenericGetter(accReadMethod));
+            }
+            final Method accWriteMethod = accessibleLookup.getAccessibleMethod(descriptor.getWriteMethod());
+            if(accWriteMethod != null) {
+                propertySetters.put(name, new SimpleDynamicMethod(Lookup.PUBLIC.unreflect(accWriteMethod)));
+            }
+        }
+
+        // Add field getters
+        for(Field field: clazz.getFields()) {
+            final int modifiers = field.getModifiers();
+            if(Modifier.isStatic(modifiers)) {
                 continue;
             }
-            final Method accReadMethod = accessibleLookup.getAccessibleMethod(readMethod);
-            if(accReadMethod == null) {
-                continue;
+            final String name = field.getName();
+            if(!propertyGetters.containsKey(name)) {
+                // Only add field getter if we don't have an explicit property
+                // getter with the same name
+                propertyGetters.put(name, new AnnotatedMethodHandle(Lookup.PUBLIC.unreflectGetter(field), false));
             }
-            propertyGetters.put(descriptor.getName(), getMostGenericGetter(readMethod));
         }
 
         // Add instance methods
@@ -77,16 +95,49 @@ class BeanLinker implements GuardingDynamicLinker {
         for(int i = 0; i < methodDescs.length; i++) {
             final MethodDescriptor descriptor = methodDescs[i];
             final Method method = descriptor.getMethod();
-            if(Modifier.isStatic(method.getModifiers())) {
+            if(Modifier.isStatic(method.getModifiers()) || method.isBridge() || method.isSynthetic()) {
                 continue;
             }
             final Method accMethod = accessibleLookup.getAccessibleMethod(method);
             if(accMethod == null) {
                 continue;
             }
-            addMember(accMethod);
+            final String name = method.getName();
+            final MethodHandle methodHandle = Lookup.PUBLIC.unreflect(accMethod);
+            addMember(name, methodHandle, methods);
+            // Check if this method can be an alternative property setter
+            if(isPropertySetter(accMethod)) {
+                addMember(Introspector.decapitalize(name.substring(3)), methodHandle, propertySetters);
+            }
         }
+
+        // Add field setters as property setters, but only for fields that have no property setter defined.
+        for(Field field: clazz.getFields()) {
+            final int modifiers = field.getModifiers();
+            if(Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+                continue;
+            }
+            final String name = field.getName();
+            if(!propertySetters.containsKey(name)) {
+                addMember(name, Lookup.PUBLIC.unreflectSetter(field), propertySetters);
+            }
+        }
+
+        // Make sure we don't prevent GCing the class
         Introspector.flushFromCaches(clazz);
+    }
+
+    /**
+     * Determines if the method is a property setter. Only invoked on public instance methods, so we don't check
+     * repeatedly for those. It differs somewhat from the JavaBeans introspector's definition, as we'll happily accept
+     * methods that have non-void return types, to accommodate for the widespread pattern of property setters that allow
+     * chaining.
+     * @param m the method tested for being a property setter
+     * @return true if it is a property setter, false otherwise
+     */
+    private static boolean isPropertySetter(Method m) {
+        final String name = m.getName();
+        return name.startsWith("set") && name.length() > 3 && m.getParameterTypes().length == 1;
     }
 
     /**
@@ -100,17 +151,15 @@ class BeanLinker implements GuardingDynamicLinker {
         return methods.get(name);
     }
 
-    private void addMember(Method method) {
-        final String name = method.getName();
+    private void addMember(String name, MethodHandle mh, Map<String, DynamicMethod> methods) {
         DynamicMethod existingMethod = methods.get(name);
-        DynamicMethod newMethod = addMember(method, existingMethod);
+        DynamicMethod newMethod = addMember(mh, existingMethod);
         if(newMethod != existingMethod) {
             methods.put(name, newMethod);
         }
     }
 
-    private DynamicMethod addMember(Method method, DynamicMethod existing) {
-        final MethodHandle mh = Lookup.PUBLIC.unreflect(method);
+    private DynamicMethod addMember(MethodHandle mh, DynamicMethod existing) {
         if(existing == null) {
             return new SimpleDynamicMethod(mh);
         } else
@@ -368,7 +417,6 @@ class BeanLinker implements GuardingDynamicLinker {
     }
 
     private GuardedInvocation getPropertyGetter(CallSiteDescriptor callSiteDescriptor) {
-        final MethodHandle getter;
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
@@ -380,18 +428,19 @@ class BeanLinker implements GuardingDynamicLinker {
                 // Must have exactly one argument: receiver
                 assertParameterCount(callSiteDescriptor, 1);
                 // Fixed name
-                getter = propertyGetters.get(callSiteDescriptor.getNameToken(2));
-                if(getter == null) {
+                final AnnotatedMethodHandle annGetter = propertyGetters.get(callSiteDescriptor.getNameToken(2));
+                if(annGetter == null) {
                     // Property has no getter
                     return null;
                 }
-                // NOTE: since property getters are no-arg, we don't have to
-                // worry about them being overloaded in a subclass. Therefore,
-                // we can discover the most abstract superclass that has the
-                // method, and use that as the guard with Guards.isInstance()
-                // for a more stably linked call site.
-                return new GuardedInvocation(getter.asType(type), Guards.isInstance(getter.type().parameterType(0),
-                        type));
+                final MethodHandle getter = annGetter.handle;
+                final Class<?> guardType = getter.type().parameterType(0);
+                // NOTE: since property getters (not field getters!) are no-arg, we don't have to worry about them being
+                // overloaded in a subclass. Therefore, we can discover the most abstract superclass that has the
+                // method, and use that as the guard with Guards.isInstance() for a more stably linked call site. If
+                // we're linking against a field getter, don't make the assumption.
+                return new GuardedInvocation(getter.asType(type), annGetter.overloadSafe ?
+                        Guards.isInstance(guardType, type) : Guards.isOfClass(guardType, type));
             }
             default: {
                 // Can't do anything with more than 3 name components
@@ -422,11 +471,11 @@ class BeanLinker implements GuardingDynamicLinker {
      * @throws Throwable rethrown underlying method handle invocation throwable.
      */
     public Object _getPropertyWithVariableId(Object obj, Object id) throws Throwable {
-        MethodHandle getter = propertyGetters.get(String.valueOf(id));
+        AnnotatedMethodHandle getter = propertyGetters.get(String.valueOf(id));
         if(getter == null) {
             return Results.notReadable;
         }
-        return getter.invokeWithArguments(obj);
+        return getter.handle.invokeWithArguments(obj);
     }
 
     private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findSpecial(
@@ -437,7 +486,6 @@ class BeanLinker implements GuardingDynamicLinker {
 
     /**
      * This method is public for implementation reasons. Do not invoke it directly. Sets a property on an object.
-     *
      * @param callSiteDescriptor the descriptor of the setter call site
      * @param linkerServices the linker services used for value conversion
      * @param obj the object
@@ -459,10 +507,10 @@ class BeanLinker implements GuardingDynamicLinker {
         return Results.notWritable;
     }
 
-    private static MethodHandle getMostGenericGetter(Method getter) {
+    private static AnnotatedMethodHandle getMostGenericGetter(Method getter) {
         final Method mostGenericGetter =
                 getMostGenericGetter(getter.getName(), getter.getReturnType(), getter.getDeclaringClass());
-        return Lookup.PUBLIC.unreflect(mostGenericGetter);
+        return new AnnotatedMethodHandle(Lookup.PUBLIC.unreflect(mostGenericGetter), true);
     }
 
     private static Method getMostGenericGetter(String name, Class<?> returnType, Class<?> declaringClass) {
@@ -488,5 +536,15 @@ class BeanLinker implements GuardingDynamicLinker {
             }
         }
         return null;
+    }
+
+    private static final class AnnotatedMethodHandle {
+        private final MethodHandle handle;
+        private final boolean overloadSafe;
+
+        AnnotatedMethodHandle(MethodHandle handle, boolean overloadSafe) {
+            this.handle = handle;
+            this.overloadSafe = overloadSafe;
+        }
     }
 }

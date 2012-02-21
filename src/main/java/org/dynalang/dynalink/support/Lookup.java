@@ -19,6 +19,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.BootstrapMethodError;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -55,6 +56,22 @@ public class Lookup {
             return lookup.unreflect(m);
         } catch(IllegalAccessException e) {
             throw new BootstrapMethodError("Failed to unreflect " + m, e);
+        }
+    }
+
+    public MethodHandle unreflectGetter(Field f) {
+        try {
+            return lookup.unreflectGetter(f);
+        } catch(IllegalAccessException e) {
+            throw new BootstrapMethodError("Failed to unreflect getter for " + f, e);
+        }
+    }
+
+    public MethodHandle unreflectSetter(Field f) {
+        try {
+            return lookup.unreflectSetter(f);
+        } catch(IllegalAccessException e) {
+            throw new BootstrapMethodError("Failed to unreflect setter for " + f, e);
         }
     }
 
