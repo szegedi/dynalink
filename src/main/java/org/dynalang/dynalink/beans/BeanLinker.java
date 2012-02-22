@@ -355,10 +355,10 @@ class BeanLinker implements GuardingDynamicLinker {
 
     private GuardedInvocation createGuardedDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
             LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methods) {
-        final MethodHandle invocation = getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName,
-                methods);
-        return invocation == null ? null : new GuardedInvocation(invocation, getClassGuard(
-                callSiteDescriptor.getMethodType()));
+        final MethodHandle invocation =
+                getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName, methods);
+        return invocation == null ? null : new GuardedInvocation(invocation,
+                getClassGuard(callSiteDescriptor.getMethodType()));
     }
 
     private static MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
@@ -476,8 +476,8 @@ class BeanLinker implements GuardingDynamicLinker {
     public Results _setPropertyWithVariableId(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
             Object obj, Object id, Object value) throws Throwable {
         // TODO: this is quite likely terribly inefficient. Optimize.
-        final MethodHandle invocation = getDynamicMethodInvocation(callSiteDescriptor, linkerServices, String.valueOf(
-                id), propertySetters);
+        final MethodHandle invocation =
+                getDynamicMethodInvocation(callSiteDescriptor, linkerServices, String.valueOf(id), propertySetters);
         if(invocation != null) {
             invocation.invokeWithArguments(obj, value);
             return Results.ok;

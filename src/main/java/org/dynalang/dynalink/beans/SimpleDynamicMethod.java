@@ -91,35 +91,26 @@ class SimpleDynamicMethod implements DynamicMethod {
         }
 
         final Class<?> varArgType = methodType.parameterType(fixParamsLen);
-        // Handle a somewhat sinister corner case: caller passes exactly one
-        // argument in the vararg position, and we must handle both a prepacked
-        // vararg array as well as a genuine 1-long vararg sequence.
+        // Handle a somewhat sinister corner case: caller passes exactly one argument in the vararg position, and we
+        // must handle both a prepacked vararg array as well as a genuine 1-long vararg sequence.
         if(argsLen == paramsLen) {
             final Class<?> callSiteLastArgType = callSiteType.parameterType(fixParamsLen);
             if(varArgType.isAssignableFrom(callSiteLastArgType)) {
-                // Call site signature guarantees we'll always be passed a
-                // single compatible array; just link directly to the method.
+                // Call site signature guarantees we'll always be passed a single compatible array; just link directly
+                // to the method.
                 return createConvertingInvocation(fixTarget, linkerServices, callSiteType);
-            } else
-                if(!linkerServices.canConvert(callSiteLastArgType, varArgType)) {
-                    // Call site signature guarantees the argument can
-                    // definitely
-                    // not be an array (i.e. it is primitive); link immediately
-                    // to
-                    // a vararg-packing method handle.
-                    return createConvertingInvocation(collectArguments(fixTarget, argsLen), linkerServices,
-                            callSiteType);
-                } else {
-                    // Call site signature makes no guarantees that the single
-                    // argument in the vararg position will be compatible across
-                    // all invocations. Need to insert an appropriate guard and
-                    // fall back to generic vararg method when it is not.
-                    return MethodHandles.guardWithTest(
-                            Guards.isInstance(varArgType, fixParamsLen, callSiteType),
-                            createConvertingInvocation(fixTarget, linkerServices, callSiteType),
-                            createConvertingInvocation(collectArguments(fixTarget, argsLen), linkerServices,
-                                    callSiteType));
-                }
+            } else if(!linkerServices.canConvert(callSiteLastArgType, varArgType)) {
+                // Call site signature guarantees the argument can definitely not be an array (i.e. it is primitive);
+                // link immediately to a vararg-packing method handle.
+                return createConvertingInvocation(collectArguments(fixTarget, argsLen), linkerServices, callSiteType);
+            } else {
+                // Call site signature makes no guarantees that the single argument in the vararg position will be
+                // compatible across all invocations. Need to insert an appropriate guard and fall back to generic
+                // vararg method when it is not.
+                return MethodHandles.guardWithTest(Guards.isInstance(varArgType, fixParamsLen, callSiteType),
+                        createConvertingInvocation(fixTarget, linkerServices, callSiteType),
+                        createConvertingInvocation(collectArguments(fixTarget, argsLen), linkerServices, callSiteType));
+            }
         } else {
             // Remaining case: more than one vararg.
             return createConvertingInvocation(collectArguments(fixTarget, argsLen), linkerServices, callSiteType);

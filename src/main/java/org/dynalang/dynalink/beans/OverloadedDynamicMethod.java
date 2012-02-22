@@ -175,10 +175,9 @@ class OverloadedDynamicMethod implements DynamicMethod {
             if(callSiteArgLen < fixedArgLen) {
                 return false;
             }
-        } else
-            if(callSiteArgLen != fixedArgLen) {
-                return false;
-            }
+        } else if(callSiteArgLen != fixedArgLen) {
+            return false;
+        }
         // Starting from 1, as receiver type doesn't participate
         for(int i = 1; i < fixedArgLen; ++i) {
             if(!isApplicableDynamically(linkerServices, callSiteType.parameterType(i), methodType.parameterType(i))) {

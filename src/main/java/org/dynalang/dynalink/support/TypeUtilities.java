@@ -52,24 +52,18 @@ public class TypeUtilities {
         if(c3.isPrimitive()) {
             if(c3 == Byte.TYPE)
                 c3 = Byte.class;
-            else
-                if(c3 == Short.TYPE)
-                    c3 = Short.class;
-                else
-                    if(c3 == Character.TYPE)
-                        c3 = Character.class;
-                    else
-                        if(c3 == Integer.TYPE)
-                            c3 = Integer.class;
-                        else
-                            if(c3 == Float.TYPE)
-                                c3 = Float.class;
-                            else
-                                if(c3 == Long.TYPE)
-                                    c3 = Long.class;
-                                else
-                                    if(c3 == Double.TYPE)
-                                        c3 = Double.class;
+            else if(c3 == Short.TYPE)
+                c3 = Short.class;
+            else if(c3 == Character.TYPE)
+                c3 = Character.class;
+            else if(c3 == Integer.TYPE)
+                c3 = Integer.class;
+            else if(c3 == Float.TYPE)
+                c3 = Float.class;
+            else if(c3 == Long.TYPE)
+                c3 = Long.class;
+            else if(c3 == Double.TYPE)
+                c3 = Double.class;
         }
         Set<Class<?>> a1 = getAssignables(c1, c3);
         Set<Class<?>> a2 = getAssignables(c3, c1);
