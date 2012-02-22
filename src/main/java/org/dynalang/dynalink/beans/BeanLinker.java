@@ -141,11 +141,11 @@ class BeanLinker implements GuardingDynamicLinker {
         return methods.get(name);
     }
 
-    private void addMember(String name, MethodHandle mh, Map<String, DynamicMethod> methods) {
-        DynamicMethod existingMethod = methods.get(name);
+    private void addMember(String name, MethodHandle mh, Map<String, DynamicMethod> methodMap) {
+        DynamicMethod existingMethod = methodMap.get(name);
         DynamicMethod newMethod = addMember(mh, existingMethod);
         if(newMethod != existingMethod) {
-            methods.put(name, newMethod);
+            methodMap.put(name, newMethod);
         }
     }
 
@@ -354,9 +354,9 @@ class BeanLinker implements GuardingDynamicLinker {
     }
 
     private GuardedInvocation createGuardedDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methods) {
+            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap) {
         final MethodHandle invocation =
-                getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName, methods);
+                getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName, methodMap);
         return invocation == null ? null : new GuardedInvocation(invocation,
                 getClassGuard(callSiteDescriptor.getMethodType()));
     }
@@ -411,7 +411,6 @@ class BeanLinker implements GuardingDynamicLinker {
                     return null;
                 }
                 final MethodHandle getter = annGetter.handle;
-                final MethodHandle guard;
                 final Class<?> guardType = getter.type().parameterType(0);
                 // NOTE: since property getters (not field getters!) are no-arg, we don't have to worry about them being
                 // overloaded in a subclass. Therefore, we can discover the most abstract superclass that has the

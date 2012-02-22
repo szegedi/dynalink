@@ -1,8 +1,8 @@
 package org.dynalang.dynalink;
 
 /**
- * Describes the results of various standard metaobject protocol operations.
- * Used as the return value of those operations.
+ * Describes the results of various standard metaobject protocol operations. Used as the return value of those
+ * operations.
  * @author Attila Szegedi
  * @version $Id: $
  */

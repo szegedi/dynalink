@@ -76,7 +76,7 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite impleme
         } catch(IllegalArgumentException e) {
             // Provide more information than the default JDK implementation
             throw new IllegalArgumentException("invocation and guard types " + "do not match. invocation="
-                    + invocation.type() + " guard=" + guard.type(), e);
+                    + invocation.type() + " guard=" + (guard == null ? "null" : guard.type()), e);
         }
     }
 

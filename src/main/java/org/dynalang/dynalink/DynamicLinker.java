@@ -65,8 +65,6 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  */
 public class DynamicLinker {
 
-    private static final long serialVersionUID = 1L;
-
     private final LinkerServices linkerServices;
     private final int runtimeContextArgCount;
 
@@ -117,11 +115,11 @@ public class DynamicLinker {
      * @return return value of the invocation
      * @throws Throwable rethrown underlying method handle invocation throwable.
      */
+    @SuppressWarnings("unused")
     private Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor, RelinkableCallSite callSite,
             Object... arguments) throws Throwable {
-        final LinkRequest linkRequest =
-                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, arguments)
-                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments, runtimeContextArgCount);
+        final LinkRequest linkRequest = runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor,
+                arguments) : new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments, runtimeContextArgCount);
         // Find a suitable method handle with a guard
         GuardedInvocation guardedInvocation = linkerServices.getGuardedInvocation(linkRequest);
 

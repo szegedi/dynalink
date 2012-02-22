@@ -41,6 +41,7 @@ public class Guards {
      * @param type the method type
      * @return a method handle testing whether its first argument is of the specified class.
      */
+    @SuppressWarnings("boxing")
     public static MethodHandle isOfClass(Class<?> clazz, MethodType type) {
         final Class<?> declaredType = type.parameterType(0);
         if(clazz == declaredType) {
@@ -77,6 +78,7 @@ public class Guards {
      * @param type the method type
      * @return a method handle testing whether its first argument is of the specified class or subclass.
      */
+    @SuppressWarnings("boxing")
     public static MethodHandle isInstance(Class<?> clazz, int pos, MethodType type) {
         final Class<?> declaredType = type.parameterType(pos);
         if(clazz.isAssignableFrom(declaredType)) {
@@ -98,6 +100,7 @@ public class Guards {
      * @return a method handle that returns true if the argument in the specified position is a Java array; the rest of
      * the arguments are ignored.
      */
+    @SuppressWarnings("boxing")
     public static MethodHandle isArray(int pos, MethodType type) {
         final Class<?> declaredType = type.parameterType(pos);
         if(declaredType.isArray()) {
@@ -146,15 +149,24 @@ public class Guards {
         return asType(test.bindTo(clazz), pos, type);
     }
 
+    /**
+     * Takes a guard-test method handle, and adapts it to the requested type, testing the 0th argument and returning a
+     * boolean.
+     * @param test the test method handle
+     * @param type
+     * @return
+     */
     public static MethodHandle asType(MethodHandle test, MethodType type) {
         return asType(test, 0, type);
     }
 
-    public static MethodHandle asType(MethodHandle test, int pos, MethodType type) {
-        if(type.parameterCount() < 1) {
-            throw new IllegalArgumentException("method type must specify at least one argument");
-        }
-
+    private static MethodHandle asType(MethodHandle test, int pos, MethodType type) {
+        assert test != null;
+        assert type != null;
+        assert type.parameterCount() > 0;
+        assert pos >= 0 && pos < type.parameterCount();
+        assert test.type().parameterCount() == 1;
+        assert test.type().returnType() == Boolean.TYPE;
         return MethodHandles.permuteArguments(test.asType(test.type().changeParameterType(0, type.parameterType(pos))),
                 type.changeReturnType(Boolean.TYPE), new int[] { pos });
     }

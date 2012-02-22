@@ -83,6 +83,7 @@ class OverloadedDynamicMethod implements DynamicMethod {
         // dynamic invocation, as they
         // might match more concrete types passed in invocations. That's why we
         // provisionally call them "invokable".
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         final List<MethodHandle> invokables = (List)methods.clone();
         invokables.removeAll(subtypingApplicables.getMethods());
         invokables.removeAll(methodInvocationApplicables.getMethods());
