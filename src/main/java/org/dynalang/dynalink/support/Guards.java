@@ -108,7 +108,7 @@ public class Guards {
             LOG.log(Level.WARNING, "isArrayGuardAlwaysFalse", new Object[] { pos, type });
             return constantFalse(type);
         }
-        return getArgumentTest(IS_ARRAY, pos, type);
+        return asType(IS_ARRAY, pos, type);
     }
 
     /**
@@ -143,10 +143,14 @@ public class Guards {
 
     private static MethodHandle getClassBoundArgumentTest(MethodHandle test, Class<?> clazz, int pos, MethodType type) {
         // Bind the class to the first argument of the test
-        return getArgumentTest(test.bindTo(clazz), pos, type);
+        return asType(test.bindTo(clazz), pos, type);
     }
 
-    private static MethodHandle getArgumentTest(MethodHandle test, int pos, MethodType type) {
+    public static MethodHandle asType(MethodHandle test, MethodType type) {
+        return asType(test, 0, type);
+    }
+
+    public static MethodHandle asType(MethodHandle test, int pos, MethodType type) {
         if(type.parameterCount() < 1) {
             throw new IllegalArgumentException("method type must specify at least one argument");
         }
@@ -163,6 +167,14 @@ public class Guards {
 
     private static final MethodHandle IS_ARRAY = Lookup.PUBLIC.findStatic(Guards.class, "_isArray",
             MethodType.methodType(Boolean.TYPE, Object.class));
+
+    public static MethodHandle getClassGuard(Class<?> clazz) {
+        return IS_OF_CLASS.bindTo(clazz);
+    }
+
+    public static MethodHandle getInstanceGuard(Class<?> clazz) {
+        return IS_INSTANCE.bindTo(clazz);
+    }
 
     /**
      * This method is public for implementation reasons. Do not invoke it directly. Determines whether the passed object

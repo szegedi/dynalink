@@ -54,9 +54,12 @@ class BeanLinker implements GuardingDynamicLinker {
     private final Map<String, AnnotatedMethodHandle> propertyGetters = new HashMap<String, AnnotatedMethodHandle>();
     private final Map<String, DynamicMethod> propertySetters = new HashMap<String, DynamicMethod>();
     private final Map<String, DynamicMethod> methods = new HashMap<String, DynamicMethod>();
+    private final MethodHandle classGuard;
 
     BeanLinker(Class<?> clazz) throws IntrospectionException {
         this.clazz = clazz;
+        classGuard = Guards.getClassGuard(clazz);
+
         final BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         final AccessibleMethodsLookup accessibleLookup = new AccessibleMethodsLookup(clazz);
         final PropertyDescriptor[] propDescs = beanInfo.getPropertyDescriptors();
@@ -125,19 +128,6 @@ class BeanLinker implements GuardingDynamicLinker {
 
         // Make sure we don't prevent GCing the class
         Introspector.flushFromCaches(clazz);
-    }
-
-    /**
-     * Determines if the method is a property setter. Only invoked on public instance methods, so we don't check
-     * repeatedly for those. It differs somewhat from the JavaBeans introspector's definition, as we'll happily accept
-     * methods that have non-void return types, to accommodate for the widespread pattern of property setters that allow
-     * chaining.
-     * @param m the method tested for being a property setter
-     * @return true if it is a property setter, false otherwise
-     */
-    private static boolean isPropertySetter(Method m) {
-        final String name = m.getName();
-        return name.startsWith("set") && name.length() > 3 && m.getParameterTypes().length == 1;
     }
 
     /**
@@ -221,7 +211,10 @@ class BeanLinker implements GuardingDynamicLinker {
     private static MethodHandle GET_MAP_ELEMENT = Lookup.PUBLIC.findVirtual(Map.class, "get",
             MethodType.methodType(Object.class, Object.class));
 
-    private static GuardedInvocation getElementGetter(final CallSiteDescriptor callSiteDescriptor,
+    private static MethodHandle LIST_GUARD = Guards.getInstanceGuard(List.class);
+    private static MethodHandle MAP_GUARD = Guards.getInstanceGuard(Map.class);
+
+    private GuardedInvocation getElementGetter(final CallSiteDescriptor callSiteDescriptor,
             final LinkerServices linkerServices, final Object... arguments) {
         assertParameterCount(callSiteDescriptor, 2);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
@@ -239,25 +232,25 @@ class BeanLinker implements GuardingDynamicLinker {
         if(Map.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.asType(GET_MAP_ELEMENT, callSiteType), null);
         }
-        // Otherwise, create a binding based on the actual type of the argument
-        // with an appropriate guard.
-        final Object receiver = arguments[0];
-        final Class<?> clazz = receiver.getClass();
         if(clazz.isArray()) {
             return new GuardedInvocation(linkerServices.asType(MethodHandles.arrayElementGetter(clazz), callSiteType),
-                    Guards.isOfClass(clazz, callSiteType));
+                    getClassGuard(callSiteType));
         }
-        if(List.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.asType(GET_LIST_ELEMENT, callSiteType), Guards.isInstance(
-                    List.class, callSiteType));
+        if(List.class.isAssignableFrom(clazz)) {
+            return new GuardedInvocation(linkerServices.asType(GET_LIST_ELEMENT, callSiteType), Guards.asType(
+                    LIST_GUARD, callSiteType));
         }
-        if(Map.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.asType(GET_MAP_ELEMENT, callSiteType), Guards.isInstance(
-                    Map.class, callSiteType));
+        if(Map.class.isAssignableFrom(clazz)) {
+            return new GuardedInvocation(linkerServices.asType(GET_MAP_ELEMENT, callSiteType), Guards.asType(MAP_GUARD,
+                    callSiteType));
         }
         // Can't retrieve elements for objects that are neither arrays, nor
         // list, nor maps.
         return null;
+    }
+
+    private MethodHandle getClassGuard(MethodType type) {
+        return Guards.asType(classGuard, type);
     }
 
     private static MethodHandle SET_LIST_ELEMENT = Lookup.PUBLIC.findVirtual(List.class, "set",
@@ -266,15 +259,14 @@ class BeanLinker implements GuardingDynamicLinker {
     private static MethodHandle PUT_MAP_ELEMENT = Lookup.PUBLIC.findVirtual(Map.class, "put",
             MethodType.methodType(Object.class, Object.class, Object.class));
 
-    private static GuardedInvocation getElementSetter(final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices, final Object... arguments) {
+    private GuardedInvocation getElementSetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
+            Object... arguments) {
         assertParameterCount(callSiteDescriptor, 3);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
-        // If declared type of receiver at the call site is already an array, a
-        // list or map, bind without guard. Thing is, it'd be quite stupid of a
-        // call site creator to go though invokedynamic when it knows in
-        // advance they're dealing with an array, or a list or map, but hey...
+        // If declared type of receiver at the call site is already an array, a list or map, bind without guard. Thing
+        // is, it'd be quite stupid of a call site creator to go though invokedynamic when it knows in advance they're
+        // dealing with an array, or a list or map, but hey...
         if(declaredType.isArray()) {
             return new GuardedInvocation(linkerServices.asType(MethodHandles.arrayElementSetter(declaredType),
                     callSiteType), null);
@@ -285,21 +277,18 @@ class BeanLinker implements GuardingDynamicLinker {
         if(Map.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.asType(PUT_MAP_ELEMENT, callSiteType), null);
         }
-        // Otherwise, create a binding based on the actual type of the argument
-        // with an appropriate guard.
-        final Object receiver = arguments[0];
-        final Class<?> clazz = receiver.getClass();
+        // Otherwise, create a binding based on the actual type of the argument with an appropriate guard.
         if(clazz.isArray()) {
             return new GuardedInvocation(linkerServices.asType(MethodHandles.arrayElementSetter(clazz), callSiteType),
-                    Guards.isOfClass(clazz, callSiteType));
+                    getClassGuard(callSiteType));
         }
-        if(List.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.asType(SET_LIST_ELEMENT, callSiteType), Guards.isInstance(
-                    List.class, callSiteType));
+        if(List.class.isAssignableFrom(clazz)) {
+            return new GuardedInvocation(linkerServices.asType(SET_LIST_ELEMENT, callSiteType), Guards.asType(
+                    LIST_GUARD, callSiteType));
         }
-        if(Map.class.isInstance(receiver)) {
-            return new GuardedInvocation(linkerServices.asType(PUT_MAP_ELEMENT, callSiteType), Guards.isInstance(
-                    Map.class, callSiteType));
+        if(Map.class.isAssignableFrom(clazz)) {
+            return new GuardedInvocation(linkerServices.asType(PUT_MAP_ELEMENT, callSiteType), Guards.asType(MAP_GUARD,
+                    callSiteType));
         }
         // Can't retrieve elements for objects that are neither arrays, nor
         // list, nor maps.
@@ -315,16 +304,15 @@ class BeanLinker implements GuardingDynamicLinker {
     private static MethodHandle GET_MAP_LENGTH = Lookup.PUBLIC.findVirtual(Map.class, "size",
             MethodType.methodType(int.class));
 
-    private static GuardedInvocation getLengthGetter(final CallSiteDescriptor callSiteDescriptor,
-            final Object... arguments) {
+    private static MethodHandle COLLECTION_GUARD = Guards.getInstanceGuard(Collection.class);
+
+    private GuardedInvocation getLengthGetter(CallSiteDescriptor callSiteDescriptor, Object... arguments) {
         assertParameterCount(callSiteDescriptor, 1);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
-        // If declared type of receiver at the call site is already an array,
-        // collection, or map, bind without guard. Thing is, it'd be quite
-        // stupid of a call site creator to go though invokedynamic when it
-        // knows in advance they're dealing with an array, collection, or map,
-        // but hey...
+        // If declared type of receiver at the call site is already an array, collection, or map, bind without guard.
+        // Thing is, it'd be quite stupid of a call site creator to go though invokedynamic when it knows in advance
+        // they're dealing with an array, collection, or map, but hey...
         if(declaredType.isArray()) {
             // TODO: maybe we'll have a MethodHandles.arrayLengthGetter()?
             return new GuardedInvocation(GET_ARRAY_LENGTH.asType(callSiteType), null);
@@ -337,17 +325,15 @@ class BeanLinker implements GuardingDynamicLinker {
         }
         // Otherwise, create a binding based on the actual type of the argument
         // with an appropriate guard.
-        final Class<?> clazz = arguments[0].getClass();
         if(clazz.isArray()) {
             return new GuardedInvocation(GET_ARRAY_LENGTH.asType(callSiteType), Guards.isArray(0, callSiteType));
         }
         if(Collection.class.isAssignableFrom(clazz)) {
-            return new GuardedInvocation(GET_COLLECTION_LENGTH.asType(callSiteType), Guards.isInstance(
-                    Collection.class, callSiteType));
+            return new GuardedInvocation(GET_COLLECTION_LENGTH.asType(callSiteType), Guards.asType(COLLECTION_GUARD,
+                    callSiteType));
         }
         if(Map.class.isAssignableFrom(clazz)) {
-            return new GuardedInvocation(GET_MAP_LENGTH.asType(callSiteType),
-                    Guards.isInstance(Map.class, callSiteType));
+            return new GuardedInvocation(GET_MAP_LENGTH.asType(callSiteType), Guards.asType(MAP_GUARD, callSiteType));
         }
         // Can't retrieve length for objects that are neither arrays, nor
         // collections, nor maps.
@@ -369,8 +355,7 @@ class BeanLinker implements GuardingDynamicLinker {
     private GuardedInvocation getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
             String methodName, Object... args) {
         final MethodHandle invocation = getMethodInvocation(callSiteDescriptor, linkerServices, methodName);
-        return new GuardedInvocation(invocation, Guards.isOfClass(args[0].getClass(),
-                callSiteDescriptor.getMethodType()));
+        return new GuardedInvocation(invocation, getClassGuard(callSiteDescriptor.getMethodType()));
     }
 
     private MethodHandle getMethodInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
@@ -387,21 +372,17 @@ class BeanLinker implements GuardingDynamicLinker {
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
-                // Must have theee arguments: target object, property name, and
-                // property value.
+                // Must have theee arguments: target object, property name, and property value.
                 assertParameterCount(callSiteDescriptor, 3);
-                // Create a new call site descriptor that drops the ID
-                // argument. This is used for embedded overloaded method
-                // lookup.
+                // Create a new call site descriptor that drops the ID argument. This is used for embedded overloaded
+                // method lookup.
                 final CallSiteDescriptor newDescriptor = callSiteDescriptor.dropParameterTypes(1, 2);
                 return new GuardedInvocation(MethodHandles.insertArguments(SET_PROPERTY_WITH_VARIABLE_ID, 0,
-                        newDescriptor, linkerServices).asType(type), Guards.isOfClass(clazz, type));
+                        newDescriptor, linkerServices).asType(type), getClassGuard(type));
             }
             case 3: {
                 // Must have two arguments: target object and property value
                 assertParameterCount(callSiteDescriptor, 2);
-                // Fixed name - change to a call of setXxx() to allow for
-                // overloaded setters
                 return getCallPropWithThis(callSiteDescriptor, linkerServices,
                         getSetterMethodId(callSiteDescriptor.getNameToken(2)), arguments);
             }
@@ -422,7 +403,7 @@ class BeanLinker implements GuardingDynamicLinker {
             case 2: {
                 // Must have exactly two arguments: receiver and name
                 assertParameterCount(callSiteDescriptor, 2);
-                return new GuardedInvocation(GET_PROPERTY_WITH_VARIABLE_ID.asType(type), Guards.isOfClass(clazz, type));
+                return new GuardedInvocation(GET_PROPERTY_WITH_VARIABLE_ID.asType(type), getClassGuard(type));
             }
             case 3: {
                 // Must have exactly one argument: receiver
@@ -434,13 +415,14 @@ class BeanLinker implements GuardingDynamicLinker {
                     return null;
                 }
                 final MethodHandle getter = annGetter.handle;
+                final MethodHandle guard;
                 final Class<?> guardType = getter.type().parameterType(0);
                 // NOTE: since property getters (not field getters!) are no-arg, we don't have to worry about them being
                 // overloaded in a subclass. Therefore, we can discover the most abstract superclass that has the
                 // method, and use that as the guard with Guards.isInstance() for a more stably linked call site. If
                 // we're linking against a field getter, don't make the assumption.
-                return new GuardedInvocation(getter.asType(type), annGetter.overloadSafe ?
-                        Guards.isInstance(guardType, type) : Guards.isOfClass(guardType, type));
+                return new GuardedInvocation(getter.asType(type), annGetter.overloadSafe ? Guards.isInstance(guardType,
+                        type) : getClassGuard(type));
             }
             default: {
                 // Can't do anything with more than 3 name components
@@ -546,5 +528,18 @@ class BeanLinker implements GuardingDynamicLinker {
             this.handle = handle;
             this.overloadSafe = overloadSafe;
         }
+    }
+
+    /**
+     * Determines if the method is a property setter. Only invoked on public instance methods, so we don't check
+     * repeatedly for those. It differs somewhat from the JavaBeans introspector's definition, as we'll happily accept
+     * methods that have non-void return types, to accommodate for the widespread pattern of property setters that allow
+     * chaining.
+     * @param m the method tested for being a property setter
+     * @return true if it is a property setter, false otherwise
+     */
+    private static boolean isPropertySetter(Method m) {
+        final String name = m.getName();
+        return name.startsWith("set") && name.length() > 3 && m.getParameterTypes().length == 1;
     }
 }
