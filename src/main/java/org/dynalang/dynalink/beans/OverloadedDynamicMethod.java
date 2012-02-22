@@ -154,6 +154,17 @@ class OverloadedDynamicMethod implements DynamicMethod {
         }
     }
 
+    @Override
+    public boolean contains(MethodHandle mh) {
+        final List<Class<?>> paramTypes = mh.type().parameterList();
+        for(MethodHandle method: methods) {
+            if(method.type().parameterList().equals(paramTypes)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean isApplicableDynamically(LinkerServices linkerServices, MethodType callSiteType,
             MethodHandle m) {
         final MethodType methodType = m.type();

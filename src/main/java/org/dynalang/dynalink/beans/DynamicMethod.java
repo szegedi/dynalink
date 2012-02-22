@@ -46,4 +46,12 @@ interface DynamicMethod {
      * @return an invocation suitable for calling the method from the specified call site.
      */
     abstract MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices);
+
+    /**
+     * True if this dynamic method already contains a method handle with an identical signature as the passed in method
+     * handle.
+     * @param mh the method handle to check
+     * @return true if it already contains an equivalent method handle.
+     */
+    boolean contains(MethodHandle mh);
 }

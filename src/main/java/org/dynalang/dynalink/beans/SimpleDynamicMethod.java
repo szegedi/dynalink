@@ -126,6 +126,11 @@ class SimpleDynamicMethod implements DynamicMethod {
         }
     }
 
+    @Override
+    public boolean contains(MethodHandle mh) {
+        return target.type().parameterList().equals(mh.type().parameterList());
+    }
+
     /**
      * Creates a method handle out of the original target that will collect the varargs for the exact component type of
      * the varArg array. Note that this will nicely trigger language-specific type converters for exactly those varargs

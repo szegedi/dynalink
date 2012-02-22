@@ -152,17 +152,17 @@ class BeanLinker implements GuardingDynamicLinker {
     private DynamicMethod addMember(MethodHandle mh, DynamicMethod existing) {
         if(existing == null) {
             return new SimpleDynamicMethod(mh);
-        } else
-            if(existing instanceof SimpleDynamicMethod) {
-                OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
-                odm.addMethod(((SimpleDynamicMethod)existing));
-                odm.addMethod(mh);
-                return odm;
-            } else
-                if(existing instanceof OverloadedDynamicMethod) {
-                    ((OverloadedDynamicMethod)existing).addMethod(mh);
-                    return existing;
-                }
+        } else if(existing.contains(mh)) {
+            return existing;
+        } else if(existing instanceof SimpleDynamicMethod) {
+            OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
+            odm.addMethod(((SimpleDynamicMethod)existing));
+            odm.addMethod(mh);
+            return odm;
+        } else if(existing instanceof OverloadedDynamicMethod) {
+            ((OverloadedDynamicMethod)existing).addMethod(mh);
+            return existing;
+        }
         throw new AssertionError();
     }
 
@@ -344,7 +344,8 @@ class BeanLinker implements GuardingDynamicLinker {
             Object... args) {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
-                return getCallPropWithThis(callSiteDescriptor, linkerServices, callSiteDescriptor.getNameToken(2), args);
+                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
+                        callSiteDescriptor.getNameToken(2), methods);
             }
             default: {
                 return null;
@@ -352,19 +353,18 @@ class BeanLinker implements GuardingDynamicLinker {
         }
     }
 
-    private GuardedInvocation getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            String methodName, Object... args) {
-        final MethodHandle invocation = getMethodInvocation(callSiteDescriptor, linkerServices, methodName);
-        return new GuardedInvocation(invocation, getClassGuard(callSiteDescriptor.getMethodType()));
+    private GuardedInvocation createGuardedDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
+            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methods) {
+        final MethodHandle invocation = getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName,
+                methods);
+        return invocation == null ? null : new GuardedInvocation(invocation, getClassGuard(
+                callSiteDescriptor.getMethodType()));
     }
 
-    private MethodHandle getMethodInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            String methodName) {
+    private static MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
+            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methods) {
         final DynamicMethod dynaMethod = methods.get(methodName);
-        if(dynaMethod == null) {
-            return null;
-        }
-        return dynaMethod.getInvocation(callSiteDescriptor, linkerServices);
+        return dynaMethod == null ? null : dynaMethod.getInvocation(callSiteDescriptor, linkerServices);
     }
 
     private GuardedInvocation getPropertySetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
@@ -383,18 +383,14 @@ class BeanLinker implements GuardingDynamicLinker {
             case 3: {
                 // Must have two arguments: target object and property value
                 assertParameterCount(callSiteDescriptor, 2);
-                return getCallPropWithThis(callSiteDescriptor, linkerServices,
-                        getSetterMethodId(callSiteDescriptor.getNameToken(2)), arguments);
+                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
+                        callSiteDescriptor.getNameToken(2), propertySetters);
             }
             default: {
                 // More than two name components; don't know what to do with it.
                 return null;
             }
         }
-    }
-
-    private static String getSetterMethodId(String propertyName) {
-        return "set" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
     }
 
     private GuardedInvocation getPropertyGetter(CallSiteDescriptor callSiteDescriptor) {
@@ -480,8 +476,8 @@ class BeanLinker implements GuardingDynamicLinker {
     public Results _setPropertyWithVariableId(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
             Object obj, Object id, Object value) throws Throwable {
         // TODO: this is quite likely terribly inefficient. Optimize.
-        final MethodHandle invocation =
-                getMethodInvocation(callSiteDescriptor, linkerServices, getSetterMethodId(String.valueOf(id)));
+        final MethodHandle invocation = getDynamicMethodInvocation(callSiteDescriptor, linkerServices, String.valueOf(
+                id), propertySetters);
         if(invocation != null) {
             invocation.invokeWithArguments(obj, value);
             return Results.ok;
