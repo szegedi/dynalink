@@ -44,7 +44,7 @@ import org.dynalang.dynalink.support.Lookup;
 
 /**
  * A class that provides linking capabilities for a single POJO class. Normally not used directly, but managed by
- * {@link BeansLinker}. TODO: add a class guard method, and propagate it downstream
+ * {@link BeansLinker}.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -81,8 +81,7 @@ class BeanLinker implements GuardingDynamicLinker {
 
         // Add field getters
         for(Field field: clazz.getFields()) {
-            final int modifiers = field.getModifiers();
-            if(Modifier.isStatic(modifiers)) {
+            if(Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
             final String name = field.getName();
@@ -142,8 +141,8 @@ class BeanLinker implements GuardingDynamicLinker {
     }
 
     private void addMember(String name, MethodHandle mh, Map<String, DynamicMethod> methodMap) {
-        DynamicMethod existingMethod = methodMap.get(name);
-        DynamicMethod newMethod = addMember(mh, existingMethod);
+        final DynamicMethod existingMethod = methodMap.get(name);
+        final DynamicMethod newMethod = addMember(mh, existingMethod);
         if(newMethod != existingMethod) {
             methodMap.put(name, newMethod);
         }
@@ -155,7 +154,7 @@ class BeanLinker implements GuardingDynamicLinker {
         } else if(existing.contains(mh)) {
             return existing;
         } else if(existing instanceof SimpleDynamicMethod) {
-            OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
+            final OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
             odm.addMethod(((SimpleDynamicMethod)existing));
             odm.addMethod(mh);
             return odm;
