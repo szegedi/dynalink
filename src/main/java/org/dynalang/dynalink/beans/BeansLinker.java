@@ -16,9 +16,6 @@
 
 package org.dynalang.dynalink.beans;
 
-import java.beans.IntrospectionException;
-import java.lang.reflect.UndeclaredThrowableException;
-
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -35,14 +32,11 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * @version $Id: $
  */
 public class BeansLinker implements GuardingDynamicLinker {
-    private static final ClassValue<BeanLinker> linkers = new ClassValue<BeanLinker>() {
+    private static final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {
         @Override
-        protected BeanLinker computeValue(Class<?> clazz) {
-            try {
-                return new BeanLinker(clazz);
-            } catch(IntrospectionException e) {
-                throw new UndeclaredThrowableException(e);
-            }
+        protected GuardingDynamicLinker computeValue(Class<?> clazz) {
+            return clazz == Class.class ? new ClassLinker() : clazz == ClassStatics.class ? new ClassStaticsLinker() :
+                new BeanLinker(clazz);
         }
     };
 
@@ -63,8 +57,7 @@ public class BeansLinker implements GuardingDynamicLinker {
 
         final CallSiteDescriptor callSiteDescriptor = request.getCallSiteDescriptor();
         final int l = callSiteDescriptor.getNameTokenCount();
-        // All names conforming to the dynalang MOP should have at least two
-        // tokens, the first one being "dyn"
+        // All names conforming to the dynalang MOP should have at least two tokens, the first one being "dyn"
         if(l < 2 || !"dyn".equals(callSiteDescriptor.getNameToken(0))) {
             return null;
         }
@@ -74,7 +67,6 @@ public class BeansLinker implements GuardingDynamicLinker {
             // Can't operate on null
             return null;
         }
-
         return linkers.get(receiver.getClass()).getGuardedInvocation(request, linkerServices);
     }
 }

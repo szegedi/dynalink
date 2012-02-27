@@ -18,7 +18,7 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.BootstrapMethodError;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -72,6 +72,14 @@ public class Lookup {
             return lookup.unreflectSetter(f);
         } catch(IllegalAccessException e) {
             throw new BootstrapMethodError("Failed to unreflect setter for " + f, e);
+        }
+    }
+
+    public MethodHandle unreflectConstructor(Constructor c) {
+        try {
+            return lookup.unreflectConstructor(c);
+        } catch(IllegalAccessException e) {
+            throw new BootstrapMethodError("Failed to unreflect constructor for " + c, e);
         }
     }
 

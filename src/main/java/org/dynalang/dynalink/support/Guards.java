@@ -153,8 +153,8 @@ public class Guards {
      * Takes a guard-test method handle, and adapts it to the requested type, testing the 0th argument and returning a
      * boolean.
      * @param test the test method handle
-     * @param type
-     * @return
+     * @param type the type to adapt the method handle to
+     * @return the adapted method handle
      */
     public static MethodHandle asType(MethodHandle test, MethodType type) {
         return asType(test, 0, type);
@@ -171,44 +171,58 @@ public class Guards {
                 type.changeReturnType(Boolean.TYPE), new int[] { pos });
     }
 
-    private static final MethodHandle IS_OF_CLASS = Lookup.PUBLIC.findStatic(Guards.class, "_isOfClass",
-            MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
+    private static final MethodHandle IS_OF_CLASS = new Lookup(MethodHandles.lookup()).findStatic(Guards.class,
+            "isOfClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
 
     private static final MethodHandle IS_INSTANCE = Lookup.PUBLIC.findVirtual(Class.class, "isInstance",
             MethodType.methodType(Boolean.TYPE, Object.class));
 
-    private static final MethodHandle IS_ARRAY = Lookup.PUBLIC.findStatic(Guards.class, "_isArray",
+    private static final MethodHandle IS_ARRAY = new Lookup(MethodHandles.lookup()).findStatic(Guards.class, "isArray",
             MethodType.methodType(Boolean.TYPE, Object.class));
 
+    private static final MethodHandle IS_IDENTICAL = new Lookup(MethodHandles.lookup()).findStatic(Guards.class,
+            "isIdentical", MethodType.methodType(Boolean.TYPE, Object.class, Object.class));
+
+    /**
+     * Creates a guard method that tests its only argument for being of an exact particular class.
+     * @param clazz the class to test for.
+     * @return the desired guard method.
+     */
     public static MethodHandle getClassGuard(Class<?> clazz) {
         return IS_OF_CLASS.bindTo(clazz);
     }
 
-    public static MethodHandle getInstanceGuard(Class<?> clazz) {
+    /**
+     * Creates a guard method that tests its only argument for being an instance of a particular class.
+     * @param clazz the class to test for.
+     * @return the desired guard method.
+     */
+    public static MethodHandle getInstanceOfGuard(Class<?> clazz) {
         return IS_INSTANCE.bindTo(clazz);
     }
 
     /**
-     * This method is public for implementation reasons. Do not invoke it directly. Determines whether the passed object
-     * is a Java array.
-     *
-     * @param o an object
-     * @return true if o is an instance of a Java array.
+     * Creates a guard method that tests its only argument for being referentially identical to another object
+     * @param obj the object used as referential identity test
+     * @return the desired guard method.
      */
-    public static boolean _isArray(Object o) {
+    public static MethodHandle getIdentityGuard(Object obj) {
+        return IS_IDENTICAL.bindTo(obj);
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isArray(Object o) {
         return o != null && o.getClass().isArray();
     }
 
-    /**
-     * This method public for implementation reasons. Do not invoke directly. Determines whether the class of the object
-     * is what's expected to be.
-     *
-     * @param c the class
-     * @param o the object
-     * @return true if the object is exactly of the class, false otherwise.
-     */
-    public static boolean _isOfClass(Class<?> c, Object o) {
+    @SuppressWarnings("unused")
+    private static boolean isOfClass(Class<?> c, Object o) {
         return o != null && o.getClass() == c;
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isIdentical(Object o1, Object o2) {
+        return o1 == o2;
     }
 
     private static MethodHandle constantTrue(MethodType type) {
