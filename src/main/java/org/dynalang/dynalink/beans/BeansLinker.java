@@ -25,8 +25,21 @@ import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
  * A linker for POJOs. Normally used as the ultimate fallback linker by the {@link DynamicLinkerFactory} so it is given
- * the chance to link calls to all objects that no other language runtimes recognize. Handles all intricacies and corner
- * cases of overloaded method resolution and variable argument methods when linking to Java classes.
+ * the chance to link calls to all objects that no other language runtime recognizes. Specifically, this linker will:
+ * <ul>
+ * <li>expose all methods of form {@code setXxx()}, {@code getXxx()}, and {@code isXxx()} as property setters and
+ * getters for {@code dyn:setProp} and {@code dyn:getProp} operations;</li>
+ * <li>expose all methods for {@code dyn:callPropWithThis} operation;</li>
+ * <li>expose all fields as properties, unless there are getters or setters for the properties of the same name;</li>
+ * <li>expose {@code dyn:getLength}, {@code dyn:getItem} and {@code dyn:setItem} on native Java arrays, as well as
+ * {@link java.util.List} and {@link java.util.Map} objects; ({@code dyn:getLength} works on any
+ * {@link java.util.Collection});</li>
+ * <li>expose {@code dyn:new} on instances of {@link java.lang.Class} as calls to constructors;</li>
+ * <li>expose static methods, fields, and properties of classes as an object accessible through virtual property named
+ * {@code statics} on instances of {@link java.lang.Class}.</li>
+ * </ul>
+ *  Overloaded method resolution is handled for property setters, methods, and constructors. Variable argument
+ *  invocation is handled for methods and constructors. Currently, only public fields and methods are supported.
  *
  * @author Attila Szegedi
  * @version $Id: $

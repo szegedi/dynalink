@@ -36,7 +36,7 @@ import org.dynalang.dynalink.support.Lookup;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public class ClassLinker extends BeanLinker {
+class ClassLinker extends BeanLinker {
 
     private static final ClassValue<ConstructorInfo> constructors = new ClassValue<ConstructorInfo>() {
         @Override
