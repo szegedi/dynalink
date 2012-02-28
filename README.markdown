@@ -5,7 +5,7 @@ forth, on objects from a different language runtime, within a single JVM
 instance.
 
 See the [User guide](https://github.com/szegedi/dynalink/wiki) and the
-[Javadoc](http://szegedi.github.com/dynalink/javadoc/index.html) for details.
+[Javadoc](http://szegedi.github.com/dynalink/0.2/javadoc/index.html) for details.
 Both are fairly comprehensive and should get you started quickly.
 
 You can also check out the [video](http://medianetwork.oracle.com/media/show/17012)
@@ -15,3 +15,4 @@ If you just want the binaries, you can get them from the
 [Maven repository](http://search.maven.org/#browse%7C-362742625).
 
 Dynalink is Open Source software, licensed under the Apache 2.0 license.
+
