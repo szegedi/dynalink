@@ -21,7 +21,7 @@ public class CallSiteDescriptorFactory {
      * passed arguments to be space efficient; i.e. if you don't use either a non-public lookup or static bootstrap
      * arguments, you'll get back an implementation that doesn't waste space on storing them. Note that you shouldn't
      * directly call this method, but you should rather use
-     * {@link CallSiteDescriptor#create(Lookup, String, MethodType, Object[])} instead.
+     * {@link CallSiteDescriptor#create(Lookup, String, MethodType, Object...)} instead.
      * @param lookup the lookup that determines access rights at the call site. If your language runtime doesn't have
      * equivalents of Java access concepts, just use {@link MethodHandles#publicLookup()}. Must not be null.
      * @param name the name of the method at the call site. Must not be null.
