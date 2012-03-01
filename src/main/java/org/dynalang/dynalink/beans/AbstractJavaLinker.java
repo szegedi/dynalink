@@ -78,7 +78,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                     // getMostGenericGetter() will look for the most generic superclass that declares this getter. Since
                     // getters have zero args (aside from the receiver), they can't be overloaded, so we're free to link
                     // with an instanceof guard for the most generic one, creating more stable call sites.
-                    addPropertyGetter(name, getMostGenericGetter(accReadMethod), true);
+                    addPropertyGetter(name, introspector.unreflect(getMostGenericGetter(accReadMethod)), true);
                 }
                 final Method accWriteMethod = accessibleLookup.getAccessibleMethod(descriptor.getWriteMethod());
                 if(accWriteMethod != null) {
@@ -353,10 +353,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return Results.notWritable;
     }
 
-    private static MethodHandle getMostGenericGetter(Method getter) {
-        final Method mostGenericGetter =
-                getMostGenericGetter(getter.getName(), getter.getReturnType(), getter.getDeclaringClass());
-        return Lookup.PUBLIC.unreflect(mostGenericGetter);
+    private static Method getMostGenericGetter(Method getter) {
+        return getMostGenericGetter(getter.getName(), getter.getReturnType(), getter.getDeclaringClass());
     }
 
     private static Method getMostGenericGetter(String name, Class<?> returnType, Class<?> declaringClass) {
