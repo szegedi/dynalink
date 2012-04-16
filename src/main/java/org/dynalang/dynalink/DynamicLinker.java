@@ -64,7 +64,6 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  * @version $Id: $
  */
 public class DynamicLinker {
-
     private final LinkerServices linkerServices;
     private final int runtimeContextArgCount;
 
@@ -75,6 +74,9 @@ public class DynamicLinker {
      * @param runtimeContextArgCount see {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
     DynamicLinker(final LinkerServices linkerServices, final int runtimeContextArgCount) {
+        if(runtimeContextArgCount < 0) {
+            throw new IllegalArgumentException("runtimeContextArgCount < 0");
+        }
         this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;
     }
@@ -118,8 +120,10 @@ public class DynamicLinker {
     @SuppressWarnings("unused")
     private Object _relinkAndInvoke(final CallSiteDescriptor callSiteDescriptor, RelinkableCallSite callSite,
             Object... arguments) throws Throwable {
-        final LinkRequest linkRequest = runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor,
-                arguments) : new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments, runtimeContextArgCount);
+        final LinkRequest linkRequest =
+                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, arguments)
+                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments, runtimeContextArgCount);
+
         // Find a suitable method handle with a guard
         GuardedInvocation guardedInvocation = linkerServices.getGuardedInvocation(linkRequest);
 
@@ -128,30 +132,25 @@ public class DynamicLinker {
             throw new NoSuchDynamicMethodException();
         }
 
-        // If our call sites have a runtime context, and the linker produced a
-        // context-stripped invocation, adapt the produced invocation into
-        // contextual invocation (that drops the context...)
+        // If our call sites have a runtime context, and the linker produced a context-stripped invocation, adapt the
+        // produced invocation into contextual invocation (by dropping the context...)
         if(runtimeContextArgCount > 0) {
             final MethodType origType = callSiteDescriptor.getMethodType();
-            final int paramCount = origType.parameterCount();
-            final int contextStart = paramCount - runtimeContextArgCount;
-            if(guardedInvocation.getInvocation().type().parameterCount() == contextStart) {
-                final List<Class<?>> prefix = origType.parameterList().subList(contextStart, paramCount);
+            final MethodHandle invocation = guardedInvocation.getInvocation();
+            if(invocation.type().parameterCount() == origType.parameterCount() - runtimeContextArgCount) {
+                final List<Class<?>> prefix = origType.parameterList().subList(0, runtimeContextArgCount);
                 final MethodHandle guard = guardedInvocation.getGuard();
                 guardedInvocation =
-                        guardedInvocation.replaceMethods(
-                                MethodHandles.dropArguments(guardedInvocation.getInvocation(), contextStart, prefix),
-                                guard == null ? null : MethodHandles.dropArguments(guard, contextStart, prefix));
+                        guardedInvocation.replaceMethods(MethodHandles.dropArguments(invocation, 0, prefix),
+                                guard == null ? null : MethodHandles.dropArguments(guard, 0, prefix));
             }
         }
 
-        // Allow the call site to relink and execute its inline caching
-        // strategy.
+        // Allow the call site to relink and execute its inline caching strategy.
         callSite.setGuardedInvocation(guardedInvocation);
 
-        // Invoke the method. Note we bypass the guard, as the assumption is
-        // that the current arguments will pass the guard (and there actually
-        // might be no guard at all).
+        // Invoke the method. Note we bypass the guard, as the assumption is that the current arguments will pass the
+        // guard (and there actually might be no guard at all).
         return guardedInvocation.getInvocation().invokeWithArguments(arguments);
     }
 }

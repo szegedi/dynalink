@@ -19,7 +19,8 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkRequest;
 
 /**
- * A link request implementation for call sites that pass language runtime specific context arguments on the stack.
+ * A link request implementation for call sites that pass language runtime specific context arguments on the stack. The
+ * context specific arguments should be the first "n" arguments.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -34,12 +35,16 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
      *
      * @param callSiteDescriptor the descriptor for the call site being linked
      * @param arguments the arguments for the invocation
-     * @param runtimeContextArgCount the number of the trailing arguments on the stack that represent the language
+     * @param runtimeContextArgCount the number of the leading arguments on the stack that represent the language
      * runtime specific context arguments.
+     * @throws IllegalArgumentException if runtimeContextArgCount is less than 1.
      */
     public RuntimeContextLinkRequestImpl(CallSiteDescriptor callSiteDescriptor, Object[] arguments,
             int runtimeContextArgCount) {
         super(callSiteDescriptor, arguments);
+        if(runtimeContextArgCount < 1) {
+            throw new IllegalArgumentException("runtimeContextArgCount < 1");
+        }
         this.runtimeContextArgCount = runtimeContextArgCount;
     }
 
@@ -63,7 +68,7 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
     private Object[] getTruncatedArguments() {
         final Object[] args = getArguments();
         final Object[] newargs = new Object[args.length - runtimeContextArgCount];
-        System.arraycopy(args, 0, newargs, 0, newargs.length);
+        System.arraycopy(args, runtimeContextArgCount, newargs, 0, newargs.length);
         return newargs;
     }
 }
