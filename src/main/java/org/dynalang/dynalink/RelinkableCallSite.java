@@ -32,16 +32,10 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
  */
 public interface RelinkableCallSite {
     /**
-     * Sets the relink method. This is a method matching the method type of the call site that will try to discover the
-     * adequate target for the invocation and then subsequently invoke {@link #setGuardedInvocation(GuardedInvocation,
-     * MethodHandle)}. This method is normally only called by the {@link DynamicLinker} implementation once when setting
-     * up the call site.
-     *
-     * @param relink the relink method handle.
-     * @throws IllegalArgumentException if the relink is null
-     * @throws IllegalStateException if the method was already called
+     * See {@link CallSite#setTarget(MethodHandle)}.
+     * @param target the target of the call site
      */
-    public void setRelink(MethodHandle relink);
+    public void setTarget(MethodHandle target);
 
     /**
      * Returns the descriptor for this call site.
@@ -49,14 +43,6 @@ public interface RelinkableCallSite {
      * @return the descriptor for this call site.
      */
     public CallSiteDescriptor getDescriptor();
-
-    /**
-     * Returns the descriptor for this call site.
-     * @deprecated use {@link #getDescriptor()} instead.
-     * @return the descriptor for this call site.
-     */
-    @Deprecated
-    public CallSiteDescriptor getCallSiteDescriptor();
 
     /**
      * This method will be called once by the dynamic linker every time the call site is relinked.

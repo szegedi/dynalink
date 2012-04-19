@@ -35,23 +35,9 @@ public class TestRelinkableCallSite extends TestCase {
      */
     public static void testNullRelink() {
         try {
-            createCallSite(MethodType.methodType(Void.TYPE)).setRelink(null);
+            createCallSite(MethodType.methodType(Void.TYPE)).setTarget(null);
             fail();
-        } catch(IllegalArgumentException e) {
-            // This is expected
-        }
-    }
-
-    /**
-     * Tests against allowing relink to be called twice.
-     */
-    public static void testRelinkSetTwice() {
-        RelinkableCallSite cs = createCallSite(MethodType.methodType(Object.class));
-        cs.setRelink(MethodHandles.constant(Object.class, new Object()));
-        try {
-            cs.setRelink(MethodHandles.constant(Object.class, new Object()));
-            fail();
-        } catch(IllegalStateException e) {
+        } catch(NullPointerException e) {
             // This is expected
         }
     }

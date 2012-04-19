@@ -1,6 +1,5 @@
 package org.dynalang.dynalink.support;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MutableCallSite;
 
 import org.dynalang.dynalink.RelinkableCallSite;
@@ -25,24 +24,7 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite impleme
     }
 
     @Override
-    public void setRelink(MethodHandle relink) {
-        if(relink == null) {
-            throw new IllegalArgumentException("relink == null");
-        }
-        if(getTarget() != null) {
-            throw new IllegalStateException("target already set");
-        }
-        // Set it as the initial target
-        setTarget(relink);
-    }
-
-    @Override
     public CallSiteDescriptor getDescriptor() {
         return descriptor;
-    }
-
-    @Override
-    public CallSiteDescriptor getCallSiteDescriptor() {
-        return getDescriptor();
     }
 }

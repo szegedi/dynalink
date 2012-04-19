@@ -91,7 +91,7 @@ public class DynamicLinker {
      * @param callSite the call site to link.
      */
     public void link(final RelinkableCallSite callSite) {
-        callSite.setRelink(createRelinkAndInvokeMethod(callSite));
+        callSite.setTarget(createRelinkAndInvokeMethod(callSite));
     }
 
     private static final MethodHandle RELINK_AND_INVOKE = new Lookup(MethodHandles.lookup()).findSpecial(
