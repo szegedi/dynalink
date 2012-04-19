@@ -33,8 +33,9 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 public interface RelinkableCallSite {
     /**
      * Sets the relink method. This is a method matching the method type of the call site that will try to discover the
-     * adequate target for the invocation and then subsequently invoke {@link #setGuardedInvocation(GuardedInvocation)}.
-     * This method is normally only called by the {@link DynamicLinker} implementation.
+     * adequate target for the invocation and then subsequently invoke {@link #setGuardedInvocation(GuardedInvocation,
+     * MethodHandle)}. This method is normally only called by the {@link DynamicLinker} implementation once when setting
+     * up the call site.
      *
      * @param relink the relink method handle.
      * @throws IllegalArgumentException if the relink is null
@@ -63,6 +64,11 @@ public interface RelinkableCallSite {
      * @param guardedInvocation the guarded invocation that the call site should set as its current target. Note that
      * the call sites are allowed to keep other non-invalidated invocations around for implementation of polymorphic
      * inline caches.
+     * @param fallback the fallback method. This is a method matching the method type of the call site that is supplied
+     * by the {@link DynamicLinker} to be used by this call site as a fallback when it can't invoke its target with the
+     * passed arguments. The fallback method is such that when it's invoked, it'll try to discover the adequate target
+     * for the invocation, subsequently invoke {@link #setGuardedInvocation(GuardedInvocation, MethodHandle)}, and
+     * finally invoke the target.
      */
-    public void setGuardedInvocation(GuardedInvocation guardedInvocation);
+    public void setGuardedInvocation(GuardedInvocation guardedInvocation, MethodHandle fallback);
 }

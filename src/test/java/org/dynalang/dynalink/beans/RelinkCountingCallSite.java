@@ -1,5 +1,6 @@
 package org.dynalang.dynalink.beans;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
@@ -15,8 +16,8 @@ public class RelinkCountingCallSite extends MonomorphicCallSite {
     }
 
     @Override
-    public void setGuardedInvocation(GuardedInvocation guardedInvocation) {
-        super.setGuardedInvocation(guardedInvocation);
+    public void setGuardedInvocation(GuardedInvocation guardedInvocation, MethodHandle relink) {
+        super.setGuardedInvocation(guardedInvocation, relink);
         ++relinkCount;
     }
 

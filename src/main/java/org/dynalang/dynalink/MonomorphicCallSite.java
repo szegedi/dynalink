@@ -19,6 +19,7 @@ package org.dynalang.dynalink;
 import java.lang.invoke.MethodHandle;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 
 /**
@@ -38,16 +39,9 @@ public class MonomorphicCallSite extends AbstractRelinkableCallSite {
         super(descriptor);
     }
 
-    @Override
-    protected MethodHandle getGuardFallback() {
-        // Relink the call site when a guard fails.
-        return getRelink();
-    }
 
     @Override
-    protected MethodHandle getSwitchPointFallback() {
-        // Relink the call site when a switch point invalidates the linked
-        // method.
-        return getRelink();
+    public void setGuardedInvocation(GuardedInvocation guardedInvocation, MethodHandle relink) {
+        setTarget(guardedInvocation.compose(relink));
     }
 }
