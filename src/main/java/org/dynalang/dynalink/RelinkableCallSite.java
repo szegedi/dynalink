@@ -18,6 +18,8 @@ package org.dynalang.dynalink;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MutableCallSite;
+import java.lang.invoke.VolatileCallSite;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -25,7 +27,10 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 /**
  * Interface for relinkable call sites. Language runtimes wishing to use this framework must use subclasses of
  * {@link CallSite} that also implement this interface as their call sites. There is a readily usable
- * {@link MonomorphicCallSite} subclass that implements monomorphic inline caching strategy.
+ * {@link MonomorphicCallSite} subclass that implements monomorphic inline caching strategy as well as a
+ * {@link ChainedCallSite} that retains a chain of already linked method handles. The reason this is defined as an
+ * interface instead of a concrete, albeit abstract class is that it allows independent implementations to choose
+ * between {@link MutableCallSite} and {@link VolatileCallSite} as they see fit.
  *
  * @author Attila Szegedi
  * @version $Id: $
