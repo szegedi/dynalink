@@ -19,6 +19,7 @@ package org.dynalang.dynalink;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.MutableCallSite;
 import java.util.List;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
@@ -66,6 +67,7 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
 public class DynamicLinker {
     private final LinkerServices linkerServices;
     private final int runtimeContextArgCount;
+    private final boolean syncOnRelink;
 
     /**
      * Creates a new dynamic linker.
@@ -73,12 +75,13 @@ public class DynamicLinker {
      * @param linkerServices the linkerServices used by the linker, created by the factory.
      * @param runtimeContextArgCount see {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
-    DynamicLinker(final LinkerServices linkerServices, final int runtimeContextArgCount) {
+    DynamicLinker(LinkerServices linkerServices, int runtimeContextArgCount, boolean syncOnRelink) {
         if(runtimeContextArgCount < 0) {
             throw new IllegalArgumentException("runtimeContextArgCount < 0");
         }
         this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;
+        this.syncOnRelink = syncOnRelink;
     }
 
     /**
@@ -144,6 +147,9 @@ public class DynamicLinker {
 
         // Allow the call site to relink and execute its inline caching strategy.
         callSite.setGuardedInvocation(guardedInvocation, createRelinkAndInvokeMethod(callSite));
+        if(syncOnRelink) {
+            MutableCallSite.syncAll(new MutableCallSite[] { (MutableCallSite)callSite });
+        }
         // Invoke the method. Note we bypass the guard, as the assumption is that the current arguments will pass the
         // guard (and there actually might be no guard at all).
         return guardedInvocation.getInvocation().invokeWithArguments(arguments);

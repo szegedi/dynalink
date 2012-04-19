@@ -16,6 +16,7 @@
 
 package org.dynalang.dynalink;
 
+import java.lang.invoke.MutableCallSite;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +50,7 @@ public class DynamicLinkerFactory {
     private List<? extends GuardingDynamicLinker> prioritizedLinkers;
     private List<? extends GuardingDynamicLinker> fallbackLinkers;
     private int runtimeContextArgCount = 0;
+    private boolean syncOnRelink = false;
 
     /**
      * Sets the class loader for automatic discovery of available linkers. If not set explicitly, then the thread
@@ -127,6 +129,16 @@ public class DynamicLinkerFactory {
     }
 
     /**
+     * Sets whether the linker created by this factory will invoke {@link MutableCallSite#syncAll(MutableCallSite[])}
+     * after a call site is relinked. Defaults to false. You probably want to set it to true if your runtime supports
+     * multithreaded execution of dynamically linked code.
+     * @param syncOnRelink true for invoking sync on relink, false otherwise.
+     */
+    public void setSyncOnRelink(boolean syncOnRelink) {
+        this.syncOnRelink = syncOnRelink;
+    }
+
+    /**
      * Creates a new dynamic linker consisting of all the prioritized, autodiscovered, and fallback linkers.
      *
      * @return the new dynamic Linker
@@ -186,7 +198,7 @@ public class DynamicLinkerFactory {
             }
         }
         return new DynamicLinker(new LinkerServicesImpl(new TypeConverterFactory(typeConverters), composite),
-                runtimeContextArgCount);
+                runtimeContextArgCount, syncOnRelink);
     }
 
     private static void addClasses(Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses,
