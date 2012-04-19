@@ -17,6 +17,7 @@
 package org.dynalang.dynalink.linker;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
 import java.lang.invoke.WrongMethodTypeException;
@@ -98,6 +99,14 @@ public class GuardedInvocation {
     }
 
     /**
+     * Returns true if and only if this guarded invocation has a switchpoint, and that switchpoint has been invalidated.
+     * @return true if this guarded invocation's switchpoint has been invalidated.
+     */
+    public boolean hasBeenInvalidated() {
+        return switchPoint != null && switchPoint.hasBeenInvalidated();
+    }
+
+    /**
      * Asserts that the invocation is of the specified type, and the guard (if present) is of the specified type with a
      * boolean return type.
      *
@@ -118,6 +127,27 @@ public class GuardedInvocation {
      */
     public GuardedInvocation replaceMethods(MethodHandle newInvocation, MethodHandle newGuard) {
         return new GuardedInvocation(newInvocation, newGuard, switchPoint);
+    }
+
+    /**
+     * Composes the invocation, switchpoint, and the guard into a composite method handle that knows how to fall back.
+     * @param fallback the fallback method handle in case switchpoint is invalidated or guard returns false.
+     * @return a composite method handle.
+     */
+    public MethodHandle compose(MethodHandle fallback) {
+        return compose(fallback, fallback);
+    }
+
+    /**
+     * Composes the invocation, switchpoint, and the guard into a composite method handle that knows how to fall back.
+     * @param switchpointFallback the fallback method handle in case switchpoint is invalidated.
+     * @param guardFallback the fallback method handle in case guard returns false.
+     * @return a composite method handle.
+     */
+    public MethodHandle compose(MethodHandle switchpointFallback, MethodHandle guardFallback) {
+        final MethodHandle switched =
+                switchPoint == null ? invocation : switchPoint.guardWithTest(invocation, switchpointFallback);
+        return guard == null ? switched : MethodHandles.guardWithTest(guard, switched, guardFallback);
     }
 
     private static void assertType(MethodHandle mh, MethodType type) {
