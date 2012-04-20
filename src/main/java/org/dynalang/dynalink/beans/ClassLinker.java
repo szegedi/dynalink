@@ -76,7 +76,7 @@ class ClassLinker extends BeanLinker {
         final LinkRequest ncrequest = request.withoutRuntimeContext();
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getNameToken(1);
-        if("new".equals(op)) {
+        if("new" == op) {
             return constructors.get((Class)ncrequest.getArguments()[0]).getGuardedInvocation(callSiteDescriptor,
                     linkerServices);
         }

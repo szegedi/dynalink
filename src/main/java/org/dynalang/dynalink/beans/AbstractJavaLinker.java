@@ -187,18 +187,18 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getNameToken(1);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
-        if("getProp".equals(op)) {
+        if("getProp" == op) {
             return getPropertyGetter(callSiteDescriptor);
         }
         final Object[] arguments = ncrequest.getArguments();
         // Either dyn:setProp:name(this, value) or dyn:setProp(this, name,
         // value)
-        if("setProp".equals(op)) {
+        if("setProp" == op) {
             return getPropertySetter(callSiteDescriptor, linkerServices, arguments);
         }
         // Either dyn:callPropWithThis:name(this[,args]) or
         // dyn:callPropWithThis(this,name[,args]).
-        if("callPropWithThis".equals(op)) {
+        if("callPropWithThis" == op) {
             return getCallPropWithThis(callSiteDescriptor, linkerServices, arguments);
         }
         return null;

@@ -71,7 +71,7 @@ public class BeansLinker implements GuardingDynamicLinker {
         final CallSiteDescriptor callSiteDescriptor = request.getCallSiteDescriptor();
         final int l = callSiteDescriptor.getNameTokenCount();
         // All names conforming to the dynalang MOP should have at least two tokens, the first one being "dyn"
-        if(l < 2 || !"dyn".equals(callSiteDescriptor.getNameToken(0))) {
+        if(l < 2 || "dyn" != callSiteDescriptor.getNameToken(0)) {
             return null;
         }
 

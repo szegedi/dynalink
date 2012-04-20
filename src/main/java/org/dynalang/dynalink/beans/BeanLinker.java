@@ -62,14 +62,14 @@ class BeanLinker extends AbstractJavaLinker {
         // dyn:getElem(this, id)
         // id is typically either an int (for arrays and lists) or an object (for maps). linkerServices can provide
         // conversion from call site argument type though.
-        if("getElem".equals(op)) {
+        if("getElem" == op) {
             return getElementGetter(callSiteDescriptor, linkerServices, arguments);
         }
-        if("setElem".equals(op)) {
+        if("setElem" == op) {
             return getElementSetter(callSiteDescriptor, linkerServices, arguments);
         }
         // dyn:getLength(this) (works on Java arrays, collections, and maps)
-        if("getLength".equals(op)) {
+        if("getLength" == op) {
             return getLengthGetter(callSiteDescriptor, arguments);
         }
         return null;

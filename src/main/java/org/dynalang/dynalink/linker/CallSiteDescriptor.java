@@ -51,7 +51,7 @@ public abstract class CallSiteDescriptor {
      * colon ":" character.
      * @param i the index of the token. Must be between 0 (inclusive) and {@link #getNameTokenCount()} (exclusive)
      * @throws IllegalArgumentException if the index is outside the allowed range.
-     * @return the <i>i<sup>th</sup></i> token in the method name at the call site.
+     * @return the <i>i<sup>th</sup></i> token in the method name at the call site. The returned strings are interned.
      */
     public abstract String getNameToken(int i);
 
