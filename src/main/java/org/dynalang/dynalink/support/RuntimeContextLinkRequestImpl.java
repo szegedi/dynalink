@@ -51,11 +51,9 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
     @Override
     public LinkRequest withoutRuntimeContext() {
         if(contextStrippedRequest == null) {
-            final CallSiteDescriptor callSiteDescriptor = getCallSiteDescriptor();
-            final int argCount = callSiteDescriptor.getMethodType().parameterCount();
             contextStrippedRequest =
-                    new LinkRequestImpl(callSiteDescriptor.dropParameterTypes(argCount - runtimeContextArgCount,
-                            argCount), getTruncatedArguments());
+                    new LinkRequestImpl(getCallSiteDescriptor().dropParameterTypes(1, runtimeContextArgCount + 1),
+                            getTruncatedArguments());
         }
         return contextStrippedRequest;
     }
@@ -68,7 +66,8 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
     private Object[] getTruncatedArguments() {
         final Object[] args = getArguments();
         final Object[] newargs = new Object[args.length - runtimeContextArgCount];
-        System.arraycopy(args, runtimeContextArgCount, newargs, 0, newargs.length);
+        newargs[0] = args[0]; // "this" remains at the 0th position
+        System.arraycopy(args, runtimeContextArgCount + 1, newargs, 1, newargs.length - 1);
         return newargs;
     }
 }

@@ -137,11 +137,11 @@ public class DynamicLinker {
             final MethodType origType = callSiteDescriptor.getMethodType();
             final MethodHandle invocation = guardedInvocation.getInvocation();
             if(invocation.type().parameterCount() == origType.parameterCount() - runtimeContextArgCount) {
-                final List<Class<?>> prefix = origType.parameterList().subList(0, runtimeContextArgCount);
+                final List<Class<?>> prefix = origType.parameterList().subList(1, runtimeContextArgCount + 1);
                 final MethodHandle guard = guardedInvocation.getGuard();
                 guardedInvocation =
-                        guardedInvocation.replaceMethods(MethodHandles.dropArguments(invocation, 0, prefix),
-                                guard == null ? null : MethodHandles.dropArguments(guard, 0, prefix));
+                        guardedInvocation.replaceMethods(MethodHandles.dropArguments(invocation, 1, prefix),
+                                guard == null ? null : MethodHandles.dropArguments(guard, 1, prefix));
             }
         }
 

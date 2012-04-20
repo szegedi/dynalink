@@ -115,11 +115,14 @@ public class DynamicLinkerFactory {
     }
 
     /**
-     * Sets the number of trailing arguments in the call sites that represent the stack context of the language runtime
-     * creating the linker. If the language runtime uses no context information passed on stack, then it should be zero
-     * (the default value).
+     * Sets the number of arguments in the call sites that represent the stack context of the language runtime creating
+     * the linker. If the language runtime uses no context information passed on stack, then it should be zero
+     * (the default value). If it is set to nonzero value, then every dynamic call site emitted by this runtime must
+     * have the argument list of the form: {@code (this, contextArg1[, contextArg2[, ...]], normalArgs)}. It is
+     * advisable to only pass one context-specific argument, though, of an easily recognizable, runtime specific type
+     * encapsulating the runtime thread local state.
      *
-     * @param runtimeContextArgCount the number of trailing language runtime context arguments in call sites.
+     * @param runtimeContextArgCount the number of language runtime context arguments in call sites.
      */
     public void setRuntimeContextArgCount(int runtimeContextArgCount) {
         if(runtimeContextArgCount < 0) {
