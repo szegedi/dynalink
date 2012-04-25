@@ -108,10 +108,22 @@ public class DynamicLinkerFactory {
      * linkers, it will be ignored and the explicit fallback instance will be used.
      *
      * @param fallbackLinkers the list of fallback linkers. Can be empty to indicate the caller wishes to set no
-     * fallback linkers. If it is left as null, the standard fallback {@link BeansLinker} will be used.
+     * fallback linkers.
      */
     public void setFallbackLinkers(List<? extends GuardingDynamicLinker> fallbackLinkers) {
         this.fallbackLinkers = fallbackLinkers == null ? null : new ArrayList<GuardingDynamicLinker>(fallbackLinkers);
+    }
+
+    /**
+     * Sets the fallback linkers. These linkers will be consulted last in the resulting composite linker, after any
+     * autodiscovered linkers. If the framework also autodiscovers a linker of the same class as one of the fallback
+     * linkers, it will be ignored and the explicit fallback instance will be used.
+     *
+     * @param fallbackLinkers the list of fallback linkers. Can be empty to indicate the caller wishes to set no
+     * fallback linkers. If it is left as null, the standard fallback {@link BeansLinker} will be used.
+     */
+    public void setFallbackLinkers(GuardingDynamicLinker... fallbackLinkers) {
+        setFallbackLinkers(Arrays.asList(fallbackLinkers));
     }
 
     /**
