@@ -69,7 +69,7 @@ class ClassLinker extends BeanLinker {
     @SuppressWarnings("rawtypes")
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request, LinkerServices linkerServices) {
-        GuardedInvocation gi = super.getGuardedInvocation(request, linkerServices);
+        final GuardedInvocation gi = super.getGuardedInvocation(request, linkerServices);
         if(gi != null) {
             return gi;
         }
@@ -83,6 +83,11 @@ class ClassLinker extends BeanLinker {
         return null;
     }
 
+    // Exposed to ClassStaticsLinker
+    static DynamicMethod getConstructor(Class<?> clazz) {
+        return constructors.get(clazz).constructor;
+    }
+
     private static class ConstructorInfo {
         private final MethodHandle constructorGuard;
         private final DynamicMethod constructor;
@@ -91,7 +96,7 @@ class ClassLinker extends BeanLinker {
             final Constructor<?>[] ctrs = clazz.getConstructors();
             final MethodHandle[] mhs = new MethodHandle[ctrs.length];
             for(int i = 0; i < ctrs.length; ++i) {
-                mhs[i] = MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, Class.class);
+                mhs[i] = MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, Object.class);
             }
             constructor = AbstractJavaLinker.createDynamicMethod(mhs, clazz);
             constructorGuard = constructor == null ? null : Guards.getIdentityGuard(clazz);

@@ -204,6 +204,10 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return null;
     }
 
+    MethodHandle getClassGuard(CallSiteDescriptor desc) {
+        return getClassGuard(desc.getMethodType());
+    }
+
     MethodHandle getClassGuard(MethodType type) {
         return Guards.asType(classGuard, type);
     }
@@ -230,7 +234,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         final MethodHandle invocation =
                 getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName, methodMap);
         return invocation == null ? null : new GuardedInvocation(invocation,
-                getClassGuard(callSiteDescriptor.getMethodType()));
+                getClassGuard(callSiteDescriptor));
     }
 
     private static MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,

@@ -16,6 +16,7 @@
 
 package org.dynalang.dynalink.beans;
 
+import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
@@ -23,7 +24,7 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 /**
- * Provides a linker for the static facet of the classes (their exposed static methods and interfaces).
+ * Provides a linker for the {@link ClassStatics} objects.
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -31,16 +32,41 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
     private static final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {
         @Override
         protected GuardingDynamicLinker computeValue(Class<?> clazz) {
-            return new AbstractJavaLinker(clazz, ClassStatics.getIsClass(clazz)) {
-                @Override
-                FacetIntrospector createFacetIntrospector() {
-                    return new ClassStaticsIntrospector(clazz);
-                }
-            };
+            return new SingleClassStaticsLinker(clazz);
         }
     };
 
-    @SuppressWarnings("rawtypes")
+    private static class SingleClassStaticsLinker extends AbstractJavaLinker {
+        SingleClassStaticsLinker(Class<?> clazz) {
+            super(clazz, ClassStatics.getIsClass(clazz));
+            addPropertyGetter("class", ClassStatics.GET_CLASS, false);
+        }
+
+        @Override
+        FacetIntrospector createFacetIntrospector() {
+            return new ClassStaticsIntrospector(clazz);
+        }
+
+        @Override
+        public GuardedInvocation getGuardedInvocation(LinkRequest request, LinkerServices linkerServices) {
+            final GuardedInvocation gi = super.getGuardedInvocation(request, linkerServices);
+            if(gi != null) {
+                return gi;
+            }
+            final LinkRequest ncrequest = request.withoutRuntimeContext();
+            final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
+            final String op = callSiteDescriptor.getNameToken(1);
+            if("new" == op) {
+                final DynamicMethod ctor = ClassLinker.getConstructor(clazz);
+                if(ctor != null) {
+                    return new GuardedInvocation(ctor.getInvocation(callSiteDescriptor, linkerServices),
+                            getClassGuard(callSiteDescriptor));
+                }
+            }
+            return null;
+        }
+    }
+
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request, LinkerServices linkerServices) throws Exception {
         final Object receiver = request.getArguments()[0];

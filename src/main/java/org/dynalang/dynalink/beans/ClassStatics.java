@@ -22,14 +22,32 @@ import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.support.Lookup;
 
-class ClassStatics {
+/**
+ * Object that represents the static facet of a class (its static methods, properties, and fields). Objects of this
+ * class are recognized by the {@link BeansLinker} as being special, and operations on them will be linked against the
+ * represented class' static facet. The "class" synthetic property is additionally recognized and returns the Java Class
+ * object, as per {@link #getRepresentedClass()} method. Conversely, {@link Class} objects exposed through
+ * {@link BeansLinker} expose the "statics" synthetic property which returns an instance of this class. The linker also
+ * interprets the "dyn:new" operation on these objects just as if they were executed on the Class they represent.
+ */
+public class ClassStatics {
     private final Class<?> clazz;
 
-    ClassStatics(Class<?> clazz) {
+    /**
+     * Creates a new instance of ClassStatics for the specified class.
+     * @param clazz the class for which to create the static facet.
+     * @throws NullPointerException if clazz is null
+     */
+    public ClassStatics(Class<?> clazz) {
+        clazz.getClass(); // NPE check
         this.clazz = clazz;
     }
 
-    Class<?> getRepresentedClass() {
+    /**
+     * Returns the represented Java class.
+     * @return the represented Java class.
+     */
+    public Class<?> getRepresentedClass() {
         return clazz;
     }
 
@@ -50,6 +68,9 @@ class ClassStatics {
 
     static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
+
+    static final MethodHandle GET_CLASS = new Lookup(MethodHandles.lookup()).findSpecial(ClassStatics.class,
+            "getRepresentedClass", MethodType.methodType(Class.class));
 
     static MethodHandle getIsClass(Class<?> clazz) {
         return IS_CLASS.bindTo(clazz);
