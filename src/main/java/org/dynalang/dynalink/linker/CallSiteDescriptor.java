@@ -16,11 +16,8 @@
 
 package org.dynalang.dynalink.linker;
 
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
-
-import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 /**
  * A descriptor of a call site. Used in place of passing a real call site to guarding linkers so they aren't tempted to
@@ -30,13 +27,7 @@ import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
  * @author Attila Szegedi
  * @version $Id: $
  */
-public abstract class CallSiteDescriptor {
-
-    /**
-     * Protected constructor for subclasses.
-     */
-    protected CallSiteDescriptor() {
-    }
+public interface CallSiteDescriptor {
 
     /**
      * Returns the number of tokens in the name of the method at the call site. Method names are tokenized with the
@@ -44,7 +35,7 @@ public abstract class CallSiteDescriptor {
      * property named "color" on the object it is invoked on.
      * @return the number of tokens in the name of the method at the call site.
      */
-    public abstract int getNameTokenCount();
+    public int getNameTokenCount();
 
     /**
      * Returns the <i>i<sup>th</sup></i> token in the method name at the call site. Method names are tokenized with the
@@ -53,42 +44,27 @@ public abstract class CallSiteDescriptor {
      * @throws IllegalArgumentException if the index is outside the allowed range.
      * @return the <i>i<sup>th</sup></i> token in the method name at the call site. The returned strings are interned.
      */
-    public abstract String getNameToken(int i);
+    public String getNameToken(int i);
 
     /**
      * Returns the name of the method at the call site. Note that the object internally only stores the tokenized name,
      * and has to reconstruct the full name from tokens on each invocation.
      * @return the name of the method at the call site.
      */
-    public abstract String getName();
+    public String getName();
 
     /**
      * The type of the method at the call site.
      *
      * @return type of the method at the call site.
      */
-    public abstract MethodType getMethodType();
+    public MethodType getMethodType();
 
     /**
      * Returns the lookup passed to the bootstrap method.
      * @return the lookup passed to the bootstrap method.
      */
-    public abstract Lookup getLookup();
-
-    /**
-     * Returns the number of additional static bootstrap arguments at the call site.
-     * @return the number of additional static bootstrap arguments at the call site; it can be between 0 and 251.
-     */
-    public abstract int getAdditionalBootstrapArgumentCount();
-
-    /**
-     * Returns the <i>i<sup>th</sup></i> additional static bootstrap argument at the call site.
-     * @param i the index of the argument. Must be between 0 (inclusive) and
-     * {@link #getAdditionalBootstrapArgumentCount()} (exclusive).
-     * @throws IllegalArgumentException if the index is outside the allowed range.
-     * @return the <i>i<sup>th</sup></i> additional static bootstrap argument at the call site.
-     */
-    public abstract Object getAdditionalBootstrapArgument(int i);
+    public Lookup getLookup();
 
     /**
      * Creates a new call site descriptor from this descriptor, which is identical to this, except it drops few of the
@@ -98,7 +74,7 @@ public abstract class CallSiteDescriptor {
      * @param to the index of the first parameter after "from" not to drop
      * @return a new call site descriptor with the parameter dropped.
      */
-    public abstract CallSiteDescriptor dropParameterTypes(int from, int to);
+    public CallSiteDescriptor dropParameterTypes(int from, int to);
 
     /**
      * Creates a new call site descriptor from this descriptor, which is identical to this, except it changes the type
@@ -108,20 +84,5 @@ public abstract class CallSiteDescriptor {
      * @param newType the new type for the parameter
      * @return a new call site descriptor, with the type of the parameter in the method type changed.
      */
-    public abstract CallSiteDescriptor changeParameterType(int num, Class<?> newType);
-
-    /**
-     * Creates a new call site descriptor instance. The actual underlying class of the instance is dependent on the
-     * passed arguments to be space efficient; i.e. if you don't use either a non-public lookup or static bootstrap
-     * arguments, you'll get back an implementation that doesn't waste space on storing them.
-     * @param lookup the lookup that determines access rights at the call site. If your language runtime doesn't have
-     * equivalents of Java access concepts, just use {@link MethodHandles#publicLookup()}. Must not be null.
-     * @param name the name of the method at the call site. Must not be null.
-     * @param methodType the type of the method at the call site. Must not be null.
-     * @param bootstrapArgs additional static bootstrap arguments. Can be null.
-     * @return a new call site descriptor.
-     */
-    public static CallSiteDescriptor create(Lookup lookup, String name, MethodType methodType, Object... bootstrapArgs) {
-        return CallSiteDescriptorFactory.create(lookup, name, methodType, bootstrapArgs);
-    }
+    public CallSiteDescriptor changeParameterType(int num, Class<?> newType);
 }
