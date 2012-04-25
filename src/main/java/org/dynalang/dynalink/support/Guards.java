@@ -183,6 +183,9 @@ public class Guards {
     private static final MethodHandle IS_IDENTICAL = new Lookup(MethodHandles.lookup()).findStatic(Guards.class,
             "isIdentical", MethodType.methodType(Boolean.TYPE, Object.class, Object.class));
 
+    private static final MethodHandle IS_NULL = new Lookup(MethodHandles.lookup()).findStatic(Guards.class,
+            "isNull", MethodType.methodType(Boolean.TYPE, Object.class));
+
     /**
      * Creates a guard method that tests its only argument for being of an exact particular class.
      * @param clazz the class to test for.
@@ -208,6 +211,19 @@ public class Guards {
      */
     public static MethodHandle getIdentityGuard(Object obj) {
         return IS_IDENTICAL.bindTo(obj);
+    }
+
+    /**
+     * Returns a guard that tests whether the first argument is null.
+     * @return a guard that tests whether the first argument is null.
+     */
+    public static MethodHandle isNull() {
+        return IS_NULL;
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isNull(Object obj) {
+        return obj == null;
     }
 
     @SuppressWarnings("unused")
