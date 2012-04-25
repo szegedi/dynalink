@@ -244,7 +244,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
-                // Must have theee arguments: target object, property name, and property value.
+                // Must have three arguments: target object, property name, and property value.
                 assertParameterCount(callSiteDescriptor, 3);
                 // Create a new call site descriptor that drops the ID argument. This is used for embedded overloaded
                 // method lookup.
