@@ -154,7 +154,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         }
     }
 
-    static DynamicMethod createDynamicMethod(MethodHandle[] methodHandles, Class<?> clazz) {
+    static DynamicMethod createDynamicMethod(Iterable<MethodHandle> methodHandles, Class<?> clazz) {
         DynamicMethod dynMethod = null;
         for(MethodHandle methodHandle: methodHandles) {
             dynMethod = addMember(methodHandle, dynMethod, clazz);

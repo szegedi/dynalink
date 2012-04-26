@@ -45,18 +45,39 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * @version $Id: $
  */
 public class BeansLinker implements GuardingDynamicLinker {
-    private static final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {
+    private static final ClassValue<GuardingDynamicLinker> staticLinkers = new ClassValue<GuardingDynamicLinker>() {
         @Override
         protected GuardingDynamicLinker computeValue(Class<?> clazz) {
-            return clazz == Class.class ? new ClassLinker() : clazz == ClassStatics.class ? new ClassStaticsLinker() :
-                new BeanLinker(clazz);
+            return clazz == Class.class ? new ClassLinker() : clazz == ClassStatics.class ? new ClassStaticsLinker(
+                    (ClassLinker)staticLinkers.get(Class.class)) : new BeanLinker(clazz);
         }
     };
+
+    private final ClassValue<GuardingDynamicLinker> linkers;
 
     /**
      * Creates a new POJO linker.
      */
     public BeansLinker() {
+        this(null);
+    }
+
+    /**
+     * Creates a new POJO linker with the specified constructor extender.
+     * @param constructorExtender the constructor extender to use.
+     */
+    public BeansLinker(final ConstructorExtender constructorExtender) {
+        if(constructorExtender == null) {
+            linkers = staticLinkers;
+        } else {
+            linkers = new ClassValue<GuardingDynamicLinker>() {
+                @Override
+                protected GuardingDynamicLinker computeValue(Class<?> clazz) {
+                    return clazz == Class.class ? new ClassLinker(constructorExtender) : clazz == ClassStatics.class ?
+                            new ClassStaticsLinker((ClassLinker)linkers.get(Class.class)) : staticLinkers.get(clazz);
+                }
+            };
+        }
     }
 
     @Override

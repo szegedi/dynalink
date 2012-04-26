@@ -20,6 +20,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -38,10 +40,10 @@ import org.dynalang.dynalink.support.Lookup;
  */
 class ClassLinker extends BeanLinker {
 
-    private static final ClassValue<ConstructorInfo> constructors = new ClassValue<ConstructorInfo>() {
+    private final ClassValue<ConstructorInfo> constructors = new ClassValue<ConstructorInfo>() {
         @Override
         protected ConstructorInfo computeValue(Class<?> type) {
-            return new ConstructorInfo(type);
+            return new ConstructorInfo(type, constructorExtender);
         }
     };
 
@@ -52,8 +54,15 @@ class ClassLinker extends BeanLinker {
         }
     };
 
+    private final ConstructorExtender constructorExtender;
+
     ClassLinker() {
+        this(null);
+    }
+
+    ClassLinker(ConstructorExtender constructorExtender) {
         super(Class.class);
+        this.constructorExtender = constructorExtender;
         // Map class.statics to ClassLinker.statics.get(class)
         addPropertyGetter("statics", GET_STATICS, false);
     }
@@ -84,7 +93,7 @@ class ClassLinker extends BeanLinker {
     }
 
     // Exposed to ClassStaticsLinker
-    static DynamicMethod getConstructor(Class<?> clazz) {
+    DynamicMethod getConstructor(Class<?> clazz) {
         return constructors.get(clazz).constructor;
     }
 
@@ -92,11 +101,14 @@ class ClassLinker extends BeanLinker {
         private final MethodHandle constructorGuard;
         private final DynamicMethod constructor;
 
-        ConstructorInfo(Class<?> clazz) {
+        ConstructorInfo(Class<?> clazz, ConstructorExtender extender) {
             final Constructor<?>[] ctrs = clazz.getConstructors();
-            final MethodHandle[] mhs = new MethodHandle[ctrs.length];
+            final List<MethodHandle> mhs = new ArrayList<>(ctrs.length * ((extender == null) ? 1 : 2));
             for(int i = 0; i < ctrs.length; ++i) {
-                mhs[i] = MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, Object.class);
+                mhs.add(MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, Object.class));
+            }
+            if(extender != null) {
+                mhs.addAll(extender.getAdditionalConstructors(clazz));
             }
             constructor = AbstractJavaLinker.createDynamicMethod(mhs, clazz);
             constructorGuard = constructor == null ? null : Guards.getIdentityGuard(clazz);

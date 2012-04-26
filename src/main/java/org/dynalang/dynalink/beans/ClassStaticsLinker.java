@@ -29,14 +29,20 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  * @version $Id: $
  */
 class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
-    private static final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {
+    private final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {
         @Override
         protected GuardingDynamicLinker computeValue(Class<?> clazz) {
             return new SingleClassStaticsLinker(clazz);
         }
     };
 
-    private static class SingleClassStaticsLinker extends AbstractJavaLinker {
+    private final ClassLinker classLinker;
+
+    ClassStaticsLinker(ClassLinker classLinker) {
+        this.classLinker = classLinker;
+    }
+
+    private class SingleClassStaticsLinker extends AbstractJavaLinker {
         SingleClassStaticsLinker(Class<?> clazz) {
             super(clazz, ClassStatics.getIsClass(clazz));
             addPropertyGetter("class", ClassStatics.GET_CLASS, false);
@@ -57,7 +63,7 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
             final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
             final String op = callSiteDescriptor.getNameToken(1);
             if("new" == op) {
-                final DynamicMethod ctor = ClassLinker.getConstructor(clazz);
+                final DynamicMethod ctor = classLinker.getConstructor(clazz);
                 if(ctor != null) {
                     return new GuardedInvocation(ctor.getInvocation(callSiteDescriptor, linkerServices),
                             getClassGuard(callSiteDescriptor));
