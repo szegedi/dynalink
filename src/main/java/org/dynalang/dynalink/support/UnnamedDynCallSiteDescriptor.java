@@ -18,6 +18,10 @@ class UnnamedDynCallSiteDescriptor extends AbstractCallSiteDescriptor {
         return 2;
     }
 
+    String getOp() {
+        return op;
+    }
+
     @Override
     public String getNameToken(int i) {
         switch(i) {

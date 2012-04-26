@@ -4,15 +4,12 @@ import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 
-class NamedDynCallSiteDescriptor extends AbstractCallSiteDescriptor {
-    private final MethodType methodType;
-    private final String op;
+class NamedDynCallSiteDescriptor extends UnnamedDynCallSiteDescriptor {
     private final String name;
 
     NamedDynCallSiteDescriptor(String op, String name, MethodType methodType) {
-        this.op = op;
+        super(op, methodType);
         this.name = name;
-        this.methodType = methodType;
     }
 
     @Override
@@ -24,26 +21,21 @@ class NamedDynCallSiteDescriptor extends AbstractCallSiteDescriptor {
     public String getNameToken(int i) {
         switch(i) {
             case 0: return "dyn";
-            case 1: return op;
+            case 1: return getOp();
             case 2: return name;
             default: throw new IndexOutOfBoundsException(String.valueOf(i));
         }
     }
 
     @Override
-    public MethodType getMethodType() {
-        return methodType;
-    }
-
-    @Override
     public CallSiteDescriptor dropParameterTypes(int from, int to) {
-        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new NamedDynCallSiteDescriptor(op, name,
-                methodType.dropParameterTypes(from, to)));
+        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new NamedDynCallSiteDescriptor(getOp(), name,
+                getMethodType().dropParameterTypes(from, to)));
     }
 
     @Override
     public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new NamedDynCallSiteDescriptor(op, name,
-                methodType.changeParameterType(num, newType)));
+        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new NamedDynCallSiteDescriptor(getOp(), name,
+                getMethodType().changeParameterType(num, newType)));
     }
 }
