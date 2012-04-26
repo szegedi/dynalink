@@ -17,6 +17,7 @@
 package org.dynalang.dynalink.support;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,9 +29,9 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 /**
  * A composite type-based guarding dynamic linker. When a receiver of a not yet seen class is encountered, all linkers
- * are invoked sequentially until one returns <true> from {@link TypeBasedGuardingDynamicLinker#canLinkType(Class)} .
- * This linker is then bound to the class, and next time a receiver of same type is encountered, the linking is
- * delegated to that linker first, speeding up dispatch.
+ * are queried sequentially on their {@link TypeBasedGuardingDynamicLinker#canLinkType(Class)} method. The linkers
+ * returning true are then bound to the class, and next time a receiver of same type is encountered, the linking is
+ * delegated to those linkers only, speeding up dispatch.
  *
  * @author Attila Szegedi
  * @version $Id: $
@@ -38,27 +39,48 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardingDynamicLinker, Serializable {
     private static final long serialVersionUID = 1L;
 
-    // Using a separate static class instance so there's no strong reference
-    // from the class value back to the composite linker.
-    private static class ClassToLinker extends ClassValue<TypeBasedGuardingDynamicLinker> {
+    // Using a separate static class instance so there's no strong reference from the class value back to the composite
+    // linker.
+    private static class ClassToLinker extends ClassValue<List<TypeBasedGuardingDynamicLinker>> {
+        private static final List<TypeBasedGuardingDynamicLinker> NO_LINKER = Collections.emptyList();
         private final TypeBasedGuardingDynamicLinker[] linkers;
+        private final List<TypeBasedGuardingDynamicLinker>[] singletonLinkers;
 
+        @SuppressWarnings("unchecked")
         ClassToLinker(TypeBasedGuardingDynamicLinker[] linkers) {
             this.linkers = linkers;
+            singletonLinkers = new List[linkers.length];
+            for(int i = 0; i < linkers.length; ++i) {
+                singletonLinkers[i] = Collections.singletonList(linkers[i]);
+            }
         }
 
         @Override
-        protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
-            for(TypeBasedGuardingDynamicLinker linker: linkers) {
+        protected List<TypeBasedGuardingDynamicLinker> computeValue(Class<?> clazz) {
+            List<TypeBasedGuardingDynamicLinker> list = NO_LINKER;
+            for(int i = 0; i < linkers.length; ++i) {
+                final TypeBasedGuardingDynamicLinker linker = linkers[i];
                 if(linker.canLinkType(clazz)) {
-                    return linker;
+                    switch(list.size()) {
+                        case 0: {
+                            list = singletonLinkers[i];
+                            break;
+                        }
+                        case 1: {
+                            list = new LinkedList<>(list);
+                            // intentional fallthrough
+                        }
+                        default: {
+                            list.add(linker);
+                        }
+                    }
                 }
             }
-            return BottomGuardingDynamicLinker.INSTANCE;
+            return list;
         }
     }
 
-    private final ClassValue<TypeBasedGuardingDynamicLinker> classToLinker;
+    private final ClassValue<List<TypeBasedGuardingDynamicLinker>> classToLinker;
 
     /**
      * Creates a new composite type-based linker.
@@ -75,21 +97,27 @@ public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardin
 
     @Override
     public boolean canLinkType(Class<?> type) {
-        return classToLinker.get(type) != BottomGuardingDynamicLinker.INSTANCE;
+        return !classToLinker.get(type).isEmpty();
     }
 
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, final LinkerServices linkerServices)
             throws Exception {
         final Object[] arguments = linkRequest.getArguments();
-        if(arguments.length == 0) {
+        if(arguments == null || arguments.length == 0) {
             return null;
         }
         final Object obj = arguments[0];
         if(obj == null) {
             return null;
         }
-        return classToLinker.get(obj.getClass()).getGuardedInvocation(linkRequest, linkerServices);
+        for(TypeBasedGuardingDynamicLinker linker: classToLinker.get(obj.getClass())) {
+            final GuardedInvocation invocation = linker.getGuardedInvocation(linkRequest, linkerServices);
+            if(invocation != null) {
+                return invocation;
+            }
+        }
+        return null;
     }
 
     /**
