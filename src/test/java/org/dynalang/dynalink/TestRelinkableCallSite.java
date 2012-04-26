@@ -19,7 +19,7 @@ package org.dynalang.dynalink;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 import junit.framework.TestCase;
 
@@ -43,6 +43,6 @@ public class TestRelinkableCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "", type));
+        return new MonomorphicCallSite(CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "", type));
     }
 }
