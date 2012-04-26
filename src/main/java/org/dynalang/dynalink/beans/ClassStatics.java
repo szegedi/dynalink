@@ -16,6 +16,7 @@
 
 package org.dynalang.dynalink.beans;
 
+import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -30,7 +31,9 @@ import org.dynalang.dynalink.support.Lookup;
  * {@link BeansLinker} expose the "statics" synthetic property which returns an instance of this class. The linker also
  * interprets the "dyn:new" operation on these objects just as if they were executed on the Class they represent.
  */
-public class ClassStatics {
+public class ClassStatics implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final Class<?> clazz;
 
     /**
