@@ -32,18 +32,29 @@ import org.dynalang.dynalink.support.Lookup;
  * interprets the "dyn:new" operation on these objects just as if they were executed on the Class they represent.
  */
 public class ClassStatics implements Serializable {
+    private static final ClassValue<ClassStatics> statics = new ClassValue<ClassStatics>() {
+        @Override
+        protected ClassStatics computeValue(Class<?> type) {
+            return new ClassStatics(type);
+        }
+    };
+
     private static final long serialVersionUID = 1L;
 
     private final Class<?> clazz;
 
-    /**
-     * Creates a new instance of ClassStatics for the specified class.
-     * @param clazz the class for which to create the static facet.
-     * @throws NullPointerException if clazz is null
-     */
-    public ClassStatics(Class<?> clazz) {
+    private ClassStatics(Class<?> clazz) {
         clazz.getClass(); // NPE check
         this.clazz = clazz;
+    }
+
+    /**
+     * Retrieves the {@link ClassStatics} instance for the specified class.
+     * @param clazz the class for which the statics instance is requested.
+     * @return the {@link ClassStatics} instance representing the specified class.
+     */
+    public static ClassStatics forClass(Class<?> clazz) {
+        return statics.get(clazz);
     }
 
     /**
@@ -55,19 +66,12 @@ public class ClassStatics implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return isClass(clazz, obj);
-    }
-
-    @Override
-    public int hashCode() {
-        return clazz.hashCode();
-    }
-
-    @Override
     public String toString() {
         return "ClassStatics[" + clazz.getName() + "]";
     }
+
+    static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassLinker.class,
+            "forClass", MethodType.methodType(ClassStatics.class, Class.class));
 
     static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
@@ -79,7 +83,12 @@ public class ClassStatics implements Serializable {
         return IS_CLASS.bindTo(clazz);
     }
 
+    @SuppressWarnings("unused")
     private static boolean isClass(Class<?> clazz, Object obj) {
         return obj instanceof ClassStatics && ((ClassStatics)obj).clazz == clazz;
+    }
+
+    private Object readResolve() {
+        return forClass(clazz);
     }
 }

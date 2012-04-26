@@ -18,7 +18,6 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,13 +46,6 @@ class ClassLinker extends BeanLinker {
         }
     };
 
-    private static final ClassValue<ClassStatics> statics = new ClassValue<ClassStatics>() {
-        @Override
-        protected ClassStatics computeValue(Class<?> type) {
-            return new ClassStatics(type);
-        }
-    };
-
     private final ConstructorExtender constructorExtender;
 
     ClassLinker() {
@@ -64,15 +56,7 @@ class ClassLinker extends BeanLinker {
         super(Class.class);
         this.constructorExtender = constructorExtender;
         // Map class.statics to ClassLinker.statics.get(class)
-        addPropertyGetter("statics", GET_STATICS, false);
-    }
-
-    private static final MethodHandle GET_STATICS = new Lookup(MethodHandles.lookup()).findStatic(ClassLinker.class,
-            "getStatics", MethodType.methodType(ClassStatics.class, Class.class));
-
-    @SuppressWarnings("unused")
-    private static ClassStatics getStatics(Class<?> clazz) {
-        return statics.get(clazz);
+        addPropertyGetter("statics", ClassStatics.FOR_CLASS, false);
     }
 
     @SuppressWarnings("rawtypes")
@@ -93,8 +77,8 @@ class ClassLinker extends BeanLinker {
     }
 
     // Exposed to ClassStaticsLinker
-    DynamicMethod getConstructor(Class<?> clazz) {
-        return constructors.get(clazz).constructor;
+    DynamicMethod getConstructor(Class<?> type) {
+        return constructors.get(type).constructor;
     }
 
     private static class ConstructorInfo {
