@@ -7,12 +7,13 @@ import java.lang.invoke.MethodType;
 import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 public class RelinkCountingCallSite extends MonomorphicCallSite {
     private int relinkCount;
 
     public RelinkCountingCallSite(String name, MethodType type) {
-        super(CallSiteDescriptor.create(MethodHandles.publicLookup(), name, type));
+        super(CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), name, type));
     }
 
     @Override

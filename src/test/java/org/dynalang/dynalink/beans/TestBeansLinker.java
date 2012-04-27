@@ -25,6 +25,7 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 
 import junit.framework.AssertionFailedError;
@@ -97,7 +98,7 @@ public class TestBeansLinker extends TestCase {
     }
 
     public static CallSiteDescriptor createCallSiteDescriptor(String name, MethodType methodType) {
-        return CallSiteDescriptor.create(MethodHandles.publicLookup(), name, methodType);
+        return CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), name, methodType);
     }
 
 }

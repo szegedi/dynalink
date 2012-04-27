@@ -22,6 +22,7 @@ import java.lang.invoke.MethodType;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 
 import junit.framework.TestCase;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 /**
  * Tests for the {@link RelinkableCallSite}.
@@ -43,6 +44,6 @@ public class TestRelinkableCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "", type));
+        return new MonomorphicCallSite(CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "", type));
     }
 }

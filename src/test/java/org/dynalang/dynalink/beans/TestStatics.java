@@ -10,6 +10,7 @@ import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 public class TestStatics extends TestCase {
     private static final DynamicLinker linker = new DynamicLinkerFactory().createLinker();
@@ -41,7 +42,7 @@ public class TestStatics extends TestCase {
     }
 
     private static MethodHandle getInvoker(String name, Class<?> retType, Class<?>... paramTypes) {
-        final MonomorphicCallSite cs = new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(),
+        final MonomorphicCallSite cs = new MonomorphicCallSite(CallSiteDescriptorFactory.create(MethodHandles.publicLookup(),
                 name, MethodType.methodType(retType, paramTypes)));
         linker.link(cs);
         return cs.dynamicInvoker();
