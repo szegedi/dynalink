@@ -56,7 +56,7 @@ public class CallSiteDescriptorFactory {
     }
 
     private static CallSiteDescriptor createPublicCallSiteDescriptor(String[] tokenizedName, MethodType methodType) {
-        if(tokenizedName[0] == "dyn") {
+        if(tokenizedName.length > 0 && tokenizedName[0] == "dyn") {
             if(tokenizedName.length == 2) {
                 return new UnnamedDynCallSiteDescriptor(tokenizedName[1], methodType);
             } if (tokenizedName.length == 3) {

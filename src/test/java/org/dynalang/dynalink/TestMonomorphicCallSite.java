@@ -24,6 +24,7 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 
 import junit.framework.TestCase;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 /**
  * Tests for the {@link MonomorphicCallSite}.
@@ -59,6 +60,6 @@ public class TestMonomorphicCallSite extends TestCase {
     }
 
     private static MonomorphicCallSite createCallSite(MethodType type) {
-        return new MonomorphicCallSite(CallSiteDescriptor.create(MethodHandles.publicLookup(), "", type));
+        return new MonomorphicCallSite(CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "", type));
     }
 }
