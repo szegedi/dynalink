@@ -70,7 +70,7 @@ public class ClassStatics implements Serializable {
         return "ClassStatics[" + clazz.getName() + "]";
     }
 
-    static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassLinker.class,
+    static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
             "forClass", MethodType.methodType(ClassStatics.class, Class.class));
 
     static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
