@@ -57,8 +57,8 @@ public class GuardedInvocation {
      *
      * @param invocation the method handle representing the invocation. Must not be null.
      * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
-     * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null to represent
-     * an unconditional invocation, although that is fairly unusual.
+     * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null. If both it
+     * and the switch point are null, this represents an unconditional invocation, which is legal but fairly unusual.
      * @param switchPoint the optional switch point that can be used to invalidate this linkage.
      * @throws IllegalArgumentException if invocation is null.
      */
