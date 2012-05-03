@@ -180,7 +180,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices) {
+    public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices)
+            throws Exception {
         final LinkRequest ncrequest = request.withoutRuntimeContext();
         // BeansLinker already checked that the name is at least 2 elements
         // long and the first element is "dyn".

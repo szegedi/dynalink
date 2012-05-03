@@ -17,11 +17,6 @@
 package org.dynalang.dynalink.beans;
 
 import java.io.Serializable;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-
-import org.dynalang.dynalink.support.Lookup;
 
 /**
  * Object that represents the static facet of a class (its static methods, properties, and fields). Objects of this
@@ -68,24 +63,6 @@ public class ClassStatics implements Serializable {
     @Override
     public String toString() {
         return "ClassStatics[" + clazz.getName() + "]";
-    }
-
-    static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
-            "forClass", MethodType.methodType(ClassStatics.class, Class.class));
-
-    static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
-            "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
-
-    static final MethodHandle GET_CLASS = new Lookup(MethodHandles.lookup()).findSpecial(ClassStatics.class,
-            "getRepresentedClass", MethodType.methodType(Class.class));
-
-    static MethodHandle getIsClass(Class<?> clazz) {
-        return IS_CLASS.bindTo(clazz);
-    }
-
-    @SuppressWarnings("unused")
-    private static boolean isClass(Class<?> clazz, Object obj) {
-        return obj instanceof ClassStatics && ((ClassStatics)obj).clazz == clazz;
     }
 
     private Object readResolve() {

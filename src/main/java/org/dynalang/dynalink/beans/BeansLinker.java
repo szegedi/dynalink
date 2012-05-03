@@ -22,6 +22,7 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 
 /**
  * A linker for POJOs. Normally used as the ultimate fallback linker by the {@link DynamicLinkerFactory} so it is given
@@ -45,39 +46,27 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * @version $Id: $
  */
 public class BeansLinker implements GuardingDynamicLinker {
-    private static final ClassValue<GuardingDynamicLinker> staticLinkers = new ClassValue<GuardingDynamicLinker>() {
+    private static final ClassValue<TypeBasedGuardingDynamicLinker> linkers = new ClassValue<TypeBasedGuardingDynamicLinker>() {
         @Override
-        protected GuardingDynamicLinker computeValue(Class<?> clazz) {
-            return clazz == Class.class ? new ClassLinker() : clazz == ClassStatics.class ? new ClassStaticsLinker(
-                    (ClassLinker)staticLinkers.get(Class.class)) : new BeanLinker(clazz);
+        protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
+            return clazz == Class.class ? new ClassLinker() : clazz == ClassStatics.class ? new ClassStaticsLinker() :
+                new BeanLinker(clazz);
         }
     };
-
-    private final ClassValue<GuardingDynamicLinker> linkers;
 
     /**
      * Creates a new POJO linker.
      */
     public BeansLinker() {
-        this(null);
     }
 
     /**
-     * Creates a new POJO linker with the specified constructor extender.
-     * @param constructorExtender the constructor extender to use.
+     * Returns a bean linker for a particular single class.
+     * @param clazz the class
+     * @return a bean linker for that class
      */
-    public BeansLinker(final ConstructorExtender constructorExtender) {
-        if(constructorExtender == null) {
-            linkers = staticLinkers;
-        } else {
-            linkers = new ClassValue<GuardingDynamicLinker>() {
-                @Override
-                protected GuardingDynamicLinker computeValue(Class<?> clazz) {
-                    return clazz == Class.class ? new ClassLinker(constructorExtender) : clazz == ClassStatics.class ?
-                            new ClassStaticsLinker((ClassLinker)linkers.get(Class.class)) : staticLinkers.get(clazz);
-                }
-            };
-        }
+    public static TypeBasedGuardingDynamicLinker getLinkerForClass(Class<?> clazz) {
+        return linkers.get(clazz);
     }
 
     @Override
@@ -101,6 +90,6 @@ public class BeansLinker implements GuardingDynamicLinker {
             // Can't operate on null
             return null;
         }
-        return linkers.get(receiver.getClass()).getGuardedInvocation(request, linkerServices);
+        return getLinkerForClass(receiver.getClass()).getGuardedInvocation(request, linkerServices);
     }
 }

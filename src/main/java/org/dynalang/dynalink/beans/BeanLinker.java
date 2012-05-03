@@ -28,6 +28,7 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
 
@@ -38,16 +39,21 @@ import org.dynalang.dynalink.support.Lookup;
  * @author Attila Szegedi
  * @version $Id: $
  */
-class BeanLinker extends AbstractJavaLinker {
+class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicLinker {
     BeanLinker(Class<?> clazz) {
         super(clazz, Guards.getClassGuard(clazz), Guards.getInstanceOfGuard(clazz));
-    }
         if(clazz.isArray()) {
             // Some languages won't have a notion of manipulating collections. Exposing "length" on arrays as an
             // explicit property is beneficial for them.
             // REVISIT: is it maybe a code smell that "dyn:getLength" is not needed?
             addPropertyGetter("length", GET_ARRAY_LENGTH, false);
         }
+    }
+
+    @Override
+    public boolean canLinkType(Class<?> type) {
+        return type == clazz;
+    }
 
     @Override
     FacetIntrospector createFacetIntrospector() {
@@ -55,7 +61,8 @@ class BeanLinker extends AbstractJavaLinker {
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices) {
+    public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices)
+            throws Exception {
         final GuardedInvocation gi = super.getGuardedInvocation(request, linkerServices);
         if(gi != null) {
             return gi;
@@ -184,31 +191,26 @@ class BeanLinker extends AbstractJavaLinker {
         // Thing is, it'd be quite stupid of a call site creator to go though invokedynamic when it knows in advance
         // they're dealing with an array, collection, or map, but hey...
         if(declaredType.isArray()) {
-            // TODO: maybe we'll have a MethodHandles.arrayLengthGetter()?
             return new GuardedInvocation(GET_ARRAY_LENGTH.asType(callSiteType), null);
-        }
-        if(Collection.class.isAssignableFrom(declaredType)) {
+        } else if(Collection.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(GET_COLLECTION_LENGTH.asType(callSiteType), null);
-        }
-        if(Map.class.isAssignableFrom(declaredType)) {
+        } else if(Map.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(GET_MAP_LENGTH.asType(callSiteType), null);
         }
-        // Otherwise, create a binding based on the actual type of the argument
-        // with an appropriate guard.
+
+        // Otherwise, create a binding based on the actual type of the argument with an appropriate guard.
         if(clazz.isArray()) {
             return new GuardedInvocation(GET_ARRAY_LENGTH.asType(callSiteType), Guards.isArray(0, callSiteType));
-        }
-        if(Collection.class.isAssignableFrom(clazz)) {
+        } if(Collection.class.isAssignableFrom(clazz)) {
             return new GuardedInvocation(GET_COLLECTION_LENGTH.asType(callSiteType), Guards.asType(COLLECTION_GUARD,
                     callSiteType));
-        }
-        if(Map.class.isAssignableFrom(clazz)) {
+        } if(Map.class.isAssignableFrom(clazz)) {
             return new GuardedInvocation(GET_MAP_LENGTH.asType(callSiteType), Guards.asType(MAP_GUARD, callSiteType));
         }
-        // Can't retrieve length for objects that are neither arrays, nor
-        // collections, nor maps.
+        // Can't retrieve length for objects that are neither arrays, nor collections, nor maps.
         return null;
     }
+
     private static void assertParameterCount(CallSiteDescriptor descriptor, int paramCount) {
         if(descriptor.getMethodType().parameterCount() != paramCount) {
             throw new BootstrapMethodError(descriptor.getName() + " must have exactly " + paramCount + " parameters.");
