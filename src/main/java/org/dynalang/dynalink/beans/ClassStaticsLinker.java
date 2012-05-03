@@ -93,10 +93,10 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
         return type == ClassStatics.class;
     }
 
-    private static final MethodHandle GET_CLASS = new Lookup(MethodHandles.lookup()).findSpecial(ClassStatics.class,
+    private static final MethodHandle GET_CLASS = new Lookup(MethodHandles.lookup()).findVirtual(ClassStatics.class,
             "getRepresentedClass", MethodType.methodType(Class.class));
 
-    private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStatics.class,
+    private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStaticsLinker.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
 
     @SuppressWarnings("unused")
