@@ -21,6 +21,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
 import java.lang.invoke.WrongMethodTypeException;
+import java.util.List;
 
 import org.dynalang.dynalink.support.Guards;
 
@@ -128,6 +129,56 @@ public class GuardedInvocation {
     public GuardedInvocation replaceMethods(MethodHandle newInvocation, MethodHandle newGuard) {
         return new GuardedInvocation(newInvocation, newGuard, switchPoint);
     }
+
+    /**
+     * Changes the type of the invocation, as if {@link MethodHandle#asType(MethodType)} was applied to its invocation
+     * and its guard, if it has one (with return type changed to boolean for guard). If the invocation already is of the
+     * required type, returns this object.
+     * @param newType the new type of the invocation.
+     * @return a guarded invocation with the new type applied to it.
+     */
+    public GuardedInvocation asType(MethodType newType) {
+        final MethodHandle newInvocation = invocation.asType(newType);
+        if(newInvocation == invocation) {
+            return this;
+        }
+        final MethodHandle newGuard = guard == null ? null : guard.asType(newType.changeReturnType(Boolean.TYPE));
+        return replaceMethods(newInvocation, newGuard);
+    }
+
+    /**
+     * Applies argument filters to both the invocation and the guard (if there is one).
+     * @param pos the position of the first argumen being filtered
+     * @param filters the argument filters
+     * @return a filtered invocation
+     */
+    public GuardedInvocation filterArguments(int pos, MethodHandle... filters) {
+        return replaceMethods(MethodHandles.filterArguments(invocation, pos, filters), guard == null ? null :
+            MethodHandles.filterArguments(guard, pos, filters));
+    }
+
+    /**
+     * Makes an invocation that drops arguments in both the invocation and the guard (if there is one).
+     * @param pos the position of the first argument being dropped
+     * @param valueTypes the types of the values being dropped
+     * @return an invocation that drops arguments
+     */
+    public GuardedInvocation dropArguments(int pos, List<Class<?>> valueTypes) {
+        return replaceMethods(MethodHandles.dropArguments(invocation, pos, valueTypes), guard == null ? null :
+            MethodHandles.dropArguments(guard, pos, valueTypes));
+    }
+
+    /**
+     * Makes an invocation that drops arguments in both the invocation and the guard (if there is one).
+     * @param pos the position of the first argument being dropped
+     * @param valueTypes the types of the values being dropped
+     * @return an invocation that drops arguments
+     */
+    public GuardedInvocation dropArguments(int pos, Class<?>... valueTypes) {
+        return replaceMethods(MethodHandles.dropArguments(invocation, pos, valueTypes), guard == null ? null :
+            MethodHandles.dropArguments(guard, pos, valueTypes));
+    }
+
 
     /**
      * Composes the invocation, switchpoint, and the guard into a composite method handle that knows how to fall back.
