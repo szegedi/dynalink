@@ -72,7 +72,7 @@ public class CallSiteDescriptorFactory {
     }
 
     /**
-     * Tokenizes the compoiste name along semicolons and interns the tokens.
+     * Tokenizes the composite name along semicolons and interns the tokens.
      * @param name the composite name
      * @return an array of tokens
      */
