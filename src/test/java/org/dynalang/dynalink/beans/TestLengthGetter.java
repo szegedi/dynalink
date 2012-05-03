@@ -12,14 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;
+
+import junit.framework.TestCase;
 
 public class TestLengthGetter extends TestCase {
     public void testEarlyBoundArrayLengthGetter() throws Throwable {
@@ -39,18 +39,40 @@ public class TestLengthGetter extends TestCase {
         return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args), null);
     }
 
-    private void testEarlyBoundArrayLengthGetter(Class<?> arrayClass) throws Throwable {
+    private static void testEarlyBoundArrayLengthGetter(Class<?> arrayClass) throws Throwable {
+        testEarlyBoundArrayLengthGetter(arrayClass, "getLength", true);
+    }
+
+    private static void testEarlyBoundArrayLengthGetter(Class<?> arrayClass, String op, boolean early) throws Throwable {
         final BeansLinker bl = new BeansLinker();
         final CallSiteDescriptor csd =
-                createCallSiteDescriptor("dyn:getLength", MethodType.methodType(int.class, arrayClass));
+                createCallSiteDescriptor("dyn:" + op, MethodType.methodType(int.class, arrayClass));
         final Object array = Array.newInstance(arrayClass.getComponentType(), 2);
         final GuardedInvocation inv = getGuardedInvocation(bl, csd, array);
-        // early bound, as call site guarantees we'll pass an array
-        assertNull(inv.getGuard());
+        if(early) {
+            // early bound, as call site guarantees we'll pass an array
+            assertNull(inv.getGuard());
+        }
         final MethodHandle mh = inv.getInvocation();
         assertNotNull(mh);
         assertEquals(csd.getMethodType(), mh.type());
         assertEquals(2, mh.invokeWithArguments(array));
+    }
+
+    private static void testArrayLengthPropertyGetter(Class<?> arrayClass) throws Throwable {
+        testEarlyBoundArrayLengthGetter(arrayClass, "getProp:length", false);
+    }
+
+    public static void testArrayLengthPropertyGetter() throws Throwable {
+        testArrayLengthPropertyGetter(byte[].class);
+        testArrayLengthPropertyGetter(short[].class);
+        testArrayLengthPropertyGetter(char[].class);
+        testArrayLengthPropertyGetter(int[].class);
+        testArrayLengthPropertyGetter(long[].class);
+        testArrayLengthPropertyGetter(float[].class);
+        testArrayLengthPropertyGetter(double[].class);
+        testArrayLengthPropertyGetter(Object[].class);
+        testArrayLengthPropertyGetter(String[].class);
     }
 
     public void testEarlyBoundCollectionLengthGetter() throws Throwable {
