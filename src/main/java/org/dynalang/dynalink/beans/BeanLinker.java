@@ -42,6 +42,12 @@ class BeanLinker extends AbstractJavaLinker {
     BeanLinker(Class<?> clazz) {
         super(clazz, Guards.getClassGuard(clazz), Guards.getInstanceOfGuard(clazz));
     }
+        if(clazz.isArray()) {
+            // Some languages won't have a notion of manipulating collections. Exposing "length" on arrays as an
+            // explicit property is beneficial for them.
+            // REVISIT: is it maybe a code smell that "dyn:getLength" is not needed?
+            addPropertyGetter("length", GET_ARRAY_LENGTH, false);
+        }
 
     @Override
     FacetIntrospector createFacetIntrospector() {
