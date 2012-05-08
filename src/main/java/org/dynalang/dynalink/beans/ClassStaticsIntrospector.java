@@ -21,6 +21,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -89,7 +90,12 @@ class ClassStaticsIntrospector extends FacetIntrospector {
 
     @Override
     MethodHandle editMethodHandle(MethodHandle mh) {
-        // TODO: Maybe introduce a filterArguments check instead, to ensure the target represents the class object
-        return MethodHandles.dropArguments(mh, 0, Object.class);
+        MethodHandle newHandle = MethodHandles.dropArguments(mh, 0, Object.class);
+        // NOTE: this is a workaround for the fact that dropArguments doesn't preserve vararg collector state.
+        if(mh.isVarargsCollector() && !newHandle.isVarargsCollector()) {
+            final MethodType type = mh.type();
+            newHandle = newHandle.asVarargsCollector(type.parameterType(type.parameterCount() - 1));
+        }
+        return newHandle;
     }
 }
