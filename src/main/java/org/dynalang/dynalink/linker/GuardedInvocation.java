@@ -73,6 +73,19 @@ public class GuardedInvocation {
     }
 
     /**
+     * Creates a new guarded invocation.
+     *
+     * @param invocation the method handle representing the invocation. Must not be null.
+     * @param switchPoint the optional switch point that can be used to invalidate this linkage.
+     * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
+     * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null. If both it
+     * and the switch point are null, this represents an unconditional invocation, which is legal but fairly unusual.
+     * @throws IllegalArgumentException if invocation is null.
+     */
+    public GuardedInvocation(MethodHandle invocation, SwitchPoint switchPoint, MethodHandle guard) {
+        this(invocation, guard, switchPoint);
+    }
+    /**
      * Returns the invocation method handle.
      *
      * @return the invocation method handle. It will never be null.
@@ -142,10 +155,27 @@ public class GuardedInvocation {
         if(newInvocation == invocation) {
             return this;
         }
-        final MethodHandle newGuard = guard == null ? null : guard.asType(newType.changeReturnType(Boolean.TYPE));
-        return replaceMethods(newInvocation, newGuard);
+        return replaceMethods(newInvocation, guardAsType(newType));
     }
 
+    /**
+     * Changes the type of the invocation, as if {@link MethodHandle#asType(MethodType)} was applied to its invocation
+     * and its guard, if it has one (with return type changed to boolean for guard). If the invocation already is of the
+     * required type, returns this object.
+     * @param desc a call descriptor whose method type is adapted.
+     * @return a guarded invocation with the new type applied to it.
+     */
+    public GuardedInvocation asType(CallSiteDescriptor desc) {
+        return asType(desc.getMethodType());
+    }
+
+    private MethodHandle guardAsType(MethodType newType) {
+        if(guard == null) {
+            return null;
+        }
+        return guard.asType(newType.changeReturnType(Boolean.TYPE).dropParameterTypes(guard.type().parameterCount(),
+                newType.parameterCount()));
+    }
     /**
      * Applies argument filters to both the invocation and the guard (if there is one).
      * @param pos the position of the first argumen being filtered
