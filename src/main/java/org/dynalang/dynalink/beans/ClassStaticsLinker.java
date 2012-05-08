@@ -66,12 +66,12 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
                 // Re-invoke the linker chain for the Class object
                 final Object[] args = request.getArguments();
                 args[0] = clazz;
-                final LinkRequest classRequest = new LinkRequestImpl(request.getCallSiteDescriptor(), args);
+                final LinkRequest classRequest = new LinkRequestImpl(
+                        request.getCallSiteDescriptor().changeParameterType(0, Class.class), args);
                 final GuardedInvocation classInvocation = linkerServices.getGuardedInvocation(classRequest);
                 // If it found a constructor invocation, link that with a modified guard. To be completely honest, we'd
-                // also need to include a filterArguments(invocation, 0, ClassStatics.GET_CLASS), but
                 if(classInvocation != null) {
-                    return classInvocation.replaceMethods(classInvocation.getInvocation(), getClassGuard(desc));
+                    return classInvocation.filterArguments(0, GET_CLASS_OBJ).asType(desc);
                 }
             }
             return null;
@@ -98,6 +98,14 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
 
     private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStaticsLinker.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
+
+    @SuppressWarnings("unused")
+    private static Class<?> getRepresentedClass(Object obj) {
+        return obj instanceof ClassStatics ? ((ClassStatics)obj).getRepresentedClass() : null;
+    }
+
+    private static final MethodHandle GET_CLASS_OBJ = new Lookup(MethodHandles.lookup()).findStatic(
+            ClassStaticsLinker.class, "getRepresentedClass", MethodType.methodType(Class.class, Object.class));
 
     @SuppressWarnings("unused")
     private static boolean isClass(Class<?> clazz, Object obj) {
