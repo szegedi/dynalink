@@ -141,39 +141,7 @@ public class TypeConverterFactory {
      * @return true if it's safe to let MethodHandles.convertArguments() to handle this conversion.
      */
     private static boolean canAutoConvert(final Class<?> fromType, final Class<?> toType) {
-        if(fromType.isPrimitive()) {
-            if(fromType == Void.TYPE) {
-                return true;
-            }
-            if(toType.isPrimitive()) {
-                if(toType == Void.TYPE) {
-                    return true;
-                }
-                return canAutoConvertPrimitives(fromType, toType);
-            }
-            return canAutoConvertPrimitiveToReference(fromType, toType);
-        }
-        if(toType.isPrimitive()) {
-            if(toType == Void.TYPE) {
-                return true;
-            }
-            return canAutoConvertPrimitiveToReference(toType, fromType);
-        }
-        // In all other cases, only allow automatic conversion from a class to
-        // its superclass or superinterface.
-        return toType.isAssignableFrom(fromType);
-    }
-
-    private static boolean canAutoConvertPrimitiveToReference(final Class<?> primitiveType, final Class<?> refType) {
-        return TypeUtilities.isAssignableFromBoxedPrimitive(refType)
-                && ((primitiveType != Byte.TYPE && primitiveType != Boolean.TYPE) || refType != Character.class);
-    }
-
-    private static boolean canAutoConvertPrimitives(Class<?> fromType, Class<?> toType) {
-        // the only cast conversion not allowed between non-boolean primitives
-        // is byte->char, all other narrowing and widening conversions are
-        // allowed. boolean is converted to byte first, so same applies to it.
-        return (fromType != Byte.TYPE && fromType != Boolean.TYPE) || toType != Character.TYPE;
+        return TypeUtilities.isMethodInvocationConvertible(fromType, toType);
     }
 
     private MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {

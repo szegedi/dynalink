@@ -306,7 +306,7 @@ public class TypeUtilities {
      * @return true if the class can be assigned from any boxed primitive. Basically, it is true if the class is any
      * primitive wrapper class, or a superclass or superinterface of any primitive wrapper class.
      */
-    static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
+    private static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
         return PRIMITIVE_WRAPPER_TYPES.contains(clazz);
     }
 }

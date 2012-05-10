@@ -16,6 +16,8 @@
 
 package org.dynalang.dynalink.linker;
 
+import org.dynalang.dynalink.support.TypeUtilities;
+
 /**
  * Optional interface that can be implemented by {@link GuardingDynamicLinker} implementations to provide
  * language-runtime specific implicit type conversion capabilities.
@@ -25,17 +27,11 @@ package org.dynalang.dynalink.linker;
  */
 public interface GuardingTypeConverterFactory {
     /**
-     * Returns a method handle that receives an Object of the specified source type and returns an Object converted to
-     * the specified target type. The type of the invocation is targetType(sourceType), while the type of the guard is
-     * boolean(sourceType). Note that this will never be invoked for type conversions automatically handled by the
-     * linker framework, namely:
-     * <ul>
-     * <li>when targetType is assignable from sourceType, or</li>
-     * <li>for any primitive conversion, either narrowing or widening, except (byte|boolean)->char, or</li>
-     * <li>for any boxing or unboxing conversion, either narrowing or widening, except (byte|boolean)->Character.</li>
-     * </li>
-     * An implementation can assume it is never requested to produce a converter for these conversions. As a corollary,
-     * targetType will never be {@link java.lang.Object}.
+     * Returns a guarded invoation that receives an Object of the specified source type and returns an Object converted
+     * to the specified target type. The type of the invocation is targetType(sourceType), while the type of the guard
+     * is boolean(sourceType). Note that this will never be invoked for type conversions allowed by the JLS 5.3 "Method
+     * Invocation Conversion", see {@link TypeUtilities#isMethodInvocationConvertible(Class, Class)} for details. An
+     * implementation can assume it is never requested to produce a converter for these conversions.
      *
      * @param sourceType source type
      * @param targetType the target type.
