@@ -128,7 +128,7 @@ public class DynamicLinker {
 
         // None found - throw an exception
         if(guardedInvocation == null) {
-            throw new NoSuchDynamicMethodException();
+            throw new NoSuchDynamicMethodException(callSiteDescriptor.toString());
         }
 
         // If our call sites have a runtime context, and the linker produced a context-stripped invocation, adapt the
