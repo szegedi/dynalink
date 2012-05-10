@@ -28,6 +28,7 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Provides a linker for the {@link ClassStatics} objects.
@@ -46,6 +47,11 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
         SingleClassStaticsLinker(Class<?> clazz) {
             super(clazz, IS_CLASS.bindTo(clazz));
             addPropertyGetter("class", GET_CLASS, false);
+            Class<?> primitiveType = TypeUtilities.getPrimitiveType(clazz);
+            if(primitiveType != null) {
+                addPropertyGetter("TYPE", MethodHandles.dropArguments(MethodHandles.constant(Class.class,
+                        primitiveType), 0, Object.class), false);
+            }
         }
 
         @Override

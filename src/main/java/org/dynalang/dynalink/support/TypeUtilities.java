@@ -273,6 +273,22 @@ public class TypeUtilities {
         return false;
     }
 
+    private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE_TYPES = createWrapperToPrimitiveTypes();
+
+    private static Map<Class<?>, Class<?>> createWrapperToPrimitiveTypes() {
+        final Map<Class<?>, Class<?>> classes = new IdentityHashMap<Class<?>, Class<?>>();
+        classes.put(Void.class, Void.TYPE);
+        classes.put(Boolean.class, Boolean.TYPE);
+        classes.put(Byte.class, Byte.TYPE);
+        classes.put(Character.class, Character.TYPE);
+        classes.put(Short.class, Short.TYPE);
+        classes.put(Integer.class, Integer.TYPE);
+        classes.put(Long.class, Long.TYPE);
+        classes.put(Float.class, Float.TYPE);
+        classes.put(Double.class, Double.TYPE);
+        return classes;
+    }
+
     private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES = createPrimitiveWrapperTypes();
 
     private static Set<Class<?>> createPrimitiveWrapperTypes() {
@@ -282,8 +298,8 @@ public class TypeUtilities {
         addClassHierarchy(classes, Character.class);
         addClassHierarchy(classes, Short.class);
         addClassHierarchy(classes, Integer.class);
-        addClassHierarchy(classes, Float.class);
         addClassHierarchy(classes, Long.class);
+        addClassHierarchy(classes, Float.class);
         addClassHierarchy(classes, Double.class);
         return classes.keySet();
     }
@@ -308,5 +324,9 @@ public class TypeUtilities {
      */
     private static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
         return PRIMITIVE_WRAPPER_TYPES.contains(clazz);
+    }
+
+    public static Class<?> getPrimitiveType(Class<?> referenceClass) {
+        return PRIMITIVE_TYPES.get(referenceClass);
     }
 }
