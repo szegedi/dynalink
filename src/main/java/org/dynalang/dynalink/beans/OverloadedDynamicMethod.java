@@ -54,21 +54,17 @@ class OverloadedDynamicMethod implements DynamicMethod {
     public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices) {
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
 
-        // First, find all methods applicable to the call site by subtyping
-        // (JLS 15.12.2.2)
-        final ApplicableOverloadedMethods subtypingApplicables =
-                getApplicables(callSiteType, ApplicableOverloadedMethods.APPLICABLE_BY_SUBTYPING);
-        // Next, find all methods applicable by method invocation conversion to
-        // the call site (JLS 15.12.2.3).
-        final ApplicableOverloadedMethods methodInvocationApplicables =
-                getApplicables(callSiteType, ApplicableOverloadedMethods.APPLICABLE_BY_METHOD_INVOCATION_CONVERSION);
-        // Finally, find all methods applicable by variable arity invocation.
-        // (JLS 15.12.2.4).
-        final ApplicableOverloadedMethods variableArityApplicables =
-                getApplicables(callSiteType, ApplicableOverloadedMethods.APPLICABLE_BY_VARIABLE_ARITY);
+        // First, find all methods applicable to the call site by subtyping (JLS 15.12.2.2)
+        final ApplicableOverloadedMethods subtypingApplicables = getApplicables(callSiteType,
+                ApplicableOverloadedMethods.APPLICABLE_BY_SUBTYPING);
+        // Next, find all methods applicable by method invocation conversion to the call site (JLS 15.12.2.3).
+        final ApplicableOverloadedMethods methodInvocationApplicables = getApplicables(callSiteType,
+                ApplicableOverloadedMethods.APPLICABLE_BY_METHOD_INVOCATION_CONVERSION);
+        // Finally, find all methods applicable by variable arity invocation. (JLS 15.12.2.4).
+        final ApplicableOverloadedMethods variableArityApplicables = getApplicables(callSiteType,
+                ApplicableOverloadedMethods.APPLICABLE_BY_VARIABLE_ARITY);
 
-        // Find the methods that are maximally specific based on the call site
-        // signature
+        // Find the methods that are maximally specific based on the call site signature
         List<MethodHandle> maximallySpecifics = subtypingApplicables.findMaximallySpecificMethods();
         if(maximallySpecifics.isEmpty()) {
             maximallySpecifics = methodInvocationApplicables.findMaximallySpecificMethods();
@@ -77,12 +73,12 @@ class OverloadedDynamicMethod implements DynamicMethod {
             }
         }
 
-        // Now, get a list of the rest of the methods; those that are *not*
-        // applicable to the call site signature based on JLS rules. As
-        // paradoxical as that might sound, we have to consider these for
-        // dynamic invocation, as they
-        // might match more concrete types passed in invocations. That's why we
-        // provisionally call them "invokable".
+        // Now, get a list of the rest of the methods; those that are *not* applicable to the call site signature based
+        // on JLS rules. As paradoxical as that might sound, we have to consider these for dynamic invocation, as they
+        // might match more concrete types passed in invocations. That's why we provisionally call them "invokables".
+        // This is typical for very generic signatures at call sites. Typical example: call site specifies
+        // (Object, Object), and we have a method whose parameter types are (String, int). None of the JLS applicability
+        // rules will trigger, but we must consider the method, as it can be the right match for a concrete invocation.
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final List<MethodHandle> invokables = (List)methods.clone();
         invokables.removeAll(subtypingApplicables.getMethods());
@@ -95,9 +91,8 @@ class OverloadedDynamicMethod implements DynamicMethod {
             }
         }
 
-        // If no additional methods can apply at run time, and there's more
-        // than one maximally specific method based on call site signature,
-        // that is a link-time ambiguity.
+        // If no additional methods can apply at run time, and there's more than one maximally specific method based on
+        // call site signature, that is a link-time ambiguity.
         if(invokables.isEmpty() && maximallySpecifics.size() > 1) {
             throw new BootstrapMethodError("Can't choose among " + maximallySpecifics + " for argument types "
                     + callSiteType);
@@ -111,20 +106,17 @@ class OverloadedDynamicMethod implements DynamicMethod {
                 return null;
             }
             case 1: {
-                // Very lucky, we ended up with a single candidate method
-                // handle based on the call site signature; we can link it very
-                // simply by delegating to a SimpleDynamicMethod.
+                // Very lucky, we ended up with a single candidate method handle based on the call site signature; we
+                // can link it very simply by delegating to a SimpleDynamicMethod.
                 final MethodHandle mh = invokables.iterator().next();
                 return new SimpleDynamicMethod(mh).getInvocation(callSiteDescriptor, linkerServices);
             }
         }
 
-        // We have more than one candidate. We have no choice but to link to a
-        // method that resolves overloads on every invocation (alternatively,
-        // we could opportunistically link the one method that resolves for the
-        // current arguments, but we'd need to install a fairly complex guard
-        // for that and when it'd fail, we'd go back all the way to candidate
-        // selection.
+        // We have more than one candidate. We have no choice but to link to a method that resolves overloads on every
+        // invocation (alternatively, we could opportunistically link the one method that resolves for the current
+        // arguments, but we'd need to install a fairly complex guard for that and when it'd fail, we'd go back all the
+        // way to candidate selection.
         final List<MethodHandle> fixArgMethods = new LinkedList<MethodHandle>();
         final List<MethodHandle> varArgMethods = new LinkedList<MethodHandle>();
         for(MethodHandle mh: invokables) {
@@ -145,14 +137,12 @@ class OverloadedDynamicMethod implements DynamicMethod {
         if(varArgsMethod == null) {
             return fixArgsMethod.getFixArgsInvocation(linkerServices, callSiteType);
         } else {
-            // We're using catchException because it is actually surprisingly
-            // effective - we'll be throwing a shared instance of the exception
-            // for signaling there's no appropriate fixarg method. We could've
-            // used foldArguments() too, except then the vararg invocation
-            // would also always be invoked, causing unnecessary conversions on
-            // its arguments.
-            // TODO: use dropArguments() once bug with catchException failing
-            // with non-boot-classpath exception classes is fixed...
+            // We're using catchException because it is actually surprisingly effective - we'll be throwing a shared
+            // instance of the exception for signaling there's no appropriate fixarg method. We could've used
+            // foldArguments() too, except then the vararg invocation would also always be invoked, causing unnecessary
+            // conversions on its arguments.
+            // TODO: use dropArguments() once bug with catchException failing with non-boot-classpath exception classes
+            // is fixed...
             return MethodHandles.catchException(fixArgsMethod.getFixArgsFirstInvocation(linkerServices, callSiteType),
                     NoSuchMethodException.class, varArgsMethod.getVarArgsInvocation(linkerServices, callSiteType));
         }
