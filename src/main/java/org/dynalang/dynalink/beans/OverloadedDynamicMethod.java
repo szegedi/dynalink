@@ -139,9 +139,9 @@ class OverloadedDynamicMethod implements DynamicMethod {
             }
         }
         final int paramCount = callSiteType.parameterCount();
-        final OverloadedMethod fixArgsMethod = new OverloadedMethod(fixArgMethods, paramCount, false, classLoader);
-        final OverloadedMethod varArgsMethod =
-                varArgMethods.isEmpty() ? null : new OverloadedMethod(varArgMethods, paramCount, true, classLoader);
+        final OverloadedMethod fixArgsMethod = new OverloadedMethod(fixArgMethods, paramCount, null, classLoader);
+        final OverloadedMethod varArgsMethod = varArgMethods.isEmpty() ? null : new OverloadedMethod(varArgMethods,
+                paramCount, fixArgsMethod, classLoader);
         if(varArgsMethod == null) {
             return fixArgsMethod.getFixArgsInvocation(linkerServices, callSiteType);
         } else {

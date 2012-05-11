@@ -19,7 +19,6 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.BootstrapMethodError;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,11 +50,13 @@ class OverloadedMethod {
     private final Map<ClassString, MethodHandle> argTypesToMethods = new ConcurrentHashMap<ClassString, MethodHandle>();
     private final boolean varArg;
     private final ClassLoader classLoader;
-
+    private final OverloadedMethod fixArgMethod;
     private final List<MethodHandle> methods = new LinkedList<MethodHandle>();
 
-    public OverloadedMethod(List<MethodHandle> methodHandles, int argNum, boolean varArg, ClassLoader classLoader) {
-        this.varArg = varArg;
+    OverloadedMethod(List<MethodHandle> methodHandles, int argNum, OverloadedMethod fixArgMethod,
+            ClassLoader classLoader) {
+        this.varArg = fixArgMethod != null;
+        this.fixArgMethod = fixArgMethod;
         this.classLoader = classLoader;
         for(MethodHandle method: methodHandles) {
             methods.add(method);
@@ -129,7 +130,8 @@ class OverloadedMethod {
     public Object _invokeFixArgs(MethodType callSiteType, Object... args) throws Throwable {
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
-            throw new BootstrapMethodError("None of the methods " + methods + " matches arguments");
+            throw new BootstrapMethodError("None of the methods " + methods + " matches arguments "
+                    + getArgumentTypes(args));
         }
         return method.invokeWithArguments(args);
     }
@@ -150,10 +152,33 @@ class OverloadedMethod {
         }
         final MethodHandle method = getInvocationForArgs(callSiteType, args);
         if(method == NO_SUCH_METHOD) {
-            throw new BootstrapMethodError("None of the methods " + methods + " matches arguments");
+            if(fixArgMethod == null) {
+                throw new BootstrapMethodError("None of the variable-arity methods " + methods + " matches arguments "
+                        + getArgumentTypes(args));
+            } else {
+                throw new BootstrapMethodError("Neither of the fixed-arity methods " + fixArgMethod.methods +
+                        " nor the variable-arity methods " + methods + " matches arguments " + getArgumentTypes(args));
+            }
         }
         return SimpleDynamicMethod.collectArguments(method, callSiteType.parameterCount()).invokeWithArguments(args);
 
+    }
+
+    private static String getArgumentTypes(Object[] args) {
+
+        StringBuilder b = new StringBuilder('[');
+        if(args.length > 0) {
+            appendArgType(b, args[0]);
+        }
+        for(int i = 1; i < args.length; ++i) {
+            appendArgType(b.append(", "), args[i]);
+        }
+        return b.append(']').toString();
+    }
+
+
+    private static void appendArgType(StringBuilder b, Object o) {
+        b.append(o == null ? "null" : o.getClass().getCanonicalName());
     }
 
     MethodHandle getInvocationForArgs(MethodType callSiteType, Object... args) {
