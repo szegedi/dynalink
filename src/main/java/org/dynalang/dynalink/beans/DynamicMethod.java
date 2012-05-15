@@ -31,7 +31,7 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * @author Attila Szegedi
  * @version $Id: $
  */
-interface DynamicMethod {
+abstract class DynamicMethod {
     /**
      * Creates an invocation for the dynamic method. If the method is overloaded, it will perform overloaded method
      * resolution based on the formal argument types in the call site. The resulting resolution can either identify a
@@ -53,5 +53,5 @@ interface DynamicMethod {
      * @param mh the method handle to check
      * @return true if it already contains an equivalent method handle.
      */
-    boolean contains(MethodHandle mh);
+    abstract boolean contains(MethodHandle mh);
 }

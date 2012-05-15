@@ -34,7 +34,7 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * @author Attila Szegedi
  * @version $Id: $
  */
-class OverloadedDynamicMethod implements DynamicMethod {
+class OverloadedDynamicMethod extends DynamicMethod {
     /**
      * Holds a list of all methods.
      */

@@ -31,7 +31,7 @@ import org.dynalang.dynalink.support.Guards;
  * @author Attila Szegedi
  * @version $Id: $
  */
-class SimpleDynamicMethod implements DynamicMethod {
+class SimpleDynamicMethod extends DynamicMethod {
     private final MethodHandle target;
 
     /**
