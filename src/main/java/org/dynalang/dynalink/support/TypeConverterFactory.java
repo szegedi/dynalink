@@ -55,7 +55,7 @@ public class TypeConverterFactory {
      *
      * @param factories the {@link GuardingTypeConverterFactory} instances to compose.
      */
-    public TypeConverterFactory(Iterable<GuardingTypeConverterFactory> factories) {
+    public TypeConverterFactory(Iterable<? extends GuardingTypeConverterFactory> factories) {
         final List<GuardingTypeConverterFactory> l = new LinkedList<GuardingTypeConverterFactory>();
         for(GuardingTypeConverterFactory factory: factories) {
             l.add(factory);
