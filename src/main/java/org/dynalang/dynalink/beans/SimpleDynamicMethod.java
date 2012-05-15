@@ -62,22 +62,19 @@ class SimpleDynamicMethod extends DynamicMethod {
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final int argsLen = callSiteType.parameterCount();
         if(argsLen < fixParamsLen) {
-            // Less actual arguments than number of fixed declared arguments;
-            // can't invoke.
+            // Less actual arguments than number of fixed declared arguments; can't invoke.
             return null;
         }
         // Method handle of the same number of arguments as the call site type
         if(argsLen == fixParamsLen) {
-            // Method handle that matches the number of actual arguments as the
-            // number of fixed arguments
+            // Method handle that matches the number of actual arguments as the number of fixed arguments
             final MethodHandle matchedMethod;
             if(varArgs) {
-                // If vararg, add a zero-length array of the expected type as
-                // the last argument to signify no variable arguments. TODO:
-                // check whether collectArguments() would handle this too.
-                matchedMethod =
-                        MethodHandles.insertArguments(fixTarget, fixParamsLen,
-                                Array.newInstance(methodType.parameterType(fixParamsLen).getComponentType(), 0));
+                // If vararg, add a zero-length array of the expected type as the last argument to signify no variable
+                // arguments.
+                // TODO: check whether collectArguments() would handle this too.
+                matchedMethod = MethodHandles.insertArguments(fixTarget, fixParamsLen, Array.newInstance(
+                        methodType.parameterType(fixParamsLen).getComponentType(), 0));
             } else {
                 // Otherwise, just use the method
                 matchedMethod = fixTarget;
