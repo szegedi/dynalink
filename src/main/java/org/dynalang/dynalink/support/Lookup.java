@@ -140,4 +140,29 @@ public class Lookup {
         }
     }
 
+    /**
+     * Given a lookup, finds using {@link #findSpecial(Class, String, MethodType)} a method on that lookup's class.
+     * Useful in classes' code for convenient linking to their own privates.
+     * @param lookup the lookup for the class
+     * @param name the name of the method
+     * @param rtype the return type of the method
+     * @param ptypes the parameter types of the method
+     * @return the method handle for the method
+     */
+    public static MethodHandle findOwnSpecial(MethodHandles.Lookup lookup, String name, Class<?> rtype, Class<?>... ptypes) {
+        return new Lookup(lookup).findSpecial(lookup.lookupClass(), name, MethodType.methodType(rtype, ptypes));
+    }
+
+    /**
+     * Given a lookup, finds using {@link #findStatic(Class, String, MethodType)} a method on that lookup's class.
+     * Useful in classes' code for convenient linking to their own privates.
+     * @param lookup the lookup for the class
+     * @param name the name of the method
+     * @param rtype the return type of the method
+     * @param ptypes the parameter types of the method
+     * @return the method handle for the method
+     */
+    public static MethodHandle findOwnStatic(MethodHandles.Lookup lookup, String name, Class<?> rtype, Class<?>... ptypes) {
+        return new Lookup(lookup).findStatic(lookup.lookupClass(), name, MethodType.methodType(rtype, ptypes));
+    }
 }
