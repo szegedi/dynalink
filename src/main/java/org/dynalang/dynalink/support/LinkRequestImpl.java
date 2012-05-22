@@ -47,6 +47,11 @@ public class LinkRequestImpl implements LinkRequest {
     }
 
     @Override
+    public Object getReceiver() {
+        return arguments != null && arguments.length > 0 ? arguments[0] : null;
+    }
+
+    @Override
     public CallSiteDescriptor getCallSiteDescriptor() {
         return callSiteDescriptor;
     }

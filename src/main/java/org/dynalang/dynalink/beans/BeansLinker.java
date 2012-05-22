@@ -72,12 +72,6 @@ public class BeansLinker implements GuardingDynamicLinker {
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices)
             throws Exception {
-        final Object[] arguments = request.getArguments();
-        if(arguments == null || arguments.length == 0) {
-            // Can't handle static calls; must have a receiver
-            return null;
-        }
-
         final CallSiteDescriptor callSiteDescriptor = request.getCallSiteDescriptor();
         final int l = callSiteDescriptor.getNameTokenCount();
         // All names conforming to the dynalang MOP should have at least two tokens, the first one being "dyn"
@@ -85,7 +79,7 @@ public class BeansLinker implements GuardingDynamicLinker {
             return null;
         }
 
-        final Object receiver = arguments[0];
+        final Object receiver = request.getReceiver();
         if(receiver == null) {
             // Can't operate on null
             return null;

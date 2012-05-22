@@ -32,11 +32,19 @@ public interface LinkRequest {
     public CallSiteDescriptor getCallSiteDescriptor();
 
     /**
-     * Returns the arguments for the invocation being linked.
+     * Returns the arguments for the invocation being linked. The returned array is a clone; modifications to it won't
+     * affect the arguments in this request.
      *
      * @return the arguments for the invocation being linked.
      */
     public Object[] getArguments();
+
+    /**
+     * Returns the 0th argument for the invocation being linked; this is typically the receiver object.
+     *
+     * @return the receiver object.
+     */
+    public Object getReceiver();
 
     /**
      * Returns a request stripped from runtime context arguments. Some language runtimes will include runtime-specific

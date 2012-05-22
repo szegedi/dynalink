@@ -103,11 +103,7 @@ public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardin
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, final LinkerServices linkerServices)
             throws Exception {
-        final Object[] arguments = linkRequest.getArguments();
-        if(arguments == null || arguments.length == 0) {
-            return null;
-        }
-        final Object obj = arguments[0];
+        final Object obj = linkRequest.getReceiver();
         if(obj == null) {
             return null;
         }

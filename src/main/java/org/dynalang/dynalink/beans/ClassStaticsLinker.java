@@ -86,7 +86,7 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
 
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request, LinkerServices linkerServices) throws Exception {
-        final Object receiver = request.getArguments()[0];
+        final Object receiver = request.getReceiver();
         if(receiver instanceof ClassStatics) {
             return linkers.get(((ClassStatics)receiver).getRepresentedClass()).getGuardedInvocation(request,
                     linkerServices);
