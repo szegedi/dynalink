@@ -1,66 +1,63 @@
 package org.dynalang.dynalink.beans;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
- * Utility class that encapsulates the algorithm for choosing the maximally specific methods. It is generic and can thus
- * work with an arbitrary representation of a method.
+ * Utility class that encapsulates the algorithm for choosing the maximally specific methods.
  *
  * @author Attila Szegedi
  * @version $Id: $
  */
 class MaximallySpecific {
     /**
-     * Interface for a function that takes a method and returns its type.
+     * Given a list of methods, returns a list of maximally specific methods.
      *
-     * @author Attila Szegedi
-     * @version $Id: $
-     * @param <M> the method representation
-     */
-    interface TypeFunction<M> {
-        /**
-         * Takes a method, and returns its type.
-         *
-         * @param m the method
-         * @return the method's type
-         */
-        MethodType type(M m);
-    }
-
-    /**
-     * Given a list of methods and a function for retrieving their type, returns a list of maximally specific methods.
-     *
-     * @param <M> the method representation class
      * @param methods the list of methods
-     * @param typeFunction the type function
      * @param varArgs whether to assume the methods are varargs
      * @return the list of maximally specific methods.
      */
-    static <M> List<M> getMaximallySpecificMethods(List<M> methods, TypeFunction<M> typeFunction, boolean varArgs) {
+    static List<MethodHandle> getMaximallySpecificMethods(List<MethodHandle> methods, boolean varArgs) {
+        return getMaximallySpecificMethods(methods, varArgs, null, null);
+    }
+
+    /**
+     * Given a list of methods, returns a list of maximally specific methods, applying language-runtime specific
+     * conversion preferences.
+     *
+     * @param methods the list of methods
+     * @param varArgs whether to assume the methods are varargs
+     * @param argTypes concrete argument types for the invocation
+     * @return the list of maximally specific methods.
+     */
+    static List<MethodHandle> getMaximallySpecificMethods(List<MethodHandle> methods, boolean varArgs,
+            Class<?>[] argTypes, LinkerServices ls) {
         if(methods.size() < 2) {
             return methods;
         }
-        final LinkedList<M> maximals = new LinkedList<M>();
-        for(M m: methods) {
-            final MethodType methodType = typeFunction.type(m);
+        final LinkedList<MethodHandle> maximals = new LinkedList<>();
+        for(MethodHandle m: methods) {
+            final MethodType methodType = m.type();
             boolean lessSpecific = false;
-            for(Iterator<M> maximal = maximals.iterator(); maximal.hasNext();) {
-                final M max = maximal.next();
-                switch(isMoreSpecific(methodType, typeFunction.type(max), varArgs)) {
-                    case moreSpecific: {
+            for(Iterator<MethodHandle> maximal = maximals.iterator(); maximal.hasNext();) {
+                final MethodHandle max = maximal.next();
+                switch(isMoreSpecific(methodType, max.type(), varArgs, argTypes, ls)) {
+                    case TYPE_1_BETTER: {
                         maximal.remove();
                         break;
                     }
-                    case lessSpecific: {
+                    case TYPE_2_BETTER: {
                         lessSpecific = true;
                         break;
                     }
-                    case indeterminate: {
+                    case INDETERMINATE: {
                         // do nothing
                     }
                 }
@@ -72,51 +69,57 @@ class MaximallySpecific {
         return maximals;
     }
 
-    private enum Specificity {
-        moreSpecific, lessSpecific, indeterminate
-    }
-
-    private static Specificity isMoreSpecific(MethodType t1, MethodType t2, boolean varArgs) {
+    private static Comparison isMoreSpecific(MethodType t1, MethodType t2, boolean varArgs, Class<?>[] argTypes,
+            LinkerServices ls) {
         final int pc1 = t1.parameterCount();
         final int pc2 = t2.parameterCount();
-        assert varArgs || pc1 == pc2;
-        final int maxPc = Math.max(pc1, pc2);
+        assert varArgs || (pc1 == pc2) && (argTypes == null || argTypes.length == pc1);
+        assert (argTypes == null) == (ls == null);
+        final int maxPc = Math.max(Math.max(pc1, pc2), argTypes == null ? 0 : argTypes.length);
         boolean t1MoreSpecific = false;
         boolean t2MoreSpecific = false;
-        // NOTE: Starting from 1 as overloaded method resolution doesn't depend
-        // on 0th element, which is the type of 'this'. We're only dealing with
-        // instance methods here, not static methods.
+        // NOTE: Starting from 1 as overloaded method resolution doesn't depend on 0th element, which is the type of
+        // 'this'. We're only dealing with instance methods here, not static methods. Actually, static methods will have
+        // a fake 'this' of type ClassStatics.
         for(int i = 1; i < maxPc; ++i) {
             final Class<?> c1 = getParameterClass(t1, pc1, i, varArgs);
             final Class<?> c2 = getParameterClass(t2, pc2, i, varArgs);
             if(c1 != c2) {
-                final boolean c1MoreSpecific = TypeUtilities.isSubtype(c1, c2);
-                if(c1MoreSpecific && !t1MoreSpecific) {
+                final Comparison cmp = compare(c1, c2, argTypes, i, ls);
+                if(cmp == Comparison.TYPE_1_BETTER && !t1MoreSpecific) {
                     t1MoreSpecific = true;
                     if(t2MoreSpecific) {
-                        return Specificity.indeterminate;
+                        return Comparison.INDETERMINATE;
                     }
                 }
-                final boolean c2MoreSpecific = TypeUtilities.isSubtype(c2, c1);
-                if(c2MoreSpecific && !t2MoreSpecific) {
+                if(cmp == Comparison.TYPE_2_BETTER && !t2MoreSpecific) {
                     t2MoreSpecific = true;
                     if(t1MoreSpecific) {
-                        return Specificity.indeterminate;
+                        return Comparison.INDETERMINATE;
                     }
                 }
             }
         }
         if(t1MoreSpecific) {
-            return Specificity.moreSpecific;
+            return Comparison.TYPE_1_BETTER;
+        } else if(t2MoreSpecific) {
+            return Comparison.TYPE_2_BETTER;
         }
-        if(t2MoreSpecific) {
-            return Specificity.lessSpecific;
+        return Comparison.INDETERMINATE;
+    }
+
+    private static Comparison compare(Class<?> c1, Class<?> c2, Class<?>[] argTypes, int i, LinkerServices cmp) {
+        if(TypeUtilities.isSubtype(c1, c2)) {
+            return Comparison.TYPE_1_BETTER;
+        } if(TypeUtilities.isSubtype(c2, c1)) {
+            return Comparison.TYPE_2_BETTER;
+        } else if(cmp != null) {
+            return cmp.compareConversion(argTypes[i], c1, c2);
         }
-        return Specificity.indeterminate;
+        return Comparison.INDETERMINATE;
     }
 
     private static Class<?> getParameterClass(MethodType t, int l, int i, boolean varArgs) {
         return varArgs && i >= l - 1 ? t.parameterType(l - 1).getComponentType() : t.parameterType(i);
     }
-
 }

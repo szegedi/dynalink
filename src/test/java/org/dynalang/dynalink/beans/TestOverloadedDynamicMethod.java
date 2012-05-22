@@ -19,16 +19,28 @@ package org.dynalang.dynalink.beans;
 import static org.dynalang.dynalink.beans.TestBeansLinker.createCallSiteDescriptor;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.dynalang.dynalink.DynamicLinker;
+import org.dynalang.dynalink.DynamicLinkerFactory;
+import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
+import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.LinkerServicesImpl;
+import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.TypeConverterFactory;
+
+import junit.framework.TestCase;
 
 /**
  *
@@ -84,9 +96,8 @@ public class TestOverloadedDynamicMethod extends TestCase {
     public void testVeryGenericSignature() throws Throwable {
         final DynamicMethod dm = linker.getMethod("add");
         // Two-arg String add should make a match
-        final CallSiteDescriptor cs =
-                createCallSiteDescriptor("add",
-                        MethodType.methodType(Object.class, Object.class, Object.class, Object.class));
+        final CallSiteDescriptor cs = createCallSiteDescriptor("add", MethodType.methodType(Object.class, Object.class,
+                Object.class, Object.class));
         final MethodHandle mh = dm.getInvocation(cs, linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two Strings
@@ -95,6 +106,56 @@ public class TestOverloadedDynamicMethod extends TestCase {
         assertEquals(1, mh.invokeWithArguments(new Test1(), 1, 2));
         // Must be able to invoke it with explicitly packed varargs
         assertEquals(4, mh.invokeWithArguments(new Test1(), 1, new int[] { 2 }));
+    }
+
+    public void testStringFormat() throws Throwable {
+        DynamicLinker linker = new DynamicLinkerFactory().createLinker();
+        MonomorphicCallSite callSite = new MonomorphicCallSite(CallSiteDescriptorFactory.create(
+                MethodHandles.publicLookup(), "dyn:callPropWithThis:format", MethodType.methodType(Object.class,
+                        Object.class, Object.class, Object.class, Object.class)));
+        linker.link(callSite);
+        System.out.println(callSite.dynamicInvoker().invokeWithArguments(ClassStatics.forClass(String.class),
+                "%4.0f %4.0f", 12f, 1f));
+    }
+
+    public void testVarArg() throws Throwable {
+        final DynamicMethod dm = linker.getMethod("boo");
+        // we want to link to the one-arg invocation
+        assertBooReturns(1, linkerServices, 1);
+
+        // we want to link to the vararg invocation
+        assertBooReturns(2, linkerServices);
+
+        // we want to link to the vararg invocation
+        assertBooReturns(2, linkerServices, 1, 2);
+
+        // If we're linking with a converter that knows how to convert double to int, then we want to make sure we
+        // don't link to the vararg (Class, int[]) invocation but to the (Class, int) invocation.
+        final LinkerServices ls = new LinkerServicesImpl(new TypeConverterFactory(Collections.singleton(
+                new GuardingTypeConverterFactory() {
+                    @Override
+                    public GuardedInvocation convertToType(Class<?> sourceType, Class<?> targetType) {
+                        if(targetType == int.class) {
+                            return new GuardedInvocation(new Lookup(MethodHandles.publicLookup()).findVirtual(
+                                    Double.class, "intValue", MethodType.methodType(int.class)).asType(
+                                            MethodType.methodType(int.class, sourceType)), Guards.isOfClass(
+                                                    Double.class, MethodType.methodType(boolean.class, sourceType)));
+                        }
+                        return null;
+                    }
+                })), linker);
+        assertBooReturns(1, ls, 1.0);
+    }
+
+    private void assertBooReturns(int retval, LinkerServices ls, Object... args) throws Throwable {
+        final List<Object> argList = new ArrayList<>();
+        argList.add(new Test1());
+        argList.add(String.class);
+        argList.addAll(Arrays.asList(args));
+
+        final CallSiteDescriptor csd = createCallSiteDescriptor("dyn:callPropWithThis:boo", MethodType.methodType(
+                Object.class, (List)Collections.nCopies(args.length + 2, Object.class)));
+        assertEquals(retval, linker.getMethod("boo").getInvocation(csd, ls).invokeWithArguments(argList));
     }
 
     public class Test1 {
@@ -112,6 +173,17 @@ public class TestOverloadedDynamicMethod extends TestCase {
 
         public int add(int i1, int... in) {
             return 4;
+        }
+
+        // The "boo" methods are meant to represent the situation with java.lang.reflect.Array.newInstance() which is
+        // quite interesting.
+
+        public int boo(Class<?> a, int b) {
+            return 1;
+        }
+
+        public int boo(Class<?> a, int... b) {
+            return 2;
         }
     }
 }

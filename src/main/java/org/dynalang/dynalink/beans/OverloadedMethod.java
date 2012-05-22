@@ -19,14 +19,14 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
-import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Represents a subset of overloaded methods for a certain method name on a certain class. It can be either a fixarg or
@@ -38,181 +38,163 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * @version $Id: $
  */
 class OverloadedMethod {
-    static final MethodHandle NO_SUCH_METHOD = getPlaceholder("_noSuchMethod");
-    static final MethodHandle AMBIGUOUS_METHOD = getPlaceholder("_ambiguousMethod");
-
-    // This contains either declared types of method arguments, or their
-    // superclasses/interfaces, so we can strongly reference them. This is the
-    // method type with most general types of arguments common to every method,
-    // per argument. It is used for initial conversion.
-    private MethodType commonMethodType;
-    private final MethodType commonMethodTypeWithException;
     private final Map<ClassString, MethodHandle> argTypesToMethods = new ConcurrentHashMap<ClassString, MethodHandle>();
-    private final boolean varArg;
-    private final ClassLoader classLoader;
-    private final OverloadedMethod fixArgMethod;
-    private final List<MethodHandle> methods = new LinkedList<MethodHandle>();
+    private final OverloadedDynamicMethod parent;
+    private final MethodType callSiteType;
+    private final MethodHandle invoker;
+    private final LinkerServices linkerServices;
+    private final ArrayList<MethodHandle> fixArgMethods;
+    private final ArrayList<MethodHandle> varArgMethods;
 
-    OverloadedMethod(List<MethodHandle> methodHandles, int argNum, OverloadedMethod fixArgMethod,
-            ClassLoader classLoader) {
-        this.varArg = fixArgMethod != null;
-        this.fixArgMethod = fixArgMethod;
-        this.classLoader = classLoader;
-        for(MethodHandle method: methodHandles) {
-            methods.add(method);
-            MethodType methodType = method.type();
-            if(varArg) {
-                final int fixArgs = methodType.parameterCount() - 1;
-                final Class<?> varArgType = methodType.parameterType(fixArgs).getComponentType();
-                methodType = methodType.changeParameterType(fixArgs, varArgType);
-                for(int i = fixArgs + 1; i < argNum; ++i) {
-                    methodType = methodType.insertParameterTypes(i, varArgType);
+    OverloadedMethod(List<MethodHandle> methodHandles, OverloadedDynamicMethod parent, MethodType callSiteType,
+            LinkerServices linkerServices) {
+        this.parent = parent;
+        this.callSiteType = callSiteType;
+        this.linkerServices = linkerServices;
+
+        fixArgMethods = new ArrayList<>(methodHandles.size());
+        varArgMethods = new ArrayList<>(methodHandles.size());
+        final int argNum = callSiteType.parameterCount();
+        for(MethodHandle mh: methodHandles) {
+            if(mh.isVarargsCollector()) {
+                final MethodHandle asFixed = mh.asFixedArity();
+                if(argNum == asFixed.type().parameterCount()) {
+                    fixArgMethods.add(asFixed);
                 }
-            }
-            if(commonMethodType == null) {
-                commonMethodType = methodType;
+                varArgMethods.add(mh);
             } else {
-                for(int i = 0; i < argNum; ++i) {
-                    final Class<?> oldType = commonMethodType.parameterType(i);
-                    final Class<?> newType =
-                            TypeUtilities.getMostSpecificCommonType(oldType, methodType.parameterType(i));
-                    if(oldType != newType) {
-                        commonMethodType = commonMethodType.changeParameterType(i, newType);
-                    }
-                }
-                final Class<?> oldRetType = commonMethodType.returnType();
-                final Class<?> newRetType =
-                        TypeUtilities.getMostSpecificCommonType(oldRetType, methodType.returnType());
-                if(oldRetType != newRetType) {
-                    commonMethodType = commonMethodType.changeReturnType(newRetType);
-                }
+                fixArgMethods.add(mh);
             }
         }
-        commonMethodTypeWithException = commonMethodType.insertParameterTypes(0, NoSuchMethodException.class);
+        fixArgMethods.trimToSize();
+        varArgMethods.trimToSize();
+
+        final MethodHandle bound = SELECT_METHOD.bindTo(this);
+        final MethodHandle collecting = SimpleDynamicMethod.collectArguments(bound, argNum).asType(
+                callSiteType.changeReturnType(MethodHandle.class));
+        invoker = MethodHandles.foldArguments(MethodHandles.exactInvoker(callSiteType), collecting);
     }
 
-    public MethodHandle getFixArgsInvocation(LinkerServices linkerServices, MethodType callSiteType) {
-        return getFixArgInvocation(INVOKE_FIXARGS, linkerServices, callSiteType);
+    MethodHandle getInvoker() {
+        return invoker;
     }
 
-    public MethodHandle getFixArgsFirstInvocation(LinkerServices linkerServices, MethodType callSiteType) {
-        return getFixArgInvocation(INVOKE_FIXARGS_FIRST, linkerServices, callSiteType);
-    }
+    private static final MethodHandle SELECT_METHOD = Lookup.findOwnSpecial(MethodHandles.lookup(), "selectMethod",
+            MethodHandle.class, Object[].class);
 
-    public MethodHandle getVarArgsInvocation(LinkerServices linkerServices, MethodType callSiteType) {
-        final MethodHandle bound = MethodHandles.insertArguments(INVOKE_VARARGS, 0, this, callSiteType);
-        final MethodHandle collecting =
-                SimpleDynamicMethod.collectArguments(bound, commonMethodTypeWithException.parameterCount());
-        final MethodHandle converting =
-                linkerServices.asType(collecting, callSiteType.insertParameterTypes(0, NoSuchMethodException.class));
-        return converting;
-    }
-
-    private MethodHandle getFixArgInvocation(MethodHandle invoker, LinkerServices linkerServices,
-            MethodType callSiteType) {
-        final MethodHandle bound = MethodHandles.insertArguments(invoker, 0, this, callSiteType);
-        final MethodHandle collecting = SimpleDynamicMethod.collectArguments(bound, commonMethodType.parameterCount());
-        final MethodHandle converting = linkerServices.asType(collecting, callSiteType);
-        return converting;
-    }
-
-    private static final MethodHandle INVOKE_FIXARGS = getFixArgsInvocationMethod("_invokeFixArgs");
-    private static final MethodHandle INVOKE_FIXARGS_FIRST = getFixArgsInvocationMethod("_invokeFixArgsFirst");
-    private static final MethodHandle INVOKE_VARARGS = new Lookup(MethodHandles.lookup()).findSpecial(
-            OverloadedMethod.class, "_invokeVarArgs",
-            MethodType.methodType(Object.class, MethodType.class, NoSuchMethodException.class, Object[].class));
-
-    private static MethodHandle getFixArgsInvocationMethod(String name) {
-        return new Lookup(MethodHandles.lookup()).findSpecial(OverloadedMethod.class, name,
-                MethodType.methodType(Object.class, MethodType.class, Object[].class));
-    }
-
-    public Object _invokeFixArgs(MethodType callSiteType, Object... args) throws Throwable {
-        final MethodHandle method = getInvocationForArgs(callSiteType, args);
-        if(method == NO_SUCH_METHOD) {
-            throw new BootstrapMethodError("None of the methods " + methods + " matches arguments "
-                    + getArgumentTypes(args));
-        }
-        return method.invokeWithArguments(args);
-    }
-
-    private static final NoSuchMethodException NO_SUCH_FIX_ARGS_METHOD = new NoSuchMethodException();
-
-    public Object _invokeFixArgsFirst(MethodType callSiteType, Object... args) throws Throwable {
-        final MethodHandle method = getInvocationForArgs(callSiteType, args);
-        if(method == NO_SUCH_METHOD) {
-            throw NO_SUCH_FIX_ARGS_METHOD;
-        }
-        return method.invokeWithArguments(args);
-    }
-
-    public Object _invokeVarArgs(MethodType callSiteType, NoSuchMethodException e, Object... args) throws Throwable {
-        if(e != NO_SUCH_FIX_ARGS_METHOD) {
-            throw e;
-        }
-        final MethodHandle method = getInvocationForArgs(callSiteType, args);
-        if(method == NO_SUCH_METHOD) {
-            if(fixArgMethod == null) {
-                throw new BootstrapMethodError("None of the variable-arity methods " + methods + " matches arguments "
-                        + getArgumentTypes(args));
-            } else {
-                throw new BootstrapMethodError("Neither of the fixed-arity methods " + fixArgMethod.methods +
-                        " nor the variable-arity methods " + methods + " matches arguments " + getArgumentTypes(args));
-            }
-        }
-        return SimpleDynamicMethod.collectArguments(method, callSiteType.parameterCount()).invokeWithArguments(args);
-
-    }
-
-    private static String getArgumentTypes(Object[] args) {
-
-        StringBuilder b = new StringBuilder('[');
-        if(args.length > 0) {
-            appendArgType(b, args[0]);
-        }
-        for(int i = 1; i < args.length; ++i) {
-            appendArgType(b.append(", "), args[i]);
-        }
-        return b.append(']').toString();
-    }
-
-
-    private static void appendArgType(StringBuilder b, Object o) {
-        b.append(o == null ? "null" : o.getClass().getCanonicalName());
-    }
-
-    MethodHandle getInvocationForArgs(MethodType callSiteType, Object... args) {
-        Class<?>[] argTypes = new Class[args.length];
+    @SuppressWarnings("unused")
+    private MethodHandle selectMethod(Object[] args) throws NoSuchMethodException {
+        final Class<?>[] argTypes = new Class[args.length];
         for(int i = 0; i < argTypes.length; ++i) {
-            Object arg = args[i];
+            final Object arg = args[i];
             argTypes[i] = arg == null ? callSiteType.parameterType(i) : arg.getClass();
         }
         final ClassString classString = new ClassString(argTypes);
         MethodHandle method = argTypesToMethods.get(classString);
         if(method == null) {
-            method = classString.getMostSpecific(methods, varArg);
-            // Avoid keeping references to unrelated classes; this ruins
-            // the performance a bit, but avoids class loader memory leaks.
-            if(classString.isVisibleFrom(classLoader)) {
+            List<MethodHandle> methods = classString.getMaximallySpecifics(fixArgMethods, linkerServices, false);
+            if(methods.isEmpty()) {
+                methods = classString.getMaximallySpecifics(varArgMethods, linkerServices, true);
+            }
+            switch(methods.size()) {
+                case 0: {
+                    method = getNoSuchMethodThrower(argTypes);
+                    break;
+                }
+                case 1: {
+                    method = new SimpleDynamicMethod(methods.get(0)).getInvocation(callSiteType, linkerServices);
+                    break;
+                }
+                default: {
+                    // This is unfortunate - invocation time ambiguity. We can still save the day if
+                    method = getAmbiguousMethodThrower(argTypes, methods);
+                    break;
+                }
+            }
+            // Avoid keeping references to unrelated classes; this ruins the performance a bit, but avoids class loader
+            // memory leaks.
+            if(classString.isVisibleFrom(parent.getClassLoader())) {
                 argTypesToMethods.put(classString, method);
             }
-        }
-        if(method == AMBIGUOUS_METHOD) {
-            throw new BootstrapMethodError("Can't unambiguously select one of " + methods);
         }
         return method;
     }
 
-    public static final void _noSuchMethod() {
-        throw new UnsupportedOperationException("Not intended to be called");
+    private MethodHandle getNoSuchMethodThrower(Class<?>[] argTypes) {
+        return adaptThrower(MethodHandles.insertArguments(THROW_NO_SUCH_METHOD, 0, this, argTypes));
     }
 
-    public static final void _ambiguousMethod() {
-        throw new UnsupportedOperationException("Not intended to be called");
+    private static final MethodHandle THROW_NO_SUCH_METHOD = Lookup.findOwnSpecial(MethodHandles.lookup(),
+            "throwNoSuchMethod", void.class, Class[].class);
+
+    @SuppressWarnings("unused")
+    private void throwNoSuchMethod(Class<?>[] argTypes) throws NoSuchMethodException {
+        if(varArgMethods.isEmpty()) {
+            throw new NoSuchMethodException("None of the fixed arity signatures " + getSignatureList(fixArgMethods) +
+                    " of method " + parent.getName() + " match the argument types " + argTypesString(argTypes));
+        }
+        throw new NoSuchMethodException("None of the fixed arity signatures " + getSignatureList(fixArgMethods) +
+                " or the variable arity signatures " + getSignatureList(varArgMethods) + " of the method " +
+                parent.getName() + " match the argument types " + argTypesString(argTypes));
     }
 
-    private static final MethodHandle getPlaceholder(String name) {
-        return new Lookup(MethodHandles.lookup()).findStatic(OverloadedMethod.class, name,
-                MethodType.methodType(Void.TYPE));
+    private MethodHandle getAmbiguousMethodThrower(Class<?>[] argTypes, List<MethodHandle> methods) {
+        return adaptThrower(MethodHandles.insertArguments(THROW_AMBIGUOUS_METHOD, 0, this, argTypes, methods));
+    }
+
+    private MethodHandle adaptThrower(MethodHandle rawThrower) {
+        return MethodHandles.dropArguments(rawThrower, 0, callSiteType.parameterList()).asType(callSiteType);
+    }
+
+    private static final MethodHandle THROW_AMBIGUOUS_METHOD = Lookup.findOwnSpecial(MethodHandles.lookup(),
+            "throwAmbiguousMethod", void.class, Class[].class, List.class);
+
+    @SuppressWarnings("unused")
+    private void throwAmbiguousMethod(Class<?>[] argTypes, List<MethodHandle> methods) throws NoSuchMethodException {
+        final String arity = methods.get(0).isVarargsCollector() ? "variable" : "fixed";
+        throw new NoSuchMethodException("Can't unambiguously select between " + arity + " arity signatures " +
+                getSignatureList(methods) + " of the method " + parent.getName() + " for argument types " +
+                argTypesString(argTypes));
+    }
+
+    private static String argTypesString(Class<?>[] classes) {
+        final StringBuilder b = new StringBuilder().append('[');
+        appendTypes(b, classes, false);
+        return b.append(']').toString();
+    }
+
+    private static String getSignatureList(List<MethodHandle> methods) {
+        final StringBuilder b = new StringBuilder().append('[');
+        final Iterator<MethodHandle> it = methods.iterator();
+        if(it.hasNext()) {
+            appendSig(b, it.next());
+            while(it.hasNext()) {
+                appendSig(b.append(", "), it.next());
+            }
+        }
+        return b.append(']').toString();
+    }
+
+    private static void appendSig(StringBuilder b, MethodHandle m) {
+        b.append('(');
+        appendTypes(b, m.type().parameterArray(), m.isVarargsCollector());
+        b.append(')');
+    }
+
+    private static void appendTypes(StringBuilder b, Class<?>[] classes, boolean varArg) {
+        final int l = classes.length;
+        if(!varArg) {
+            if(l > 1) {
+                b.append(classes[1].getCanonicalName());
+                for(int i = 2; i < l; ++i) {
+                    b.append(", ").append(classes[i].getCanonicalName());
+                }
+            }
+        } else {
+            for(int i = 1; i < l - 1; ++i) {
+                b.append(classes[i].getCanonicalName()).append(", ");
+            }
+            b.append(classes[l - 1].getComponentType().getCanonicalName()).append("...");
+        }
     }
 }

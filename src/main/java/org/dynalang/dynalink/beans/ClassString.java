@@ -21,6 +21,7 @@ import java.lang.invoke.MethodType;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.TypeUtilities;
 
@@ -35,6 +36,10 @@ final class ClassString {
 
     ClassString(Class<?>[] classes) {
         this.classes = classes;
+    }
+
+    ClassString(MethodType type) {
+        this(type.parameterArray());
     }
 
     Class<?>[] getClasses() {
@@ -79,37 +84,18 @@ final class ClassString {
         return true;
     }
 
-    private static MaximallySpecific.TypeFunction<MethodHandle> TF =
-            new MaximallySpecific.TypeFunction<MethodHandle>() {
-                @Override
-                public MethodType type(MethodHandle mh) {
-                    return mh.type();
-                };
-            };
-
-    MethodHandle getMostSpecific(List<MethodHandle> methods, boolean varArg) {
-        final List<MethodHandle> maximals =
-                MaximallySpecific.getMaximallySpecificMethods(getApplicables(methods, varArg), TF, varArg);
-        switch(maximals.size()) {
-            case 0: {
-                return OverloadedMethod.NO_SUCH_METHOD;
-            }
-            case 1: {
-                return maximals.get(0);
-            }
-            default: {
-                return OverloadedMethod.AMBIGUOUS_METHOD;
-            }
-        }
+    List<MethodHandle> getMaximallySpecifics(List<MethodHandle> methods, LinkerServices linkerServices, boolean varArg) {
+        return MaximallySpecific.getMaximallySpecificMethods(getApplicables(methods, linkerServices, varArg), varArg,
+                classes, linkerServices);
     }
 
     /**
      * Returns all methods that are applicable to actual parameter classes represented by this ClassString object.
      */
-    LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods, boolean varArg) {
+    LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods, LinkerServices linkerServices, boolean varArg) {
         final LinkedList<MethodHandle> list = new LinkedList<MethodHandle>();
         for(final MethodHandle member: methods) {
-            if(isApplicable(member, varArg)) {
+            if(isApplicable(member, linkerServices, varArg)) {
                 list.add(member);
             }
         }
@@ -121,7 +107,7 @@ final class ClassString {
      * object.
      *
      */
-    private boolean isApplicable(MethodHandle method, boolean varArg) {
+    private boolean isApplicable(MethodHandle method, LinkerServices linkerServices, boolean varArg) {
         final Class<?>[] formalTypes = method.type().parameterArray();
         final int cl = classes.length;
         final int fl = formalTypes.length - (varArg ? 1 : 0);
@@ -136,18 +122,22 @@ final class ClassString {
         }
         // Starting from 1 as we ignore the receiver type
         for(int i = 1; i < fl; ++i) {
-            if(!TypeUtilities.isMethodInvocationConvertible(classes[i], formalTypes[i])) {
+            if(!canConvert(linkerServices, classes[i], formalTypes[i])) {
                 return false;
             }
         }
         if(varArg) {
-            Class<?> varArgType = formalTypes[fl].getComponentType();
+            final Class<?> varArgType = formalTypes[fl].getComponentType();
             for(int i = fl; i < cl; ++i) {
-                if(!TypeUtilities.isMethodInvocationConvertible(classes[i], varArgType)) {
+                if(!canConvert(linkerServices, classes[i], varArgType)) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    private static boolean canConvert(LinkerServices ls, Class<?> from, Class<?> to) {
+        return ls == null ? TypeUtilities.isMethodInvocationConvertible(from, to) : ls.canConvert(from, to);
     }
 }

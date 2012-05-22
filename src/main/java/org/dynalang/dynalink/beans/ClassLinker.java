@@ -85,7 +85,7 @@ class ClassLinker extends BeanLinker {
             for(int i = 0; i < ctrs.length; ++i) {
                 mhs.add(MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, Object.class));
             }
-            constructor = AbstractJavaLinker.createDynamicMethod(mhs, clazz);
+            constructor = AbstractJavaLinker.createDynamicMethod(mhs, clazz, "<init>");
             constructorGuard = constructor == null ? null : Guards.getIdentityGuard(clazz);
         }
 

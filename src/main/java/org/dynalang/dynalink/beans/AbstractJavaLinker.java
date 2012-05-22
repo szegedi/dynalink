@@ -145,27 +145,27 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     private void addMember(String name, MethodHandle mh, Map<String, DynamicMethod> methodMap) {
         final DynamicMethod existingMethod = methodMap.get(name);
-        final DynamicMethod newMethod = addMember(mh, existingMethod, clazz);
+        final DynamicMethod newMethod = addMember(mh, existingMethod, clazz, name);
         if(newMethod != existingMethod) {
             methodMap.put(name, newMethod);
         }
     }
 
-    static DynamicMethod createDynamicMethod(Iterable<MethodHandle> methodHandles, Class<?> clazz) {
+    static DynamicMethod createDynamicMethod(Iterable<MethodHandle> methodHandles, Class<?> clazz, String name) {
         DynamicMethod dynMethod = null;
         for(MethodHandle methodHandle: methodHandles) {
-            dynMethod = addMember(methodHandle, dynMethod, clazz);
+            dynMethod = addMember(methodHandle, dynMethod, clazz, name);
         }
         return dynMethod;
     }
 
-    private static DynamicMethod addMember(MethodHandle mh, DynamicMethod existing, Class<?> clazz) {
+    private static DynamicMethod addMember(MethodHandle mh, DynamicMethod existing, Class<?> clazz, String name) {
         if(existing == null) {
             return new SimpleDynamicMethod(mh);
         } else if(existing.contains(mh)) {
             return existing;
         } else if(existing instanceof SimpleDynamicMethod) {
-            final OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz);
+            final OverloadedDynamicMethod odm = new OverloadedDynamicMethod(clazz, name);
             odm.addMethod(((SimpleDynamicMethod)existing));
             odm.addMethod(mh);
             return odm;
@@ -217,8 +217,12 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             Object... args) {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
-                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
-                        callSiteDescriptor.getNameToken(2), methods);
+                String name = callSiteDescriptor.getNameToken(2);
+                final int parens = name.indexOf('(');
+                if(parens != -1) {
+                    name = name.substring(0, parens);
+                }
+                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices, name, methods);
             }
             default: {
                 return null;
@@ -305,7 +309,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     private static final Lookup privateLookup = new Lookup(MethodHandles.lookup());
-
+    // TODO: WHY IS THIS INSTANCE METHOD?
     private MethodHandle GET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findSpecial(AbstractJavaLinker.class,
             "_getPropertyWithVariableId", MethodType.methodType(Object.class, Object.class, Object.class)).bindTo(this);
 
@@ -326,7 +330,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         }
         return getter.handle.invokeWithArguments(obj);
     }
-
+    //TODO: WHY IS THIS INSTANCE METHOD?
     private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findSpecial(AbstractJavaLinker.class,
             "_setPropertyWithVariableId", MethodType.methodType(Results.class, CallSiteDescriptor.class,
                     LinkerServices.class, Object.class, Object.class, Object.class)).bindTo(this);

@@ -51,16 +51,8 @@ class ApplicableOverloadedMethods {
      * @return a list of maximally specific methods.
      */
     List<MethodHandle> findMaximallySpecificMethods() {
-        return MaximallySpecific.getMaximallySpecificMethods(methods, TF, varArgs);
+        return MaximallySpecific.getMaximallySpecificMethods(methods, varArgs);
     }
-
-    private static MaximallySpecific.TypeFunction<MethodHandle> TF =
-            new MaximallySpecific.TypeFunction<MethodHandle>() {
-                @Override
-                public MethodType type(MethodHandle mh) {
-                    return mh.type();
-                };
-            };
 
     abstract static class ApplicabilityTest {
         abstract boolean isApplicable(MethodType callSiteType, MethodHandle method);

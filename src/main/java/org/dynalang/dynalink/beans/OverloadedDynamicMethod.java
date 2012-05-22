@@ -17,7 +17,6 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -40,14 +39,16 @@ class OverloadedDynamicMethod extends DynamicMethod {
      */
     private final LinkedList<MethodHandle> methods = new LinkedList<MethodHandle>();
     private final ClassLoader classLoader;
+    private final String name;
 
     /**
      * Creates a new overloaded dynamic method.
      *
      * @param clazz the class this method belongs to
      */
-    public OverloadedDynamicMethod(Class<?> clazz) {
+    public OverloadedDynamicMethod(Class<?> clazz, String name) {
         this.classLoader = clazz.getClassLoader();
+        this.name = clazz.getName() + "." + name;
     }
 
     @Override
@@ -91,8 +92,9 @@ class OverloadedDynamicMethod extends DynamicMethod {
             }
         }
 
-        // If no additional methods can apply at run time, and there's more than one maximally specific method based on
-        // call site signature, that is a link-time ambiguity.
+        // If no additional methods can apply at invocation time, and there's more than one maximally specific method
+        // based on call site signature, that is a link-time ambiguity. In a static scenario, javac would report an
+        // ambiguity error.
         if(invokables.isEmpty() && maximallySpecifics.size() > 1) {
             throw new BootstrapMethodError("Can't choose among " + maximallySpecifics + " for argument types "
                     + callSiteType);
@@ -109,7 +111,7 @@ class OverloadedDynamicMethod extends DynamicMethod {
                 // Very lucky, we ended up with a single candidate method handle based on the call site signature; we
                 // can link it very simply by delegating to a SimpleDynamicMethod.
                 final MethodHandle mh = invokables.iterator().next();
-                return new SimpleDynamicMethod(mh).getInvocation(callSiteDescriptor, linkerServices);
+                return new SimpleDynamicMethod(mh).getInvocation(callSiteType, linkerServices);
             }
         }
 
@@ -117,35 +119,8 @@ class OverloadedDynamicMethod extends DynamicMethod {
         // invocation (alternatively, we could opportunistically link the one method that resolves for the current
         // arguments, but we'd need to install a fairly complex guard for that and when it'd fail, we'd go back all the
         // way to candidate selection.
-        final List<MethodHandle> fixArgMethods = new LinkedList<MethodHandle>();
-        final List<MethodHandle> varArgMethods = new LinkedList<MethodHandle>();
-        for(MethodHandle mh: invokables) {
-            if(mh.isVarargsCollector()) {
-                final MethodHandle asFixed = mh.asFixedArity();
-                if(callSiteType.parameterCount() == asFixed.type().parameterCount()) {
-                    fixArgMethods.add(asFixed);
-                }
-                varArgMethods.add(mh);
-            } else {
-                fixArgMethods.add(mh);
-            }
-        }
-        final int paramCount = callSiteType.parameterCount();
-        final OverloadedMethod fixArgsMethod = new OverloadedMethod(fixArgMethods, paramCount, null, classLoader);
-        final OverloadedMethod varArgsMethod = varArgMethods.isEmpty() ? null : new OverloadedMethod(varArgMethods,
-                paramCount, fixArgsMethod, classLoader);
-        if(varArgsMethod == null) {
-            return fixArgsMethod.getFixArgsInvocation(linkerServices, callSiteType);
-        } else {
-            // We're using catchException because it is actually surprisingly effective - we'll be throwing a shared
-            // instance of the exception for signaling there's no appropriate fixarg method. We could've used
-            // foldArguments() too, except then the vararg invocation would also always be invoked, causing unnecessary
-            // conversions on its arguments.
-            // TODO: use dropArguments() once bug with catchException failing with non-boot-classpath exception classes
-            // is fixed...
-            return MethodHandles.catchException(fixArgsMethod.getFixArgsFirstInvocation(linkerServices, callSiteType),
-                    NoSuchMethodException.class, varArgsMethod.getVarArgsInvocation(linkerServices, callSiteType));
-        }
+        // TODO: cache per call site type
+        return new OverloadedMethod(invokables, this, callSiteType, linkerServices).getInvoker();
     }
 
     @Override
@@ -157,6 +132,14 @@ class OverloadedDynamicMethod extends DynamicMethod {
             }
         }
         return false;
+    }
+
+    ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public String getName() {
+        return name;
     }
 
     private static boolean isApplicableDynamically(LinkerServices linkerServices, MethodType callSiteType,
