@@ -53,13 +53,16 @@ class SimpleDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices) {
+    public MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
+        return getInvocation(callSiteDescriptor.getMethodType(), linkerServices);
+    }
+
+    MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices) {
         final MethodType methodType = target.type();
         final int paramsLen = methodType.parameterCount();
         final boolean varArgs = target.isVarargsCollector();
         final MethodHandle fixTarget = varArgs ? target.asFixedArity() : target;
         final int fixParamsLen = varArgs ? paramsLen - 1 : paramsLen;
-        final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final int argsLen = callSiteType.parameterCount();
         if(argsLen < fixParamsLen) {
             // Less actual arguments than number of fixed declared arguments; can't invoke.
