@@ -129,7 +129,9 @@ public class GuardedInvocation {
      */
     public void assertType(MethodType type) {
         assertType(invocation, type);
-        assertType(guard, type.changeReturnType(Boolean.TYPE));
+        if(guard != null) {
+            assertType(guard, type.changeReturnType(Boolean.TYPE));
+        }
     }
 
     /**
