@@ -27,7 +27,7 @@ import org.dynalang.dynalink.support.TypeUtilities;
  */
 public interface GuardingTypeConverterFactory {
     /**
-     * Returns a guarded invoation that receives an Object of the specified source type and returns an Object converted
+     * Returns a guarded invocation that receives an Object of the specified source type and returns an Object converted
      * to the specified target type. The type of the invocation is targetType(sourceType), while the type of the guard
      * is boolean(sourceType). Note that this will never be invoked for type conversions allowed by the JLS 5.3 "Method
      * Invocation Conversion", see {@link TypeUtilities#isMethodInvocationConvertible(Class, Class)} for details. An
