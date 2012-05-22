@@ -21,6 +21,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.DynamicLinker;
+import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 
 /**
  * Interface for services provided to {@link GuardingDynamicLinker} instances by the {@link DynamicLinker} that owns
@@ -71,4 +72,16 @@ public interface LinkerServices {
      * @throws Exception in case the top-level linker throws an exception
      */
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest) throws Exception;
+
+    /**
+     * Determines which of the two type conversions from a source type to the two target types is preferred. This is
+     * used for dynamic overloaded method resolution. If the source type is convertible to exactly one target type with
+     * a method invocation conversion, it is chosen, otherwise available {@link ConversionComparator}s are consulted.
+     * @param sourceType the source type.
+     * @param targetType1 one potential target type
+     * @param targetType2 another potential target type.
+     * @return one of Comparison constants that establish which - if any - of the target types is preferable for the
+     * conversion.
+     */
+    public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2);
 }

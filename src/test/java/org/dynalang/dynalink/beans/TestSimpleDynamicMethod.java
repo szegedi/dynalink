@@ -21,12 +21,13 @@ import static org.dynalang.dynalink.beans.TestBeansLinker.createCallSiteDescript
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
-import junit.framework.TestCase;
-
+import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
+
+import junit.framework.TestCase;
 
 /**
  * Tests for the {@link SimpleDynamicMethod}.
@@ -83,6 +84,12 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         @Override
         public GuardedInvocation getGuardedInvocation(LinkRequest lreq) throws Exception {
+            fail(); // Not supposed to be called
+            return null;
+        }
+
+        @Override
+        public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
             fail(); // Not supposed to be called
             return null;
         }

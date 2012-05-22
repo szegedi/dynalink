@@ -21,6 +21,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
@@ -61,6 +62,10 @@ public class TestBeansLinker extends TestCase {
                 throw new AssertionFailedError();
             }
 
+            @Override
+            public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
+                throw new AssertionFailedError();
+            }
         };
 
         // Can't link with null arguments

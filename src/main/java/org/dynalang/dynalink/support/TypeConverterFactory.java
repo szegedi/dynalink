@@ -23,6 +23,8 @@ import java.lang.invoke.WrongMethodTypeException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dynalang.dynalink.linker.ConversionComparator;
+import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;
@@ -38,6 +40,8 @@ import org.dynalang.dynalink.linker.LinkerServices;
 public class TypeConverterFactory {
 
     private final GuardingTypeConverterFactory[] factories;
+    private final ConversionComparator[] comparators;
+
     private final ClassValue<ClassMap<MethodHandle>> converterMap = new ClassValue<ClassMap<MethodHandle>>() {
         @Override
         protected ClassMap<MethodHandle> computeValue(final Class<?> sourceType) {
@@ -57,10 +61,15 @@ public class TypeConverterFactory {
      */
     public TypeConverterFactory(Iterable<? extends GuardingTypeConverterFactory> factories) {
         final List<GuardingTypeConverterFactory> l = new LinkedList<GuardingTypeConverterFactory>();
+        final List<ConversionComparator> c = new LinkedList<ConversionComparator>();
         for(GuardingTypeConverterFactory factory: factories) {
             l.add(factory);
+            if(factory instanceof ConversionComparator) {
+                c.add((ConversionComparator)factory);
+            }
         }
         this.factories = l.toArray(new GuardingTypeConverterFactory[l.size()]);
+        this.comparators = c.toArray(new ConversionComparator[c.size()]);
 
     }
 
@@ -131,6 +140,33 @@ public class TypeConverterFactory {
      */
     public boolean canConvert(final Class<?> from, final Class<?> to) {
         return canAutoConvert(from, to) || getTypeConverter(from, to) != null;
+    }
+
+    /**
+     * Determines which of the two type conversions from a source type to the two target types is preferred. This is
+     * used for dynamic overloaded method resolution. If the source type is convertible to exactly one target type with
+     * a method invocation conversion, it is chosen, otherwise available {@link ConversionComparator}s are consulted.
+     * @param sourceType the source type.
+     * @param targetType1 one potential target type
+     * @param targetType2 another potential target type.
+     * @return one of Comparison constants that establish which - if any - of the target types is preferable for the
+     * conversion.
+     */
+    public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
+        if(TypeUtilities.isMethodInvocationConvertible(sourceType, targetType1)) {
+            if(!TypeUtilities.isMethodInvocationConvertible(sourceType, targetType2)) {
+                return Comparison.TYPE_1_BETTER;
+            }
+        } else if(TypeUtilities.isMethodInvocationConvertible(targetType2, sourceType)) {
+            return Comparison.TYPE_2_BETTER;
+        }
+        for(ConversionComparator comparator: comparators) {
+            final Comparison result = comparator.compareConversion(sourceType, targetType1, targetType2);
+            if(result != Comparison.INDETERMINATE) {
+                return result;
+            }
+        }
+        return Comparison.INDETERMINATE;
     }
 
     /**

@@ -18,6 +18,7 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
+import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
@@ -54,6 +55,11 @@ public class LinkerServicesImpl implements LinkerServices {
     @Override
     public MethodHandle asType(MethodHandle handle, MethodType fromType) {
         return typeConverterFactory.asType(handle, fromType);
+    }
+
+    @Override
+    public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
+        return typeConverterFactory.compareConversion(sourceType, targetType1, targetType2);
     }
 
     @Override
