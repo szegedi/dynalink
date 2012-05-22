@@ -55,7 +55,9 @@ public class Lookup {
         try {
             return lookup.unreflect(m);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to unreflect " + m, e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to unreflect method " + m);
+            ee.initCause(e);
+            throw ee;
         }
     }
 
@@ -63,7 +65,9 @@ public class Lookup {
         try {
             return lookup.unreflectGetter(f);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to unreflect getter for " + f, e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to unreflect getter for field " + f);
+            ee.initCause(e);
+            throw ee;
         }
     }
 
@@ -71,7 +75,9 @@ public class Lookup {
         try {
             return lookup.unreflectSetter(f);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to unreflect setter for " + f, e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to unreflect setter for field " + f);
+            ee.initCause(e);
+            throw ee;
         }
     }
 
@@ -79,7 +85,9 @@ public class Lookup {
         try {
             return lookup.unreflectConstructor(c);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to unreflect constructor for " + c, e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to unreflect constructor " + c);
+            ee.initCause(e);
+            throw ee;
         }
     }
 
@@ -104,11 +112,15 @@ public class Lookup {
                 return lookup.findSpecial(declaringClass, name, type, declaringClass);
             }
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to find special method "
-                    + methodDescription(declaringClass, name, type), e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to access special method " + methodDescription(
+                    declaringClass, name, type));
+            ee.initCause(e);
+            throw ee;
         } catch(NoSuchMethodException e) {
-            throw new BootstrapMethodError("Failed to find special method "
-                    + methodDescription(declaringClass, name, type), e);
+            final NoSuchMethodError ee = new NoSuchMethodError("Failed to find special method " + methodDescription(
+                    declaringClass, name, type));
+            ee.initCause(e);
+            throw ee;
         }
     }
 
@@ -116,27 +128,35 @@ public class Lookup {
         return declaringClass.getName() + "#" + name + type;
     }
 
-    public MethodHandle findStatic(Class<?> declaringClass, String methodName, MethodType methodType) {
+    public MethodHandle findStatic(Class<?> declaringClass, String name, MethodType type) {
         try {
-            return lookup.findStatic(declaringClass, methodName, methodType);
+            return lookup.findStatic(declaringClass, name, type);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to find static method "
-                    + methodDescription(declaringClass, methodName, methodType), e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to access static method " + methodDescription(
+                    declaringClass, name, type));
+            ee.initCause(e);
+            throw ee;
         } catch(NoSuchMethodException e) {
-            throw new BootstrapMethodError("Failed to find static method "
-                    + methodDescription(declaringClass, methodName, methodType), e);
+            final NoSuchMethodError ee = new NoSuchMethodError("Failed to find static method " + methodDescription(
+                    declaringClass, name, type));
+            ee.initCause(e);
+            throw ee;
         }
     }
 
-    public MethodHandle findVirtual(Class<?> declaringClass, String methodName, MethodType methodType) {
+    public MethodHandle findVirtual(Class<?> declaringClass, String name, MethodType type) {
         try {
-            return lookup.findVirtual(declaringClass, methodName, methodType);
+            return lookup.findVirtual(declaringClass, name, type);
         } catch(IllegalAccessException e) {
-            throw new BootstrapMethodError("Failed to find virtual method "
-                    + methodDescription(declaringClass, methodName, methodType), e);
+            final IllegalAccessError ee = new IllegalAccessError("Failed to access virtual method " + methodDescription(
+                    declaringClass, name, type));
+            ee.initCause(e);
+            throw ee;
         } catch(NoSuchMethodException e) {
-            throw new BootstrapMethodError("Failed to find virtual method "
-                    + methodDescription(declaringClass, methodName, methodType), e);
+            final NoSuchMethodError ee = new NoSuchMethodError("Failed to find virtual method " + methodDescription(
+                    declaringClass, name, type));
+            ee.initCause(e);
+            throw ee;
         }
     }
 
