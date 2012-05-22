@@ -57,7 +57,7 @@ class BeanIntrospector extends FacetIntrospector {
         final Collection<Method> cmethods = new ArrayList<Method>(methods.length);
         for(MethodDescriptor methodDesc: methods) {
             final Method method = methodDesc.getMethod();
-            if(!(Modifier.isStatic(method.getModifiers()) || method.isBridge() || method.isSynthetic())) {
+            if(!(Modifier.isStatic(method.getModifiers()))) {
                 cmethods.add(method);
             }
         }

@@ -98,9 +98,6 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
             // Add instance methods
             for(Method method: introspector.getMethods()) {
-                if(method.isBridge() || method.isSynthetic()) {
-                    continue;
-                }
                 final Method accMethod = accessibleLookup.getAccessibleMethod(method);
                 if(accMethod == null) {
                     continue;
