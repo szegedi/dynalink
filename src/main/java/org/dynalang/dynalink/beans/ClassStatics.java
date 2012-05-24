@@ -62,7 +62,7 @@ public class ClassStatics implements Serializable {
 
     @Override
     public String toString() {
-        return "ClassStatics[" + clazz.getName() + "]";
+        return "JavaClassStatics[" + clazz.getName() + "]";
     }
 
     private Object readResolve() {
