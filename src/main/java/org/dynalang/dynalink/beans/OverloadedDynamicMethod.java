@@ -45,6 +45,7 @@ class OverloadedDynamicMethod extends DynamicMethod {
      * Creates a new overloaded dynamic method.
      *
      * @param clazz the class this method belongs to
+     * @param name the name of the method
      */
     public OverloadedDynamicMethod(Class<?> clazz, String name) {
         this.classLoader = clazz.getClassLoader();
