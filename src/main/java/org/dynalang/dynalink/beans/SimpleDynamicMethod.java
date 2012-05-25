@@ -20,6 +20,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
+import java.util.List;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkerServices;
@@ -53,12 +54,20 @@ class SimpleDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    public MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
-        return getInvocation(callSiteDescriptor.getMethodType(), linkerServices);
+    public MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
+            List<Class<?>> explicitSignature) {
+        return getInvocation(callSiteDescriptor.getMethodType(), linkerServices, explicitSignature);
     }
 
     MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices) {
+        return getInvocation(callSiteType, linkerServices, null);
+    }
+
+    private MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices, List<Class<?>> explicitSignature) {
         final MethodType methodType = target.type();
+        if(explicitSignature != null && !explicitSignature.equals(methodType.parameterList())) {
+            return null;
+        }
         final int paramsLen = methodType.parameterCount();
         final boolean varArgs = target.isVarargsCollector();
         final MethodHandle fixTarget = varArgs ? target.asFixedArity() : target;

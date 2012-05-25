@@ -17,6 +17,7 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
+import java.util.List;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkerServices;
@@ -41,12 +42,25 @@ abstract class DynamicMethod {
      * before the invocation of the underlying method if it is not already done.
      *
      * @param callSiteDescriptor descriptor of the call site
-     * @param linkerServices linker services. Used for querying available language-specific type conversions in order to
-     * identify candidate overloaded methods.
+     * @param linkerServices linker services. Used for language-specific type conversions.
      * @return an invocation suitable for calling the method from the specified call site.
      */
-    abstract MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices);
+    MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
+        return getInvocation(callSiteDescriptor, linkerServices, null);
+    }
 
+    /**
+     * Creates an invocation for the dynamic method. It will select the method with the explicit specified signature. If
+     * the method doesn't have an overload with the exact specified signature, null is returned.
+     *
+     * @param callSiteDescriptor descriptor of the call site
+     * @param linkerServices linker services. Used for language-specific type conversions.
+     * @param explicitSignature the explicitly requested signature for the method. Can be null in which case no explicit
+     * signature is requested.
+     * @return an invocation suitable for calling the method from the specified call site.
+     */
+    abstract MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
+            List<Class<?>> explicitSignature);
     /**
      * True if this dynamic method already contains a method handle with an identical signature as the passed in method
      * handle.

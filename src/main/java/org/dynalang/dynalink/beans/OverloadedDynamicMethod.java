@@ -53,7 +53,11 @@ class OverloadedDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices) {
+    public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices,
+            List<Class<?>> explicitSignature) {
+        if(explicitSignature != null) {
+            return getExplicitInvocation(callSiteDescriptor, linkerServices, explicitSignature);
+        }
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
 
         // First, find all methods applicable to the call site by subtyping (JLS 15.12.2.2)
@@ -124,15 +128,24 @@ class OverloadedDynamicMethod extends DynamicMethod {
         return new OverloadedMethod(invokables, this, callSiteType, linkerServices).getInvoker();
     }
 
+    private MethodHandle getExplicitInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
+            List<Class<?>> explicitSignature) {
+        final MethodHandle mh = getExplicitMethod(explicitSignature);
+        return mh == null ? null : new SimpleDynamicMethod(mh).getInvocation(callSiteDescriptor, linkerServices);
+    }
+
     @Override
     public boolean contains(MethodHandle mh) {
-        final List<Class<?>> paramTypes = mh.type().parameterList();
+        return getExplicitMethod(mh.type().parameterList()) != null;
+    }
+
+    private MethodHandle getExplicitMethod(List<Class<?>> signature) {
         for(MethodHandle method: methods) {
-            if(method.type().parameterList().equals(paramTypes)) {
-                return true;
+            if(method.type().parameterList().equals(signature)) {
+                return method;
             }
         }
-        return false;
+        return null;
     }
 
     ClassLoader getClassLoader() {

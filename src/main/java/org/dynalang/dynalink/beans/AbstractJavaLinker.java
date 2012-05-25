@@ -30,9 +30,14 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.dynalang.dynalink.Results;
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
@@ -42,6 +47,7 @@ import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * A base class for both {@link ClassStaticsLinker} and {@link BeanLinker}. Deals with common aspects of property
@@ -56,7 +62,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     private final MethodHandle assignableGuard;
     private final Map<String, AnnotatedMethodHandle> propertyGetters = new HashMap<String, AnnotatedMethodHandle>();
     private final Map<String, DynamicMethod> propertySetters = new HashMap<String, DynamicMethod>();
-    private final Map<String, DynamicMethod> methods = new HashMap<String, DynamicMethod>();
+    private final ConcurrentMap<String, DynamicMethod> methods = new ConcurrentHashMap<String, DynamicMethod>();
 
     AbstractJavaLinker(Class<?> clazz, MethodHandle classGuard) {
         this(clazz, classGuard, classGuard);
@@ -214,15 +220,11 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     private GuardedInvocation getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            Object... args) {
+            Object... args) throws ClassNotFoundException {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
-                String name = callSiteDescriptor.getNameToken(2);
-                final int parens = name.indexOf('(');
-                if(parens != -1) {
-                    name = name.substring(0, parens);
-                }
-                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices, name, methods);
+                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
+                        callSiteDescriptor.getNameToken(2), methods);
             }
             default: {
                 return null;
@@ -231,21 +233,96 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     private GuardedInvocation createGuardedDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap) {
+            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap)
+    throws ClassNotFoundException {
         final MethodHandle invocation =
                 getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName, methodMap);
         return invocation == null ? null : new GuardedInvocation(invocation,
                 getClassGuard(callSiteDescriptor));
     }
 
-    private static MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methods) {
-        final DynamicMethod dynaMethod = methods.get(methodName);
-        return dynaMethod == null ? null : dynaMethod.getInvocation(callSiteDescriptor, linkerServices);
+    private MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
+            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap)
+    throws ClassNotFoundException {
+        DynamicMethod dynaMethod = methodMap.get(methodName);
+        if(dynaMethod == null) {
+            dynaMethod = getExplicitSignatureDynamicMethod(callSiteDescriptor, linkerServices, methodName, methodMap);
+            if(dynaMethod == null) {
+                return null;
+            }
+        }
+        return dynaMethod.getInvocation(callSiteDescriptor, linkerServices);
+    }
+
+    private DynamicMethod getExplicitSignatureDynamicMethod(CallSiteDescriptor callSiteDescriptor,
+            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodsMap)
+    throws ClassNotFoundException {
+        // What's below is meant to support the "name(type, type, ...)" syntax that programmers can use in a method name
+        // to manually pin down an exact overloaded variant. This is not usually required, as the overloaded method
+        // resolution works correctly in almost every situation. However, in presence of many language-specific
+        // conversions with a radically dynamic language, most overloaded methods will end up being constantly selected
+        // at invocation time, so a programmer knowledgable of the situation might choose to pin down an exact overload
+        // for performance reasons.
+
+        // Is the method name lexically of the form "name(types)"?
+        final int lastChar = methodName.length() - 1;
+        if(methodName.charAt(lastChar) != ')') {
+            return null;
+        }
+        final int openBrace = methodName.indexOf('(');
+        if(openBrace == -1) {
+            return null;
+        }
+
+        // Find an existing method for the "name" part
+        final DynamicMethod simpleNamedMethod = methodsMap.get(methodsMap.get(methodName.substring(0, openBrace)));
+        if(simpleNamedMethod == null) {
+            return null;
+        }
+
+        // Try to get the handle for the explicit parameter types. Note that any formal parameter types on the method
+        // must be visible to declaring class' loader, so we can use it for class name resolution.
+        final MethodHandle explicitHandle = simpleNamedMethod.getInvocation(callSiteDescriptor, linkerServices,
+                getTypes(methodName.substring(openBrace + 1, lastChar), clazz.getClassLoader()));
+        if(explicitHandle == null) {
+            return null;
+        }
+
+        // Encapsulate the handle in a SimpleDynamicMethod
+        final DynamicMethod simpleDynaMethod;
+        if(simpleNamedMethod instanceof SimpleDynamicMethod) {
+            simpleDynaMethod = simpleNamedMethod;
+        } else {
+            simpleDynaMethod = new SimpleDynamicMethod(explicitHandle);
+        }
+
+        // Save it for subsequent lookups
+        methodsMap.put(methodName, simpleDynaMethod );
+
+        return simpleDynaMethod;
+    }
+
+    private static List<Class<?>> getTypes(String typeSpec, ClassLoader classLoader) throws ClassNotFoundException {
+        final StringTokenizer tok = new StringTokenizer(",");
+        final List<Class<?>> list = new ArrayList<>(tok.countTokens());
+        while(tok.hasMoreTokens()) {
+            final String name = tok.nextToken().trim();
+            Class<?> type;
+            if(name.indexOf('.') == -1) {
+                type = TypeUtilities.getPrimitiveTypeByName(name);
+                if(type == null) {
+                    type = Class.forName("java.lang." + name, true, classLoader);
+                }
+            } else {
+                type = Class.forName(name, true, classLoader);
+            }
+            list.add(type);
+        }
+        return list;
     }
 
     private GuardedInvocation getPropertySetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            Object... arguments) {
+            Object... arguments) throws ClassNotFoundException {
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
