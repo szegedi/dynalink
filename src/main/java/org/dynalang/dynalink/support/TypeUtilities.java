@@ -124,6 +124,7 @@ public class TypeUtilities {
 
     private static final Map<Class<?>, Class<?>> WRAPPER_TYPES = createWrapperTypes();
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TYPES = invertMap(WRAPPER_TYPES);
+    private static final Map<String, Class<?>> PRIMITIVE_TYPES_BY_NAME = createClassNameMapping(WRAPPER_TYPES.keySet());
 
     private static Map<Class<?>, Class<?>> createWrapperTypes() {
         final Map<Class<?>, Class<?>> wrapperTypes = new IdentityHashMap<Class<?>, Class<?>>(8);
@@ -136,6 +137,14 @@ public class TypeUtilities {
         wrapperTypes.put(Float.TYPE, Float.class);
         wrapperTypes.put(Double.TYPE, Double.class);
         return Collections.unmodifiableMap(wrapperTypes);
+    }
+
+    private static Map<String, Class<?>> createClassNameMapping(Collection<Class<?>> classes) {
+        final Map<String, Class<?>> map = new HashMap<>();
+        for(Class<?> clazz: classes) {
+            map.put(clazz.getName(), clazz);
+        }
+        return map;
     }
 
     private static <K, V> Map<V, K> invertMap(Map<K, V> map) {
@@ -328,5 +337,9 @@ public class TypeUtilities {
 
     public static Class<?> getPrimitiveType(Class<?> referenceClass) {
         return PRIMITIVE_TYPES.get(referenceClass);
+    }
+
+    public static Class<?> getPrimitiveTypeByName(String name) {
+        return PRIMITIVE_TYPES_BY_NAME.get(name);
     }
 }
