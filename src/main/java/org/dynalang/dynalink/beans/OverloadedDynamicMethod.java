@@ -136,12 +136,12 @@ class OverloadedDynamicMethod extends DynamicMethod {
 
     @Override
     public boolean contains(MethodHandle mh) {
-        return getExplicitMethod(mh.type().parameterList()) != null;
+        return getExplicitMethod(getParameterListNoReceiver(mh.type())) != null;
     }
 
     private MethodHandle getExplicitMethod(List<Class<?>> signature) {
         for(MethodHandle method: methods) {
-            if(method.type().parameterList().equals(signature)) {
+            if(getParameterListNoReceiver(method.type()).equals(signature)) {
                 return method;
             }
         }

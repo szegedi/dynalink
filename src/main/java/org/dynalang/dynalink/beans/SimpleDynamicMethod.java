@@ -65,7 +65,7 @@ class SimpleDynamicMethod extends DynamicMethod {
 
     private MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices, List<Class<?>> explicitSignature) {
         final MethodType methodType = target.type();
-        if(explicitSignature != null && !explicitSignature.equals(methodType.parameterList())) {
+        if(explicitSignature != null && !explicitSignature.equals(getParameterListNoReceiver(methodType))) {
             return null;
         }
         final int paramsLen = methodType.parameterCount();

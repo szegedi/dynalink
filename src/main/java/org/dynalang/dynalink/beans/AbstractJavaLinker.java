@@ -275,7 +275,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         }
 
         // Find an existing method for the "name" part
-        final DynamicMethod simpleNamedMethod = methodsMap.get(methodsMap.get(methodName.substring(0, openBrace)));
+        final DynamicMethod simpleNamedMethod = methodsMap.get(methodName.substring(0, openBrace));
         if(simpleNamedMethod == null) {
             return null;
         }
@@ -303,7 +303,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     private static List<Class<?>> getTypes(String typeSpec, ClassLoader classLoader) throws ClassNotFoundException {
-        final StringTokenizer tok = new StringTokenizer(",");
+        final StringTokenizer tok = new StringTokenizer(typeSpec, ",");
         final List<Class<?>> list = new ArrayList<>(tok.countTokens());
         while(tok.hasMoreTokens()) {
             final String name = tok.nextToken().trim();

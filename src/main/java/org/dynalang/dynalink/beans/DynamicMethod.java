@@ -17,6 +17,7 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.util.List;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
@@ -68,4 +69,8 @@ abstract class DynamicMethod {
      * @return true if it already contains an equivalent method handle.
      */
     abstract boolean contains(MethodHandle mh);
+
+    static List<Class<?>> getParameterListNoReceiver(MethodType type) {
+        return type.parameterList().subList(1, type.parameterCount());
+    }
 }
