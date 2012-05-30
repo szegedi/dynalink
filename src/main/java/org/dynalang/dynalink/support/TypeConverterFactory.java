@@ -157,7 +157,7 @@ public class TypeConverterFactory {
             if(!TypeUtilities.isMethodInvocationConvertible(sourceType, targetType2)) {
                 return Comparison.TYPE_1_BETTER;
             }
-        } else if(TypeUtilities.isMethodInvocationConvertible(targetType2, sourceType)) {
+        } else if(TypeUtilities.isMethodInvocationConvertible(sourceType, targetType2)) {
             return Comparison.TYPE_2_BETTER;
         }
         for(ConversionComparator comparator: comparators) {
