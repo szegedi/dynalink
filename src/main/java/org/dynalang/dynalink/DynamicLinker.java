@@ -94,30 +94,29 @@ public class DynamicLinker {
         callSite.setTarget(createRelinkAndInvokeMethod(callSite));
     }
 
-    private static final MethodHandle RELINK_AND_INVOKE = new Lookup(MethodHandles.lookup()).findSpecial(
-            DynamicLinker.class, "_relinkAndInvoke",
-            MethodType.methodType(Object.class, RelinkableCallSite.class, Object[].class));
+    private static final MethodHandle RELINK = Lookup.findOwnSpecial(MethodHandles.lookup(), "relink",
+            MethodHandle.class, RelinkableCallSite.class, Object[].class);
 
     private MethodHandle createRelinkAndInvokeMethod(final RelinkableCallSite callSite) {
         // Make a bound MH of invoke() for this linker and call site
-        final MethodHandle boundInvoker = MethodHandles.insertArguments(RELINK_AND_INVOKE, 0, this, callSite);
+        final MethodHandle boundRelinker = MethodHandles.insertArguments(RELINK, 0, this, callSite);
         // Make a MH that gathers all arguments to the invocation into an Object[]
         final MethodType type = callSite.getDescriptor().getMethodType();
-        final MethodHandle collectingInvoker = boundInvoker.asCollector(Object[].class, type.parameterCount());
-        // Make a MH that converts all args to Object
-        return collectingInvoker.asType(type);
+        final MethodHandle collectingRelinker = boundRelinker.asCollector(Object[].class, type.parameterCount());
+        return MethodHandles.foldArguments(MethodHandles.exactInvoker(type), collectingRelinker.asType(
+                type.changeReturnType(MethodHandle.class)));
     }
 
     /**
-     * Relinks a call site conforming to the invocation arguments, and then invokes the newly linked method handle.
+     * Relinks a call site conforming to the invocation arguments.
      *
      * @param callSite the call site itself
      * @param arguments arguments to the invocation
-     * @return return value of the invocation
-     * @throws Throwable rethrown underlying method handle invocation throwable.
+     * @return return the method handle for the invocation
+     * @throws Exception rethrows any exception thrown by the linkers
      */
     @SuppressWarnings("unused")
-    private Object _relinkAndInvoke(RelinkableCallSite callSite, Object... arguments) throws Throwable {
+    private MethodHandle relink(RelinkableCallSite callSite, Object... arguments) throws Exception {
         final CallSiteDescriptor callSiteDescriptor = callSite.getDescriptor();
         final LinkRequest linkRequest =
                 runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, arguments)
@@ -148,8 +147,6 @@ public class DynamicLinker {
         if(syncOnRelink) {
             MutableCallSite.syncAll(new MutableCallSite[] { (MutableCallSite)callSite });
         }
-        // Invoke the method. Note we bypass the guard, as the assumption is that the current arguments will pass the
-        // guard (and there actually might be no guard at all).
-        return guardedInvocation.getInvocation().invokeWithArguments(arguments);
+        return guardedInvocation.getInvocation();
     }
 }
