@@ -259,7 +259,7 @@ public class TypeUtilities {
      * @param superType the supposed supertype
      * @return true if subType is a proper (not identical to) primitive subtype of the superType
      */
-    static boolean isProperPrimitiveSubtype(Class<?> subType, Class<?> superType) {
+    private static boolean isProperPrimitiveSubtype(Class<?> subType, Class<?> superType) {
         if(superType == boolean.class || subType == boolean.class) {
             return false;
         }
@@ -335,10 +335,6 @@ public class TypeUtilities {
      */
     private static boolean isAssignableFromBoxedPrimitive(Class<?> clazz) {
         return PRIMITIVE_WRAPPER_TYPES.contains(clazz);
-    }
-
-    public static Class<?> getPrimitiveType(Class<?> referenceClass) {
-        return PRIMITIVE_TYPES.get(referenceClass);
     }
 
     public static Class<?> getPrimitiveTypeByName(String name) {
