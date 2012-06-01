@@ -80,7 +80,7 @@ class MaximallySpecific {
         boolean t2MoreSpecific = false;
         // NOTE: Starting from 1 as overloaded method resolution doesn't depend on 0th element, which is the type of
         // 'this'. We're only dealing with instance methods here, not static methods. Actually, static methods will have
-        // a fake 'this' of type ClassStatics.
+        // a fake 'this' of type StaticClass.
         for(int i = 1; i < maxPc; ++i) {
             final Class<?> c1 = getParameterClass(t1, pc1, i, varArgs);
             final Class<?> c2 = getParameterClass(t2, pc2, i, varArgs);

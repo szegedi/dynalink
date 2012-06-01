@@ -31,8 +31,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-class ClassStaticsIntrospector extends FacetIntrospector {
-    ClassStaticsIntrospector(Class<?> clazz) {
+class StaticClassIntrospector extends FacetIntrospector {
+    StaticClassIntrospector(Class<?> clazz) {
         super(clazz);
     }
 

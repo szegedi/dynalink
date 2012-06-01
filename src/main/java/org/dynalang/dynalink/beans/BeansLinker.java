@@ -49,7 +49,7 @@ public class BeansLinker implements GuardingDynamicLinker {
     private static final ClassValue<TypeBasedGuardingDynamicLinker> linkers = new ClassValue<TypeBasedGuardingDynamicLinker>() {
         @Override
         protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
-            return clazz == Class.class ? new ClassLinker() : clazz == ClassStatics.class ? new ClassStaticsLinker() :
+            return clazz == Class.class ? new ClassLinker() : clazz == StaticClass.class ? new StaticClassLinker() :
                 new BeanLinker(clazz);
         }
     };

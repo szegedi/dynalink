@@ -26,11 +26,11 @@ import java.io.Serializable;
  * Conversely, {@link Class} objects exposed through {@link BeansLinker} expose the "static" synthetic property which
  * returns an instance of this class.
  */
-public class ClassStatics implements Serializable {
-    private static final ClassValue<ClassStatics> statics = new ClassValue<ClassStatics>() {
+public class StaticClass implements Serializable {
+    private static final ClassValue<StaticClass> staticClasses = new ClassValue<StaticClass>() {
         @Override
-        protected ClassStatics computeValue(Class<?> type) {
-            return new ClassStatics(type);
+        protected StaticClass computeValue(Class<?> type) {
+            return new StaticClass(type);
         }
     };
 
@@ -38,18 +38,18 @@ public class ClassStatics implements Serializable {
 
     private final Class<?> clazz;
 
-    private ClassStatics(Class<?> clazz) {
+    private StaticClass(Class<?> clazz) {
         clazz.getClass(); // NPE check
         this.clazz = clazz;
     }
 
     /**
-     * Retrieves the {@link ClassStatics} instance for the specified class.
+     * Retrieves the {@link StaticClass} instance for the specified class.
      * @param clazz the class for which the static facet is requested.
-     * @return the {@link ClassStatics} instance representing the specified class.
+     * @return the {@link StaticClass} instance representing the specified class.
      */
-    public static ClassStatics forClass(Class<?> clazz) {
-        return statics.get(clazz);
+    public static StaticClass forClass(Class<?> clazz) {
+        return staticClasses.get(clazz);
     }
 
     /**

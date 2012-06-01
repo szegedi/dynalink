@@ -114,7 +114,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
                 MethodHandles.publicLookup(), "dyn:callPropWithThis:format", MethodType.methodType(Object.class,
                         Object.class, Object.class, Object.class, Object.class)));
         linker.link(callSite);
-        System.out.println(callSite.dynamicInvoker().invokeWithArguments(ClassStatics.forClass(String.class),
+        System.out.println(callSite.dynamicInvoker().invokeWithArguments(StaticClass.forClass(String.class),
                 "%4.0f %4.0f", 12f, 1f));
     }
 

@@ -32,11 +32,11 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.Lookup;
 
 /**
- * Provides a linker for the {@link ClassStatics} objects.
+ * Provides a linker for the {@link StaticClass} objects.
  * @author Attila Szegedi
  * @version $Id: $
  */
-class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
+class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
     private final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {
         @Override
         protected GuardingDynamicLinker computeValue(Class<?> clazz) {
@@ -63,14 +63,14 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
             final Constructor<?>[] ctrs = clazz.getConstructors();
             final List<MethodHandle> mhs = new ArrayList<>(ctrs.length);
             for(int i = 0; i < ctrs.length; ++i) {
-                mhs.add(MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, ClassStatics.class));
+                mhs.add(MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, StaticClass.class));
             }
             return createDynamicMethod(mhs, clazz, "<init>");
         }
 
         @Override
         FacetIntrospector createFacetIntrospector() {
-            return new ClassStaticsIntrospector(clazz);
+            return new StaticClassIntrospector(clazz);
         }
 
         @Override
@@ -92,8 +92,8 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest request, LinkerServices linkerServices) throws Exception {
         final Object receiver = request.getReceiver();
-        if(receiver instanceof ClassStatics) {
-            return linkers.get(((ClassStatics)receiver).getRepresentedClass()).getGuardedInvocation(request,
+        if(receiver instanceof StaticClass) {
+            return linkers.get(((StaticClass)receiver).getRepresentedClass()).getGuardedInvocation(request,
                     linkerServices);
         }
         return null;
@@ -101,17 +101,17 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
 
     @Override
     public boolean canLinkType(Class<?> type) {
-        return type == ClassStatics.class;
+        return type == StaticClass.class;
     }
 
-    private static final MethodHandle GET_CLASS = new Lookup(MethodHandles.lookup()).findVirtual(ClassStatics.class,
+    private static final MethodHandle GET_CLASS = new Lookup(MethodHandles.lookup()).findVirtual(StaticClass.class,
             "getRepresentedClass", MethodType.methodType(Class.class));
 
-    private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(ClassStaticsLinker.class,
+    private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(StaticClassLinker.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
 
     @SuppressWarnings("unused")
     private static boolean isClass(Class<?> clazz, Object obj) {
-        return obj instanceof ClassStatics && ((ClassStatics)obj).getRepresentedClass() == clazz;
+        return obj instanceof StaticClass && ((StaticClass)obj).getRepresentedClass() == clazz;
     }
 }

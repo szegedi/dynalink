@@ -50,7 +50,7 @@ import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
- * A base class for both {@link ClassStaticsLinker} and {@link BeanLinker}. Deals with common aspects of property
+ * A base class for both {@link StaticClassLinker} and {@link BeanLinker}. Deals with common aspects of property
  * exposure and method calls for both static and instance facets of a class.
  *
  * @author Attila Szegedi
