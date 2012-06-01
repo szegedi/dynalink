@@ -203,16 +203,5 @@ public class TypeConverterFactory {
         return last == identity ? IDENTITY_CONVERSION : last;
     }
 
-    private static final MethodHandle IDENTITY_CONVERSION = new Lookup(MethodHandles.lookup()).findStatic(
-            TypeConverterFactory.class, "_identityConversion", MethodType.methodType(Object.class, Object.class));
-
-    /**
-     * This method is public for implementation reasons. Do not invoke it directly. Returns the object passed in.
-     *
-     * @param o the object
-     * @return the object
-     */
-    public static Object _identityConversion(Object o) {
-        return o;
-    }
+    private static final MethodHandle IDENTITY_CONVERSION = MethodHandles.identity(Object.class);
 }
