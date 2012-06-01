@@ -23,7 +23,7 @@ import java.io.Serializable;
  * construction of instances using "dyn:new"). Objects of this class are recognized by the {@link BeansLinker} as being
  * special, and operations on them will be linked against the represented class' static facet. The "class" synthetic
  * property is additionally recognized and returns the Java Class object, as per {@link #getRepresentedClass()} method.
- * Conversely, {@link Class} objects exposed through {@link BeansLinker} expose the "statics" synthetic property which
+ * Conversely, {@link Class} objects exposed through {@link BeansLinker} expose the "static" synthetic property which
  * returns an instance of this class.
  */
 public class ClassStatics implements Serializable {
@@ -45,7 +45,7 @@ public class ClassStatics implements Serializable {
 
     /**
      * Retrieves the {@link ClassStatics} instance for the specified class.
-     * @param clazz the class for which the statics instance is requested.
+     * @param clazz the class for which the static facet is requested.
      * @return the {@link ClassStatics} instance representing the specified class.
      */
     public static ClassStatics forClass(Class<?> clazz) {

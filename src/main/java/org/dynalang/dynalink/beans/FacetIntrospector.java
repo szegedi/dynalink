@@ -27,7 +27,7 @@ import org.dynalang.dynalink.support.Lookup;
 
 /**
  * Base for classes that expose class property, field, and method information to an {@link AbstractJavaLinker}. There
- * are subclasses for instance (bean) and statics facet of a class.
+ * are subclasses for instance (bean) and static facet of a class.
  * @author Attila Szegedi
  * @version $Id: $
  */
@@ -86,7 +86,7 @@ abstract class FacetIntrospector implements AutoCloseable {
 
     /**
      * Returns an edited method handle. A facet might need to edit an unreflected method handle before it is usable with
-     * the facet. By default, returns the passed method handle unchanged. The class statics' facet will introduce a
+     * the facet. By default, returns the passed method handle unchanged. The class' static facet will introduce a
      * dropArguments.
      * @param mh the method handle to edit.
      * @return the edited method handle.

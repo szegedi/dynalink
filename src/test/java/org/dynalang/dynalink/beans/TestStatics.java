@@ -15,13 +15,13 @@ public class TestStatics extends TestCase {
     private static final DynamicLinker linker = new DynamicLinkerFactory().createLinker();
 
     public void testFieldGetterSetter() throws Throwable {
-        final Object statics = getProperty("statics", T1.class);
+        final Object statics = getProperty("static", T1.class);
         setProperty("foo", statics, "fooValue");
         assertEquals("fooValue", getProperty("foo", statics));
     }
 
     public void testPropertyGetterSetter() throws Throwable {
-        final Object statics = getProperty("statics", T2.class);
+        final Object statics = getProperty("static", T2.class);
         setProperty("foo", statics, "fooValue");
         assertTrue(T2.invokedSetFooString);
         assertEquals("fooValue", getProperty("foo", statics));

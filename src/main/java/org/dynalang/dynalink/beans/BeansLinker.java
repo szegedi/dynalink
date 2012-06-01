@@ -37,7 +37,7 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  * {@link java.util.Collection});</li>
  * <li>expose {@code dyn:new} on instances of {@link java.lang.Class} as calls to constructors;</li>
  * <li>expose static methods, fields, and properties of classes as an object accessible through virtual property named
- * {@code statics} on instances of {@link java.lang.Class}.</li>
+ * {@code static} on instances of {@link java.lang.Class}.</li>
  * </ul>
  *  Overloaded method resolution is handled for property setters, methods, and constructors. Variable argument
  *  invocation is handled for methods and constructors. Currently, only public fields and methods are supported.
