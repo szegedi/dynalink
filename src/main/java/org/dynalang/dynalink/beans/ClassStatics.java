@@ -19,12 +19,12 @@ package org.dynalang.dynalink.beans;
 import java.io.Serializable;
 
 /**
- * Object that represents the static facet of a class (its static methods, properties, and fields). Objects of this
- * class are recognized by the {@link BeansLinker} as being special, and operations on them will be linked against the
- * represented class' static facet. The "class" synthetic property is additionally recognized and returns the Java Class
- * object, as per {@link #getRepresentedClass()} method. Conversely, {@link Class} objects exposed through
- * {@link BeansLinker} expose the "statics" synthetic property which returns an instance of this class. The linker also
- * interprets the "dyn:new" operation on these objects just as if they were executed on the Class they represent.
+ * Object that represents the static facet of a class (its static methods, properties, and fields, as well as
+ * construction of instances using "dyn:new"). Objects of this class are recognized by the {@link BeansLinker} as being
+ * special, and operations on them will be linked against the represented class' static facet. The "class" synthetic
+ * property is additionally recognized and returns the Java Class object, as per {@link #getRepresentedClass()} method.
+ * Conversely, {@link Class} objects exposed through {@link BeansLinker} expose the "statics" synthetic property which
+ * returns an instance of this class.
  */
 public class ClassStatics implements Serializable {
     private static final ClassValue<ClassStatics> statics = new ClassValue<ClassStatics>() {

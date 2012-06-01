@@ -19,6 +19,9 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -26,7 +29,6 @@ import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
-import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.Lookup;
 
 /**
@@ -43,9 +45,27 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
     };
 
     private static class SingleClassStaticsLinker extends AbstractJavaLinker {
+        private final DynamicMethod constructor;
+
         SingleClassStaticsLinker(Class<?> clazz) {
             super(clazz, IS_CLASS.bindTo(clazz));
             addPropertyGetter("class", GET_CLASS, false);
+            constructor = createConstructorMethod(clazz);
+        }
+
+        /**
+         * Creates a dynamic method containing all overloads of a class' public constructor
+         * @param clazz the target class
+         * @return a dynamic method containing all overloads of a class' public constructor. If the class has no public
+         * constructors, returns null.
+         */
+        private static DynamicMethod createConstructorMethod(Class<?> clazz) {
+            final Constructor<?>[] ctrs = clazz.getConstructors();
+            final List<MethodHandle> mhs = new ArrayList<>(ctrs.length);
+            for(int i = 0; i < ctrs.length; ++i) {
+                mhs.add(MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, ClassStatics.class));
+            }
+            return createDynamicMethod(mhs, clazz, "<init>");
         }
 
         @Override
@@ -62,17 +82,8 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
             }
             final CallSiteDescriptor desc = request.getCallSiteDescriptor();
             final String op = desc.getNameToken(1);
-            if("new" == op) {
-                // Re-invoke the linker chain for the Class object
-                final Object[] args = request.getArguments();
-                args[0] = clazz;
-                final LinkRequest classRequest = new LinkRequestImpl(
-                        request.getCallSiteDescriptor().changeParameterType(0, Class.class), args);
-                final GuardedInvocation classInvocation = linkerServices.getGuardedInvocation(classRequest);
-                // If it found a constructor invocation, link that with a modified guard. To be completely honest, we'd
-                if(classInvocation != null) {
-                    return classInvocation.filterArguments(0, GET_CLASS_OBJ).asType(desc);
-                }
+            if("new" == op && constructor != null) {
+                return new GuardedInvocation(constructor.getInvocation(desc, linkerServices), getClassGuard(desc));
             }
             return null;
         }
@@ -100,16 +111,7 @@ class ClassStaticsLinker implements TypeBasedGuardingDynamicLinker {
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
 
     @SuppressWarnings("unused")
-    private static Class<?> getRepresentedClass(Object obj) {
-        return obj instanceof ClassStatics ? ((ClassStatics)obj).getRepresentedClass() : null;
-    }
-
-    private static final MethodHandle GET_CLASS_OBJ = new Lookup(MethodHandles.lookup()).findStatic(
-            ClassStaticsLinker.class, "getRepresentedClass", MethodType.methodType(Class.class, Object.class));
-
-    @SuppressWarnings("unused")
     private static boolean isClass(Class<?> clazz, Object obj) {
         return obj instanceof ClassStatics && ((ClassStatics)obj).getRepresentedClass() == clazz;
     }
-
 }

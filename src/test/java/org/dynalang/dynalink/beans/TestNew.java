@@ -27,12 +27,13 @@ public class TestNew extends TestCase {
     }
 
     private static T1 ctor(Object arg1) throws Throwable {
-        return T1.class.cast(getInvoker("dyn:new", T1.class, Class.class, Object.class).invoke(T1.class, arg1));
+        return T1.class.cast(getInvoker("dyn:new", T1.class, ClassStatics.class, Object.class).invoke(
+                ClassStatics.forClass(T1.class), arg1));
     }
 
     private static T1 ctor(Object arg1, Object arg2) throws Throwable {
-        return T1.class.cast(getInvoker("dyn:new", T1.class, Class.class, Object.class, Object.class).invoke(T1.class,
-                arg1, arg2));
+        return T1.class.cast(getInvoker("dyn:new", T1.class, ClassStatics.class, Object.class, Object.class).invoke(
+                ClassStatics.forClass(T1.class), arg1, arg2));
     }
 
     private static MethodHandle getInvoker(String name, Class<?> retType, Class<?>... paramTypes) {
