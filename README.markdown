@@ -21,3 +21,4 @@ If you just want the binaries, you can get them from the
 
 Dynalink is Open Source software, licensed under the Apache 2.0 license.
 
+[![Build Status](https://secure.travis-ci.org/szegedi/dynalink.png)](http://travis-ci.org/szegedi/dynalink)
