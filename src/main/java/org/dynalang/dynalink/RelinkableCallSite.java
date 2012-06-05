@@ -37,10 +37,10 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
  */
 public interface RelinkableCallSite {
     /**
-     * See {@link CallSite#setTarget(MethodHandle)}.
-     * @param target the target of the call site
+     * Sets the initial target to a relink-and-invoke method.
+     * @param relinkAndInvoke a relink-and-invoke method handle supplied by the {@link DynamicLinker}.
      */
-    public void setTarget(MethodHandle target);
+    public void setRelinkAndInvoke(MethodHandle relinkAndInvoke);
 
     /**
      * Returns the descriptor for this call site.
