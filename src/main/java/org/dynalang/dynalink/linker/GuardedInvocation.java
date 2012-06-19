@@ -228,9 +228,9 @@ public class GuardedInvocation {
      * @return a composite method handle.
      */
     public MethodHandle compose(MethodHandle switchpointFallback, MethodHandle guardFallback) {
-        final MethodHandle switched =
-                switchPoint == null ? invocation : switchPoint.guardWithTest(invocation, switchpointFallback);
-        return guard == null ? switched : MethodHandles.guardWithTest(guard, switched, guardFallback);
+        final MethodHandle guarded =
+                guard == null ? invocation : MethodHandles.guardWithTest(guard, invocation, guardFallback);
+        return switchPoint == null ? guarded : switchPoint.guardWithTest(guarded, switchpointFallback);
     }
 
     private static void assertType(MethodHandle mh, MethodType type) {
