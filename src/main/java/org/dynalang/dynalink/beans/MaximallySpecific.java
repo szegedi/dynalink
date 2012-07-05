@@ -109,12 +109,16 @@ class MaximallySpecific {
     }
 
     private static Comparison compare(Class<?> c1, Class<?> c2, Class<?>[] argTypes, int i, LinkerServices cmp) {
+        if(cmp != null) {
+            final Comparison c = cmp.compareConversion(argTypes[i], c1, c2);
+            if(c != Comparison.INDETERMINATE) {
+                return c;
+            }
+        }
         if(TypeUtilities.isSubtype(c1, c2)) {
             return Comparison.TYPE_1_BETTER;
         } if(TypeUtilities.isSubtype(c2, c1)) {
             return Comparison.TYPE_2_BETTER;
-        } else if(cmp != null) {
-            return cmp.compareConversion(argTypes[i], c1, c2);
         }
         return Comparison.INDETERMINATE;
     }
