@@ -109,7 +109,11 @@ public class ChainedCallSite extends AbstractRelinkableCallSite {
         try {
             PRUNE = MethodHandles.lookup().findSpecial(ChainedCallSite.class, "prune", MethodType.methodType(
                     MethodHandle.class, MethodHandle.class), ChainedCallSite.class);
-        } catch(IllegalAccessException | NoSuchMethodException e) {
+        // NOTE: using two catch blocks so we don't introduce a reference to 1.7 ReflectiveOperationException, allowing
+        // Dynalink to be used on 1.6 JVMs with Remi's backport library.
+        } catch(IllegalAccessException e) {
+            throw new AssertionError(e.getMessage(), e); // Can not happen
+        } catch(NoSuchMethodException e) {
             throw new AssertionError(e.getMessage(), e); // Can not happen
         }
     }
