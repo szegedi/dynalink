@@ -19,7 +19,10 @@ public interface ConversionComparator {
     }
 
     /**
-     * Determines which of the two type conversions is preferred.
+     * Determines which of the two type conversions is preferred. This method will never be invoked if source type is
+     * convertible to exactly one of the target types using a JLS Method Invocation Conversion as Dynalink will chose
+     * that target type internally. Therefore, if this method is invoked, you can assume that source type is either not
+     * convertible to any of the target types, or is convertible to both of them.
      * @param sourceType the source type.
      * @param targetType1 one potential target type
      * @param targetType2 another potential target type.
