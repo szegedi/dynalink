@@ -175,7 +175,8 @@ public class Lookup {
 
     /**
      * Given a lookup, finds using {@link #findStatic(Class, String, MethodType)} a method on that lookup's class.
-     * Useful in classes' code for convenient linking to their own privates.
+     * Useful in classes' code for convenient linking to their own privates. It's easier to use than {@code findStatic}
+     * in that you can just list the parameter types, and don't have to specify lookup class.
      * @param lookup the lookup for the class
      * @param name the name of the method
      * @param rtype the return type of the method
@@ -183,6 +184,20 @@ public class Lookup {
      * @return the method handle for the method
      */
     public static MethodHandle findOwnStatic(MethodHandles.Lookup lookup, String name, Class<?> rtype, Class<?>... ptypes) {
-        return new Lookup(lookup).findStatic(lookup.lookupClass(), name, MethodType.methodType(rtype, ptypes));
+        return new Lookup(lookup).findOwnStatic(name, rtype, ptypes);
+    }
+
+    /**
+     * Finds using {@link #findStatic(Class, String, MethodType)} a method on that lookup's class. Useful in classes'
+     * code for convenient linking to their own privates. It's easier to use than {@code findStatic} in that you can
+     * just list the parameter types, and don't have to specify lookup class.
+     * @param lookup the lookup for the class
+     * @param name the name of the method
+     * @param rtype the return type of the method
+     * @param ptypes the parameter types of the method
+     * @return the method handle for the method
+     */
+    public MethodHandle findOwnStatic(String name, Class<?> rtype, Class<?>... ptypes) {
+        return findStatic(lookup.lookupClass(), name, MethodType.methodType(rtype, ptypes));
     }
 }
