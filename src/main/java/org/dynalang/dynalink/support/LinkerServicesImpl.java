@@ -58,6 +58,11 @@ public class LinkerServicesImpl implements LinkerServices {
     }
 
     @Override
+    public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+        return typeConverterFactory.getTypeConverter(sourceType, targetType);
+    }
+
+    @Override
     public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
         return typeConverterFactory.compareConversion(sourceType, targetType1, targetType2);
     }

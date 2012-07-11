@@ -50,6 +50,18 @@ public interface LinkerServices {
     public MethodHandle asType(MethodHandle handle, MethodType fromType);
 
     /**
+     * Given a source and target type, returns a method handle that converts between them. Never returns null; in worst
+     * case it will return an identity conversion (that might fail for some values at runtime). You rarely need to use
+     * this method directly; you should mostly rely on {@link #asType(MethodHandle, MethodType)} instead. You really
+     * only need this method if you have a piece of your program that is written in Java, and you need to reuse existing
+     * type conversion machinery in a non-invokedynamic context.
+     * @param sourceType the type to convert from
+     * @param targetType the type to convert to
+     * @return a method handle performing the conversion.
+     */
+    public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType);
+
+    /**
      * Returns true if there might exist a conversion between the requested types (either an automatic JVM conversion,
      * or one provided by any available {@link GuardingTypeConverterFactory}), or false if there definitely does not
      * exist a conversion between the requested types. Note that returning true does not guarantee that the conversion

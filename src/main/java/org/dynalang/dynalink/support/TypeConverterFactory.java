@@ -54,6 +54,24 @@ public class TypeConverterFactory {
         }
     };
 
+    private final ClassValue<ClassMap<MethodHandle>> converterIdentityMap = new ClassValue<ClassMap<MethodHandle>>() {
+        @Override
+        protected ClassMap<MethodHandle> computeValue(final Class<?> sourceType) {
+            return new ClassMap<MethodHandle>(sourceType.getClassLoader()) {
+                @Override
+                protected MethodHandle computeValue(Class<?> targetType) {
+                    if(!canAutoConvert(sourceType, targetType)) {
+                        final MethodHandle converter = getTypeConverterNull(sourceType, targetType);
+                        if(converter != null) {
+                            return converter;
+                        }
+                    }
+                    return IDENTITY_CONVERSION.asType(MethodType.methodType(targetType, sourceType));
+                }
+            };
+        }
+    };
+
     /**
      * Creates a new type converter factory from the available {@link GuardingTypeConverterFactory} instances.
      *
@@ -103,7 +121,7 @@ public class TypeConverterFactory {
             if(canAutoConvert(fromParamType, toParamType)) {
                 newHandle = applyConverters(newHandle, pos, converters);
             } else {
-                final MethodHandle converter = getTypeConverter(fromParamType, toParamType);
+                final MethodHandle converter = getTypeConverterNull(fromParamType, toParamType);
                 if(converter != null) {
                     if(converters.isEmpty()) {
                         pos = i;
@@ -139,7 +157,7 @@ public class TypeConverterFactory {
      * @return true if there can be a conversion, false if there can not.
      */
     public boolean canConvert(final Class<?> from, final Class<?> to) {
-        return canAutoConvert(from, to) || getTypeConverter(from, to) != null;
+        return canAutoConvert(from, to) || getTypeConverterNull(from, to) != null;
     }
 
     /**
@@ -180,9 +198,22 @@ public class TypeConverterFactory {
         return TypeUtilities.isMethodInvocationConvertible(fromType, toType);
     }
 
-    private MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+    private MethodHandle getTypeConverterNull(Class<?> sourceType, Class<?> targetType) {
         final MethodHandle converter = converterMap.get(sourceType).get(targetType);
         return converter == IDENTITY_CONVERSION ? null : converter;
+    }
+
+    /**
+     * Given a source and target type, returns a method handle that converts between them. Never returns null; in worst
+     * case it will return an identity conversion (that might fail for some values at runtime). You can use this method
+     * if you have a piece of your program that is written in Java, and you need to reuse existing type conversion
+     * machinery in a non-invokedynamic context.
+     * @param sourceType the type to convert from
+     * @param targetType the type to convert to
+     * @return a method handle performing the conversion.
+     */
+    public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+        return converterIdentityMap.get(sourceType).get(targetType);
     }
 
     private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) {

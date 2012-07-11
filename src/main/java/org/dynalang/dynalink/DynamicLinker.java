@@ -94,6 +94,21 @@ public class DynamicLinker {
         callSite.setRelinkAndInvoke(createRelinkAndInvokeMethod(callSite));
     }
 
+    /**
+     * Given a source and target type, returns a method handle that converts between them using either built-in Java
+     * method invocation conversions, or type conversions provided by language-specific linkers managed by this dynamic
+     * linker. Never returns null; in worst case it will return an identity conversion (that might fail for some values
+     * at runtime). You rarely need to use this method directly; you might need this method if you have a piece of your
+     * program that is written in Java, and you need to reuse existing type conversion machinery in a non-invokedynamic
+     * context.
+     * @param sourceType the type to convert from
+     * @param targetType the type to convert to
+     * @return a method handle performing the conversion.
+     */
+    public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+        return linkerServices.getTypeConverter(sourceType, targetType);
+    }
+
     private static final MethodHandle RELINK = Lookup.findOwnSpecial(MethodHandles.lookup(), "relink",
             MethodHandle.class, RelinkableCallSite.class, Object[].class);
 
