@@ -93,6 +93,12 @@ public class TestSimpleDynamicMethod extends TestCase {
             fail(); // Not supposed to be called
             return null;
         }
+
+        @Override
+        public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+            fail(); // Not supposed to be called
+            return null;
+        }
     }
 
     public void testExactArgsOnFixArgs() {

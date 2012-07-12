@@ -66,6 +66,11 @@ public class TestBeansLinker extends TestCase {
             public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
                 throw new AssertionFailedError();
             }
+
+            @Override
+            public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
+                throw new AssertionFailedError();
+            }
         };
 
         // Can't link with null arguments
