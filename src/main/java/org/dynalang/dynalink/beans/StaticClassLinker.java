@@ -19,6 +19,7 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,11 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
          * constructors, returns null.
          */
         private static DynamicMethod createConstructorMethod(Class<?> clazz) {
+            if(clazz.isArray()) {
+                final MethodHandle boundArrayCtor = ARRAY_CTOR.bindTo(clazz.getComponentType());
+                return new SimpleDynamicMethod(boundArrayCtor.asType(boundArrayCtor.type().changeReturnType(clazz)));
+            }
+
             final Constructor<?>[] ctrs = clazz.getConstructors();
             final List<MethodHandle> mhs = new ArrayList<>(ctrs.length);
             for(int i = 0; i < ctrs.length; ++i) {
@@ -109,6 +115,10 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
 
     private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(StaticClassLinker.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
+
+
+    private static final MethodHandle ARRAY_CTOR = Lookup.PUBLIC.findStatic(Array.class, "newInstance",
+            MethodType.methodType(Object.class, Class.class, int.class));
 
     @SuppressWarnings("unused")
     private static boolean isClass(Class<?> clazz, Object obj) {
