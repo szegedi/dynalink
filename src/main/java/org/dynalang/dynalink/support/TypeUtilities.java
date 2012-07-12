@@ -351,4 +351,16 @@ public class TypeUtilities {
     public static Class<?> getPrimitiveType(Class<?> wrapperType) {
         return WRAPPER_TO_PRIMITIVE_TYPES.get(wrapperType);
     }
+
+
+    /**
+     * When passed a class representing a primitive type, returns the class representing the corresponding
+     * wrapper type. I.e. calling it with {@code int.class} will return {@code Integer.class}. If passed a class
+     * that is not a primitive type, returns null.
+     * @param primitiveType the class object representing a primitive type
+     * @return the class object representing the wrapper type, or null if the passed class is not a primitive.
+     */
+    public static Class<?> getWrapperType(Class<?> primitiveType) {
+        return WRAPPER_TYPES.get(primitiveType);
+    }
 }
