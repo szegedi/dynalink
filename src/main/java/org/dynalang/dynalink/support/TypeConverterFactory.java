@@ -171,18 +171,18 @@ public class TypeConverterFactory {
      * conversion.
      */
     public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
+        for(ConversionComparator comparator: comparators) {
+            final Comparison result = comparator.compareConversion(sourceType, targetType1, targetType2);
+            if(result != Comparison.INDETERMINATE) {
+                return result;
+            }
+        }
         if(TypeUtilities.isMethodInvocationConvertible(sourceType, targetType1)) {
             if(!TypeUtilities.isMethodInvocationConvertible(sourceType, targetType2)) {
                 return Comparison.TYPE_1_BETTER;
             }
         } else if(TypeUtilities.isMethodInvocationConvertible(sourceType, targetType2)) {
             return Comparison.TYPE_2_BETTER;
-        }
-        for(ConversionComparator comparator: comparators) {
-            final Comparison result = comparator.compareConversion(sourceType, targetType1, targetType2);
-            if(result != Comparison.INDETERMINATE) {
-                return result;
-            }
         }
         return Comparison.INDETERMINATE;
     }
