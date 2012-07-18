@@ -63,15 +63,20 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
         private static DynamicMethod createConstructorMethod(Class<?> clazz) {
             if(clazz.isArray()) {
                 final MethodHandle boundArrayCtor = ARRAY_CTOR.bindTo(clazz.getComponentType());
-                return new SimpleDynamicMethod(boundArrayCtor.asType(boundArrayCtor.type().changeReturnType(clazz)));
+                return new SimpleDynamicMethod(drop(boundArrayCtor.asType(boundArrayCtor.type().changeReturnType(
+                        clazz))));
             }
 
             final Constructor<?>[] ctrs = clazz.getConstructors();
             final List<MethodHandle> mhs = new ArrayList<>(ctrs.length);
             for(int i = 0; i < ctrs.length; ++i) {
-                mhs.add(MethodHandles.dropArguments(Lookup.PUBLIC.unreflectConstructor(ctrs[i]), 0, StaticClass.class));
+                mhs.add(drop(Lookup.PUBLIC.unreflectConstructor(ctrs[i])));
             }
             return createDynamicMethod(mhs, clazz, "<init>");
+        }
+
+        private static MethodHandle drop(MethodHandle mh) {
+            return MethodHandles.dropArguments(mh, 0, StaticClass.class);
         }
 
         @Override
