@@ -35,6 +35,9 @@ import java.util.Set;
 public class TypeUtilities {
     static final Class<Object> OBJECT_CLASS = Object.class;
 
+    private TypeUtilities() {
+    }
+
     /**
      * Given two types represented by c1 and c2, returns a type that is their most specific common superclass or
      * superinterface.

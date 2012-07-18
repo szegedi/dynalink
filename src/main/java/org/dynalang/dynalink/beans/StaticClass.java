@@ -22,9 +22,9 @@ import java.io.Serializable;
  * Object that represents the static facet of a class (its static methods, properties, and fields, as well as
  * construction of instances using "dyn:new"). Objects of this class are recognized by the {@link BeansLinker} as being
  * special, and operations on them will be linked against the represented class' static facet. The "class" synthetic
- * property is additionally recognized and returns the Java Class object, as per {@link #getRepresentedClass()} method.
- * Conversely, {@link Class} objects exposed through {@link BeansLinker} expose the "static" synthetic property which
- * returns an instance of this class.
+ * property is additionally recognized and returns the Java {@link Class} object, as per {@link #getRepresentedClass()}
+ * method. Conversely, {@link Class} objects exposed through {@link BeansLinker} expose the "static" synthetic property
+ * which returns an instance of this class.
  */
 public class StaticClass implements Serializable {
     private static final ClassValue<StaticClass> staticClasses = new ClassValue<StaticClass>() {

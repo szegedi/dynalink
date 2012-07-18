@@ -34,8 +34,10 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 import org.dynalang.dynalink.support.Guards;
+import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.TypeConverterFactory;
@@ -45,7 +47,6 @@ import junit.framework.TestCase;
 /**
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TestOverloadedDynamicMethod extends TestCase {
     private BeanLinker linker;
@@ -118,6 +119,26 @@ public class TestOverloadedDynamicMethod extends TestCase {
                 "%4.0f %4.0f", 12f, 1f));
     }
 
+    public void testIntOrDouble() throws Throwable {
+        final DynamicMethod dm = linker.getMethod("intOrDouble");
+        final CallSiteDescriptor cs = createCallSiteDescriptor("intOrDouble", MethodType.methodType(Object.class,
+                Object.class, Object.class));
+        final MethodHandle mh = dm.getInvocation(cs, linkerServices);
+        assertNotNull(mh);
+        assertEquals("int", mh.invokeWithArguments(new Test1(), 1));
+        assertEquals("double", mh.invokeWithArguments(new Test1(), 1.0));
+    }
+
+    public void testStringOrDouble() throws Throwable {
+        final DynamicMethod dm = linker.getMethod("stringOrDouble");
+        final CallSiteDescriptor cs = createCallSiteDescriptor("stringOrDouble", MethodType.methodType(Object.class,
+                Object.class, Object.class));
+        final MethodHandle mh = dm.getInvocation(cs, linkerServices);
+        assertNotNull(mh);
+        assertEquals("double", mh.invokeWithArguments(new Test1(), 1));
+        assertEquals("double", mh.invokeWithArguments(new Test1(), 1.0));
+    }
+
     public void testVarArg() throws Throwable {
         final DynamicMethod dm = linker.getMethod("boo");
         // we want to link to the one-arg invocation
@@ -158,7 +179,22 @@ public class TestOverloadedDynamicMethod extends TestCase {
         assertEquals(retval, linker.getMethod("boo").getInvocation(csd, ls).invokeWithArguments(argList));
     }
 
-    public class Test1 {
+    public static void main(String[] args) throws Throwable {
+        TypeBasedGuardingDynamicLinker linker = BeansLinker.getLinkerForClass(Test1.class);
+        LinkerServices ls = new LinkerServicesImpl(new TypeConverterFactory(new ArrayList<GuardingTypeConverterFactory>()), linker);
+
+
+        Test1 test1 = new Test1();
+        GuardedInvocation inv = linker.getGuardedInvocation(new LinkRequestImpl(
+                CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "dyn:callPropWithThis:add",
+                        MethodType.methodType(Object.class, Object.class, Object.class, Object.class, Object.class, Object.class)),
+                        null, null, null, null, null), ls);
+        MethodHandle handle = inv.getInvocation();
+
+        System.out.println(handle.invokeWithArguments(test1, 1, 2, 3, 4));
+    }
+
+    public static class Test1 {
         public int add(int i1, int i2) {
             return 1;
         }
@@ -184,6 +220,22 @@ public class TestOverloadedDynamicMethod extends TestCase {
 
         public int boo(Class<?> a, int... b) {
             return 2;
+        }
+
+        public String intOrDouble(int i) {
+            return "int";
+        }
+
+        public String intOrDouble(double d) {
+            return "double";
+        }
+
+        public String stringOrDouble(String s) {
+            return "String";
+        }
+
+        public String stringOrDouble(double d) {
+            return "double";
         }
     }
 }

@@ -13,8 +13,13 @@ import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 
 /**
  * A relinkable call site that maintains a chain of linked method handles (up to at most 8 in the default
- * implementation) cascading from one to the other through guardWithTest(). Switchpoint-invalidated elements in the
- * chain are removed fairly eagerly (on each relink, and whenever a switchpoint-protected method handle falls back).
+ * implementation) cascading from one to the other through
+ * {@link MethodHandles#guardWithTest(MethodHandle, MethodHandle, MethodHandle)}. When it has to link a new method
+ * handle and the length of the chain is already at the maximum, it will throw away the oldest method handle.
+ * Switchpoint-invalidated handles in the chain are removed fairly eagerly (on each linking request, and whenever a
+ * switchpoint-protected method handle falls back during chain traversal on invocation). There is currently no profiling
+ * attached to the handles in the chain, so they are never reordered based on usage; the most recently linked method
+ * handle is always at the start of the chain.
  */
 public class ChainedCallSite extends AbstractRelinkableCallSite {
     private final AtomicReference<LinkedList<GuardedInvocation>> invocations = new AtomicReference<>();

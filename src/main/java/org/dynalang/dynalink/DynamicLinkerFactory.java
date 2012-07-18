@@ -36,8 +36,8 @@ import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.TypeConverterFactory;
 
 /**
- * A factory class for creating dynamic linkers. The most usual dynamic linker is a linker that is a composition of all
- * {@link GuardingDynamicLinker guarding dynamic linkers} known and precreated by the caller as well as any
+ * A factory class for creating {@link DynamicLinker}s. The most usual dynamic linker is a linker that is a composition
+ * of all {@link GuardingDynamicLinker}s known and pre-created by the caller as well as any
  * {@link AutoDiscovery automatically discovered} guarding linkers and the standard fallback {@link BeansLinker}. See
  * {@link DynamicLinker} documentation for tips on how to use this class.
  *

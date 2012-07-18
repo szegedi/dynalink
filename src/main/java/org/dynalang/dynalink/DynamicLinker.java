@@ -27,6 +27,7 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
@@ -49,17 +50,27 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  *     }
  *
  *     public static CallSite bootstrap(MethodHandles.Lookup caller, String name, MethodType type) {
- *         final MonomorphicCallSite callSite = new MonomorphicCallSite(lookup, name, type);
- *         dynamicLinker.link(callSite);
- *         return callSite;
+ *         return dynamicLinker.link(new MonomorphicCallSite(CallSiteDescriptorFactory.create(lookup, name, type)));
  *     }
  * }
  * </pre>
  *
- * Note how you're expected to implement a {@link GuardingDynamicLinker} for your own language. If your runtime doesn't
+ * Note how there are three components you will need to provide here:
+ * <ul>
+ * <li>You're expected to provide a {@link GuardingDynamicLinker} for your own language. If your runtime doesn't
  * have its own language and/or object model (i.e. it's a generic scripting shell), you don't need to implement a
- * dynamic linker; you would simply not invoke the <tt>setPrioritizedLinker</tt> on the factory, or even better, you
- * would simply use {@link DefaultBootstrapper}.
+ * dynamic linker; you would simply not invoke the {@code setPrioritizedLinker} method on the factory, or even better,
+ * simply use {@link DefaultBootstrapper}.</li>
+ * <li>The performance of the programs can depend on your choice of the class to represent call sites. The above
+ * example used {@link MonomorphicCallSite}, but you might want to use {@link ChainedCallSite} instead. You'll need to
+ * experiment and decide what fits your language runtime the best. You can subclass either of these or roll your own if
+ * you need to.</li>
+ * <li>You also need to provide {@link CallSiteDescriptor}s to your call sites. They are immutable objects that contain
+ * all the information about the call site: the class it is in (represented by the lookup object), the name of the
+ * method being invoked, and the method signature. The library has a default {@link CallSiteDescriptorFactory} for
+ * descriptors that you can use, or you can create your own descriptor classes, especially if you need to hang further
+ * information (values passed in additional parameters to the bootstrap method) to them.</li>
+ * </ul>
  *
  * @author Attila Szegedi
  */
@@ -88,9 +99,11 @@ public class DynamicLinker {
      * multi-language dispatch and relinking mechanisms.
      *
      * @param callSite the call site to link.
+     * @return the callSite, for easy call chaining.
      */
-    public void link(final RelinkableCallSite callSite) {
+    public <T extends RelinkableCallSite> T link(final T callSite) {
         callSite.setRelinkAndInvoke(createRelinkAndInvokeMethod(callSite));
+        return callSite;
     }
 
     /**

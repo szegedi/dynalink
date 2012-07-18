@@ -56,9 +56,6 @@ public class DefaultBootstrapper {
     }
 
     private static CallSite bootstrapInternal(MethodHandles.Lookup caller, String name, MethodType type) {
-        final MonomorphicCallSite callSite =
-                new MonomorphicCallSite(CallSiteDescriptorFactory.create(caller, name, type));
-        dynamicLinker.link(callSite);
-        return callSite;
+        return dynamicLinker.link(new MonomorphicCallSite(CallSiteDescriptorFactory.create(caller, name, type)));
     }
 }

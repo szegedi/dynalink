@@ -31,6 +31,9 @@ public class Guards {
     private static final Logger LOG = Logger
             .getLogger(Guards.class.getName(), "org.dynalang.dynalink.support.messages");
 
+    private Guards() {
+    }
+
     /**
      * Creates a guard method handle with arguments of a specified type, but with boolean return value. When invoked, it
      * returns true if the first argument is of the specified class (exactly of it, not a subclass). The rest of the

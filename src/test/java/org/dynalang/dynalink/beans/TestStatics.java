@@ -41,10 +41,8 @@ public class TestStatics extends TestCase {
     }
 
     private static MethodHandle getInvoker(String name, Class<?> retType, Class<?>... paramTypes) {
-        final MonomorphicCallSite cs = new MonomorphicCallSite(CallSiteDescriptorFactory.create(
-                MethodHandles.publicLookup(), name, MethodType.methodType(retType, paramTypes)));
-        linker.link(cs);
-        return cs.dynamicInvoker();
+        return linker.link(new MonomorphicCallSite(CallSiteDescriptorFactory.create(
+                MethodHandles.publicLookup(), name, MethodType.methodType(retType, paramTypes)))).dynamicInvoker();
     }
 
     public static class T1 {

@@ -30,6 +30,10 @@ import org.dynalang.dynalink.linker.GuardingDynamicLinker;
  * {@link DynamicLinkerFactory} instead.
  */
 public class AutoDiscovery {
+
+    private AutoDiscovery() {
+    }
+
     /**
      * Discovers all guarding dynamic linkers listed in JAR files of the context class loader of the current thread.
      *
