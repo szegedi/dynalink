@@ -11,7 +11,6 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * Represents overloaded methods applicable to a specific call site signature.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class ApplicableOverloadedMethods {
     private final List<MethodHandle> methods;

@@ -21,7 +21,6 @@ package org.dynalang.dynalink.linker;
  * passed to {@link GuardingDynamicLinker}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface LinkRequest {
     /**

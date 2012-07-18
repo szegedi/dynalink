@@ -30,7 +30,6 @@ import org.dynalang.dynalink.support.Guards;
  * A dynamic method bound to exactly one, non-overloaded Java method. Handles varargs.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class SimpleDynamicMethod extends DynamicMethod {
     private final MethodHandle target;

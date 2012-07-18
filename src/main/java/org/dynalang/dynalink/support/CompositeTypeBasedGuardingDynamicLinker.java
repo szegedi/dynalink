@@ -34,7 +34,6 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  * delegated to those linkers only, speeding up dispatch.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardingDynamicLinker, Serializable {
     private static final long serialVersionUID = 1L;

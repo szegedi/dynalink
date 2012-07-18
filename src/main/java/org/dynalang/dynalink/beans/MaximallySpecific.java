@@ -14,7 +14,6 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * Utility class that encapsulates the algorithm for choosing the maximally specific methods.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class MaximallySpecific {
     /**

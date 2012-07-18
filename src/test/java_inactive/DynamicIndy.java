@@ -25,7 +25,6 @@ import org.objectweb.asm.Type;
  * -java>
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class DynamicIndy extends ClassLoader {
     private int ID_GENERATOR = 0;

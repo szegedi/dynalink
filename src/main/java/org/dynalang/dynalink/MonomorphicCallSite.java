@@ -28,7 +28,6 @@ import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
  * previous linkage, and trigger relinking with its associated {@link DynamicLinker}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class MonomorphicCallSite extends AbstractRelinkableCallSite {
     /**

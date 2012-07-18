@@ -27,7 +27,6 @@ import org.dynalang.dynalink.support.Lookup;
  * methods on the class (respecting property getter/setter conventions). Note that Class objects are not recognized by
  * the Dynalink as constructors for the instances of the class, {@link StaticClass} is used for this purpose.
  * @author Attila Szegedi
- * @version $Id: $
  */
 class ClassLinker extends BeanLinker {
 

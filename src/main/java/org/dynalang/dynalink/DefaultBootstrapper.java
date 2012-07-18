@@ -17,7 +17,6 @@ import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
  * information.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class DefaultBootstrapper {
     private static final DynamicLinker dynamicLinker = new DynamicLinkerFactory().createLinker();

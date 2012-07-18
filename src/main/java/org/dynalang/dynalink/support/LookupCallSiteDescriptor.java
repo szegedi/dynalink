@@ -8,7 +8,6 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 /**
  * A call site descriptor that stores a specific {@link Lookup}. It does not, however, store static bootstrap arguments.
  * @author Attila Szegedi
- * @version $Id: $
  */
 class LookupCallSiteDescriptor extends DefaultCallSiteDescriptor {
     private Lookup lookup;

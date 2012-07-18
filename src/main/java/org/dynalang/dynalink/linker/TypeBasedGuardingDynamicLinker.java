@@ -23,7 +23,6 @@ package org.dynalang.dynalink.linker;
  * a specific language-native interface or superclass. The linker mechanism can optimize the dispatch for these linkers.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface TypeBasedGuardingDynamicLinker extends GuardingDynamicLinker {
     /**

@@ -36,7 +36,6 @@ import junit.framework.TestCase;
  * Tests {@link BeansLinker} corner cases not exercised by other tests.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TestBeansLinker extends TestCase {
     /**

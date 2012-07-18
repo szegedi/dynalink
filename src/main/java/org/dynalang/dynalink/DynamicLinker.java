@@ -62,7 +62,6 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  * would simply use {@link DefaultBootstrapper}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class DynamicLinker {
     private final LinkerServices linkerServices;

@@ -23,7 +23,6 @@ import org.dynalang.dynalink.linker.LinkRequest;
  * runtime specific native context arguments on the stack.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class LinkRequestImpl implements LinkRequest {
 

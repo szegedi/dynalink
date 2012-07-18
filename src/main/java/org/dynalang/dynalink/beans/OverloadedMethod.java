@@ -35,7 +35,6 @@ import org.dynalang.dynalink.support.Lookup;
  * (exactly matching for fixargs, or having less than or equal fixed arguments, for varargs).
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class OverloadedMethod {
     private final Map<ClassString, MethodHandle> argTypesToMethods = new ConcurrentHashMap<ClassString, MethodHandle>();

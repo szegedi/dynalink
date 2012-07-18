@@ -31,7 +31,6 @@ import java.util.Map;
  * constrained security environments.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class AccessibleMethodsLookup {
     private final Map<MethodSignature, Method> map;
@@ -61,7 +60,6 @@ class AccessibleMethodsLookup {
      * A helper class that represents a method signature - name and argument types.
      *
      * @author Attila Szegedi
-     * @version $Id: $
      */
     static final class MethodSignature {
         private final String name;

@@ -23,7 +23,6 @@ import org.dynalang.dynalink.linker.LinkRequest;
  * context specific arguments should be the first "n" arguments.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
 

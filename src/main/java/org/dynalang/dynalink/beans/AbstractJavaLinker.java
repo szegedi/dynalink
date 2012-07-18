@@ -19,7 +19,6 @@ package org.dynalang.dynalink.beans;
 /**
  * Base class for linkers that can take a bunch of fields and
  * @author Attila Szegedi
- * @version $Id: $
  */
 
 import java.beans.Introspector;
@@ -54,7 +53,6 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * exposure and method calls for both static and instance facets of a class.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     final Class<?> clazz;

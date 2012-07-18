@@ -37,7 +37,6 @@ import org.dynalang.dynalink.support.Lookup;
  * {@link BeansLinker}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicLinker {
     BeanLinker(Class<?> clazz) {

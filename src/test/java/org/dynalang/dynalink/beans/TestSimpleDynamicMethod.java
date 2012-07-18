@@ -33,7 +33,6 @@ import junit.framework.TestCase;
  * Tests for the {@link SimpleDynamicMethod}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TestSimpleDynamicMethod extends TestCase {
     /**

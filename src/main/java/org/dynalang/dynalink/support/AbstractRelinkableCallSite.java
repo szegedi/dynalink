@@ -10,7 +10,6 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
  * A basic implementation of the {@link RelinkableCallSite} as a {@link MutableCallSite} subclass.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public abstract class AbstractRelinkableCallSite extends MutableCallSite implements RelinkableCallSite {
     private final CallSiteDescriptor descriptor;

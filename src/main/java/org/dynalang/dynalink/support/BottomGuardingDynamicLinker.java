@@ -26,7 +26,6 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  * be used by other language runtimes if they need it though.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class BottomGuardingDynamicLinker implements TypeBasedGuardingDynamicLinker {
 

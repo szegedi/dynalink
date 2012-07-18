@@ -35,7 +35,6 @@ import org.dynalang.dynalink.support.Lookup;
 /**
  * Provides a linker for the {@link StaticClass} objects.
  * @author Attila Szegedi
- * @version $Id: $
  */
 class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
     private final ClassValue<GuardingDynamicLinker> linkers = new ClassValue<GuardingDynamicLinker>() {

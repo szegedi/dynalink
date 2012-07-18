@@ -31,7 +31,6 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * Represents an overloaded method.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class OverloadedDynamicMethod extends DynamicMethod {
     /**

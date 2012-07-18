@@ -28,7 +28,6 @@ import org.dynalang.dynalink.support.TypeUtilities;
 /**
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 final class ClassString {
     private final Class<?>[] classes;

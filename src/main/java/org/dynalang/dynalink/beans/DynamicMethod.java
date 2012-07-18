@@ -31,7 +31,6 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * rest of the overload resolution at invocation time for actual argument types).
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 abstract class DynamicMethod {
     /**

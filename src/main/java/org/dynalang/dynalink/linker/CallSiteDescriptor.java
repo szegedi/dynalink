@@ -25,7 +25,6 @@ import java.lang.invoke.MethodType;
  * class in which the call site is in.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface CallSiteDescriptor {
 

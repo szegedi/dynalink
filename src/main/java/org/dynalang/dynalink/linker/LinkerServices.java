@@ -29,7 +29,6 @@ import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
  * s.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface LinkerServices {
     /**

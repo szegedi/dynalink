@@ -42,7 +42,6 @@ import org.dynalang.dynalink.support.TypeConverterFactory;
  * {@link DynamicLinker} documentation for tips on how to use this class.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class DynamicLinkerFactory {
 

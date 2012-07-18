@@ -28,7 +28,6 @@ import java.lang.reflect.Modifier;
  * within your own codebase (therefore it is an error if they are not present).
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class Lookup {
     private final MethodHandles.Lookup lookup;
@@ -191,7 +190,6 @@ public class Lookup {
      * Finds using {@link #findStatic(Class, String, MethodType)} a method on that lookup's class. Useful in classes'
      * code for convenient linking to their own privates. It's easier to use than {@code findStatic} in that you can
      * just list the parameter types, and don't have to specify lookup class.
-     * @param lookup the lookup for the class
      * @param name the name of the method
      * @param rtype the return type of the method
      * @param ptypes the parameter types of the method

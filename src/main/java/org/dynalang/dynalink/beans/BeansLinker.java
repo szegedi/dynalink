@@ -43,7 +43,6 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  *  invocation is handled for methods and constructors. Currently, only public fields and methods are supported.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class BeansLinker implements GuardingDynamicLinker {
     private static final ClassValue<TypeBasedGuardingDynamicLinker> linkers = new ClassValue<TypeBasedGuardingDynamicLinker>() {

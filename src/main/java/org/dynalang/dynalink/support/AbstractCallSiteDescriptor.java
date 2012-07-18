@@ -9,7 +9,6 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
  * A base class for call site descriptor implementations. Provides reconstruction of the name from the tokens, as well
  * as a generally useful {@code equals} and {@code hashCode} methods.
  * @author Attila Szegedi
- * @version $Id: $
  */
 public abstract class AbstractCallSiteDescriptor implements CallSiteDescriptor {
 

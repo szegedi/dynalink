@@ -29,7 +29,6 @@ import org.dynalang.dynalink.support.Lookup;
  * Base for classes that expose class property, field, and method information to an {@link AbstractJavaLinker}. There
  * are subclasses for instance (bean) and static facet of a class.
  * @author Attila Szegedi
- * @version $Id: $
  */
 abstract class FacetIntrospector implements AutoCloseable {
     protected final Class<?> clazz;

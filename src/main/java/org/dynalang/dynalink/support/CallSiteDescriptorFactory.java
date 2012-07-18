@@ -12,7 +12,6 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
 /**
  * Used as a factory for call site descriptor implementations.
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class CallSiteDescriptorFactory {
     private static final String TOKEN_DELIMITER = ":";

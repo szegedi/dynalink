@@ -10,7 +10,6 @@ import org.dynalang.dynalink.linker.CallSiteDescriptor;
  * not store {@link Lookup} objects but always returns the public lookup from its {@link #getLookup()} method. If you
  * need to support non-public lookup, you can use {@link LookupCallSiteDescriptor}.
  * @author Attila Szegedi
- * @version $Id: $
  */
 class DefaultCallSiteDescriptor extends AbstractCallSiteDescriptor {
 

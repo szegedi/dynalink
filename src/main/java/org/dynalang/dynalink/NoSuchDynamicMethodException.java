@@ -23,7 +23,6 @@ import org.dynalang.dynalink.linker.GuardingDynamicLinker;
  * just use NoAccess?)
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class NoSuchDynamicMethodException extends RuntimeException {
     private static final long serialVersionUID = 1L;

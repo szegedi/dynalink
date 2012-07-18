@@ -26,7 +26,6 @@ import java.util.logging.Logger;
  * Utility methods for creating typical guards. TODO: introduce reasonable caching of created guards.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class Guards {
     private static final Logger LOG = Logger

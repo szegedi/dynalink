@@ -28,7 +28,6 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * Default implementation of the {@link LinkerServices} interface.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class LinkerServicesImpl implements LinkerServices {
 

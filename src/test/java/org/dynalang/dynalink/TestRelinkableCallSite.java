@@ -27,7 +27,6 @@ import junit.framework.TestCase;
  * Tests for the {@link RelinkableCallSite}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TestRelinkableCallSite extends TestCase {
     /**

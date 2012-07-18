@@ -33,7 +33,6 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
  * between {@link MutableCallSite} and {@link VolatileCallSite} as they see fit.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface RelinkableCallSite {
     /**

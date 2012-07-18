@@ -23,7 +23,6 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * language-runtime specific implicit type conversion capabilities.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface GuardingTypeConverterFactory {
     /**

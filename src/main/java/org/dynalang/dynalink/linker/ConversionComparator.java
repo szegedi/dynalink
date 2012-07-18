@@ -8,7 +8,6 @@ package org.dynalang.dynalink.linker;
  * will be multiple maximally specific method with unrelated signatures. In these cases, language runtimes can be asked
  * to resolve the ambiguity by expressing preferences for one conversion over the other.
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface ConversionComparator {
 

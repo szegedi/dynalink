@@ -9,7 +9,6 @@ import org.dynalang.dynalink.DynamicLinkerFactory;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TestPropertyGetter extends TestCase {
     public void testFixedNamePropertyGetter() throws Throwable {

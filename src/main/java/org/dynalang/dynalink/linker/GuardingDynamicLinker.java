@@ -24,7 +24,6 @@ package org.dynalang.dynalink.linker;
  * <tt>META-INF/services/org.dynalang.dynalink.linker.GuardingDynamicLinker</tt> file within their JAR file.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface GuardingDynamicLinker {
     /**

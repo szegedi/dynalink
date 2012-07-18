@@ -19,7 +19,6 @@ import java.lang.invoke.MethodHandles;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class Backport {
     /**

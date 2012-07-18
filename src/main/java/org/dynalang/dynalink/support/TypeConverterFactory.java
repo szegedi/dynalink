@@ -35,7 +35,6 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * instances and creates appropriate converters for method handles.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TypeConverterFactory {
 

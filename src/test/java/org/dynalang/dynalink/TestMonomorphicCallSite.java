@@ -29,7 +29,6 @@ import junit.framework.TestCase;
  * Tests for the {@link MonomorphicCallSite}.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class TestMonomorphicCallSite extends TestCase {
     static {

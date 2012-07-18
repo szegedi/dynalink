@@ -31,7 +31,6 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * null is returned.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker, Serializable {
 

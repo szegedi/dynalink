@@ -33,7 +33,6 @@ import org.dynalang.dynalink.support.Guards;
  * call site. Both the guard and the switch point are optional, neither, one, or both can be present.
  *
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class GuardedInvocation {
     private final MethodHandle invocation;

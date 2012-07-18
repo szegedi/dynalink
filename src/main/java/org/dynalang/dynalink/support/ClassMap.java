@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentMap;
  * a class loader or not.
  *
  * @author Attila Szegedi
- * @version $Id: $
  * @param <T> the type of the values in the map
  */
 public abstract class ClassMap<T> {
