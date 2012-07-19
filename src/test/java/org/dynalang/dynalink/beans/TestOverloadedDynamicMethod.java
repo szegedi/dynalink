@@ -27,10 +27,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.MonomorphicCallSite;
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;

@@ -7,7 +7,7 @@ import java.lang.ref.WeakReference;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 
 /**
  * Usable as a default factory for call site descriptor implementations. It is weakly canonicalizing, meaning it will

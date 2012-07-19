@@ -3,7 +3,7 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 
 /**
  * A base class for call site descriptor implementations. Provides reconstruction of the name from the tokens, as well

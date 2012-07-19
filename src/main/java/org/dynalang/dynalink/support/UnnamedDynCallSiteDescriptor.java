@@ -2,7 +2,7 @@ package org.dynalang.dynalink.support;
 
 import java.lang.invoke.MethodType;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 
 class UnnamedDynCallSiteDescriptor extends AbstractCallSiteDescriptor {
     private final MethodType methodType;

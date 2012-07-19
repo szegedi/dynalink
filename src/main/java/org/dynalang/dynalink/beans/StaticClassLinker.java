@@ -24,7 +24,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;

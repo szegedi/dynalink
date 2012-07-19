@@ -12,9 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;

@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.beans.ApplicableOverloadedMethods.ApplicabilityTest;
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.TypeUtilities;
 

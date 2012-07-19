@@ -23,14 +23,17 @@ import java.lang.invoke.SwitchPoint;
 import java.lang.invoke.WrongMethodTypeException;
 import java.util.List;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.support.Guards;
 
 /**
- * A triple of an invocation method handle, a guard method handle that defines the validity of the invocation, and a
- * switch point that can be used for external invalidation of the linkage. The method handle is suitable for invocation
- * at a particular call site for particular arguments, and might be used for subsequent invocations as long as the guard
- * condition is fulfilled. If the guard condition fails or the switch point is invalidated, the runtime will relink the
- * call site. Both the guard and the switch point are optional, neither, one, or both can be present.
+ * Represents a conditionally valid method handle invocation, returned by implementations of
+ * {@link GuardingDynamicLinker#getGuardedInvocation(LinkRequest, LinkerServices)} and
+ * {@link GuardingTypeConverterFactory#convertToType(Class, Class)}. It is an immutable triple of an invocation method
+ * handle, a guard method handle that defines the applicability of the invocation, and a switch point that can be used
+ * for external invalidation of the linkage. The method handle is suitable for invocation when the guard condition is
+ * fulfilled, and as long as the switch point is not invalidated. Both the guard and the switch point are optional;
+ * neither, one, or both can be present.
  *
  * @author Attila Szegedi
  */
@@ -45,7 +48,7 @@ public class GuardedInvocation {
      * @param invocation the method handle representing the invocation. Must not be null.
      * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
      * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null to represent
-     * an unconditional invocation, although that is fairly unusual.
+     * an unconditional invocation, although that is unusual.
      * @throws IllegalArgumentException if invocation is null.
      */
     public GuardedInvocation(MethodHandle invocation, MethodHandle guard) {
@@ -58,7 +61,7 @@ public class GuardedInvocation {
      * @param invocation the method handle representing the invocation. Must not be null.
      * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
      * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null. If both it
-     * and the switch point are null, this represents an unconditional invocation, which is legal but fairly unusual.
+     * and the switch point are null, this represents an unconditional invocation, which is legal but unusual.
      * @param switchPoint the optional switch point that can be used to invalidate this linkage.
      * @throws IllegalArgumentException if invocation is null.
      */
@@ -96,7 +99,7 @@ public class GuardedInvocation {
     /**
      * Returns the guard method handle.
      *
-     * @return the guard method handle. Can be null to signify an unconditional invocation.
+     * @return the guard method handle. Can be null.
      */
     public MethodHandle getGuard() {
         return guard;

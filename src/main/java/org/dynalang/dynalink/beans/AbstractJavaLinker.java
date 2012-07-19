@@ -38,8 +38,8 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.Results;
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;

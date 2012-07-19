@@ -22,7 +22,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.util.List;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
 

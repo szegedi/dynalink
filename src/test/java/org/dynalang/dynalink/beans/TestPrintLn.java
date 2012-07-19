@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.LinkedList;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;

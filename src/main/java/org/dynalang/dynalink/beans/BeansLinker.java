@@ -18,8 +18,8 @@ package org.dynalang.dynalink.beans;
 
 import java.beans.BeanInfo;
 
+import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;

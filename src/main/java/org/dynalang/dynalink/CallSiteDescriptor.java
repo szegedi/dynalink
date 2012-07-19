@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package org.dynalang.dynalink.linker;
+package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;

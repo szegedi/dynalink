@@ -21,7 +21,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MutableCallSite;
 import java.lang.invoke.VolatileCallSite;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 
 /**

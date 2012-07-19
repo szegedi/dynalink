@@ -3,7 +3,7 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 
-import org.dynalang.dynalink.linker.CallSiteDescriptor;
+import org.dynalang.dynalink.CallSiteDescriptor;
 
 /**
  * A call site descriptor that stores a specific {@link Lookup}. It does not, however, store static bootstrap arguments.
