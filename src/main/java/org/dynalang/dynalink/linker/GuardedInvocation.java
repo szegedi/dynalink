@@ -27,13 +27,11 @@ import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.support.Guards;
 
 /**
- * Represents a conditionally valid method handle invocation, returned by implementations of
- * {@link GuardingDynamicLinker#getGuardedInvocation(LinkRequest, LinkerServices)} and
- * {@link GuardingTypeConverterFactory#convertToType(Class, Class)}. It is an immutable triple of an invocation method
- * handle, a guard method handle that defines the applicability of the invocation, and a switch point that can be used
- * for external invalidation of the linkage. The method handle is suitable for invocation when the guard condition is
- * fulfilled, and as long as the switch point is not invalidated. Both the guard and the switch point are optional;
- * neither, one, or both can be present.
+ * Represents a conditionally valid method handle. It is an immutable triple of an invocation method handle, a guard
+ * method handle that defines the applicability of the invocation handle, and a switch point that can be used for
+ * external invalidation of the invocation handle. The invocation handle is suitable for invocation if the guard
+ * handle returns true for its arguments, and as long as the switch point is not invalidated. Both the guard and the
+ * switch point are optional; neither, one, or both can be present.
  *
  * @author Attila Szegedi
  */
@@ -49,7 +47,7 @@ public class GuardedInvocation {
      * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
      * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null to represent
      * an unconditional invocation, although that is unusual.
-     * @throws IllegalArgumentException if invocation is null.
+     * @throws NullPointerException if invocation is null.
      */
     public GuardedInvocation(MethodHandle invocation, MethodHandle guard) {
         this(invocation, guard, null);
@@ -63,12 +61,10 @@ public class GuardedInvocation {
      * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null. If both it
      * and the switch point are null, this represents an unconditional invocation, which is legal but unusual.
      * @param switchPoint the optional switch point that can be used to invalidate this linkage.
-     * @throws IllegalArgumentException if invocation is null.
+     * @throws NullPointerException if invocation is null.
      */
     public GuardedInvocation(MethodHandle invocation, MethodHandle guard, SwitchPoint switchPoint) {
-        if(invocation == null) {
-            throw new IllegalArgumentException("invocation == null");
-        }
+        invocation.getClass(); // NPE check
         this.invocation = invocation;
         this.guard = guard;
         this.switchPoint = switchPoint;
@@ -81,8 +77,8 @@ public class GuardedInvocation {
      * @param switchPoint the optional switch point that can be used to invalidate this linkage.
      * @param guard the method handle representing the guard. Must have the same method type as the invocation, except
      * it must return boolean. For some useful guards, check out the {@link Guards} class. It can be null. If both it
-     * and the switch point are null, this represents an unconditional invocation, which is legal but fairly unusual.
-     * @throws IllegalArgumentException if invocation is null.
+     * and the switch point are null, this represents an unconditional invocation, which is legal but unusual.
+     * @throws NullPointerException if invocation is null.
      */
     public GuardedInvocation(MethodHandle invocation, SwitchPoint switchPoint, MethodHandle guard) {
         this(invocation, guard, switchPoint);
@@ -106,9 +102,9 @@ public class GuardedInvocation {
     }
 
     /**
-     * Returns the switch point that can be used to invalidate this linkage.
+     * Returns the switch point that can be used to invalidate the invocation handle.
      *
-     * @return the switch point that can be used to invalidate this linkage. Can be null.
+     * @return the switch point that can be used to invalidate the invocation handle. Can be null.
      */
     public SwitchPoint getSwitchPoint() {
         return switchPoint;
@@ -116,7 +112,7 @@ public class GuardedInvocation {
 
     /**
      * Returns true if and only if this guarded invocation has a switchpoint, and that switchpoint has been invalidated.
-     * @return true if this guarded invocation's switchpoint has been invalidated.
+     * @return true if and only if this guarded invocation has a switchpoint, and that switchpoint has been invalidated.
      */
     public boolean hasBeenInvalidated() {
         return switchPoint != null && switchPoint.hasBeenInvalidated();

@@ -19,10 +19,16 @@ package org.dynalang.dynalink;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
+
 /**
- * A descriptor of a call site. Used in place of passing a real call site to guarding linkers so they aren't tempted to
- * directly manipulate them; also it carries the tokenized name of the method and the {@link Lookup} object for the
- * class in which the call site is in.
+ * An immutable descriptor of a call site. It is an immutable objects that contains all the information about a call
+ * site: the class performing the lookups, the name of the method being invoked, and the method signature. The library
+ * has a default {@link CallSiteDescriptorFactory} for descriptors that you can use, or you can create your own
+ * descriptor classes, especially if you need to add further information (values passed in additional parameters to the
+ * bootstrap method) to them. Call site descriptors are used in this library in place of passing a real call site to
+ * guarding linkers so they aren't tempted to directly manipulate the call sites. The constructors of built-in
+ * {@link RelinkableCallSite} implementations all need a call site descriptor.
  *
  * @author Attila Szegedi
  */

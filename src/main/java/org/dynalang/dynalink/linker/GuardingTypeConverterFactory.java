@@ -20,7 +20,10 @@ import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Optional interface that can be implemented by {@link GuardingDynamicLinker} implementations to provide
- * language-runtime specific implicit type conversion capabilities.
+ * language-runtime specific implicit type conversion capabilities. Note that if you implement this interface, you will
+ * very likely want to implement {@link ConversionComparator} interface too, as your additional language-specific
+ * conversions, in absence of a strategy for prioritizing these conversions, will cause more ambiguity in selecting the
+ * correct overload when trying to link to an overloaded POJO method.
  *
  * @author Attila Szegedi
  */
@@ -36,7 +39,8 @@ public interface GuardingTypeConverterFactory {
      * @param targetType the target type.
      * @return a guarded invocation that can take an object (if it passes guard) and returns another object that is its
      * representation coerced into the target type. In case the factory is certain it is unable to handle a conversion,
-     * it can return null.
+     * it can return null. In case the factory is certain that it can always handle the conversion, it can return an
+     * unconditional invocation (one whose guard is null).
      */
     public GuardedInvocation convertToType(Class<?> sourceType, Class<?> targetType);
 }

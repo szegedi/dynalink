@@ -65,10 +65,10 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  * experiment and decide what fits your language runtime the best. You can subclass either of these or roll your own if
  * you need to.</li>
  * <li>You also need to provide {@link CallSiteDescriptor}s to your call sites. They are immutable objects that contain
- * all the information about the call site: the class it is in (represented by the lookup object), the name of the
- * method being invoked, and the method signature. The library has a default {@link CallSiteDescriptorFactory} for
- * descriptors that you can use, or you can create your own descriptor classes, especially if you need to hang further
- * information (values passed in additional parameters to the bootstrap method) to them.</li>
+ * all the information about the call site: the class performing the lookups, the name of the method being invoked, and
+ * the method signature. The library has a default {@link CallSiteDescriptorFactory} for descriptors that you can use,
+ * or you can create your own descriptor classes, especially if you need to add further information (values passed in
+ * additional parameters to the bootstrap method) to them.</li>
  * </ul>
  *
  * @author Attila Szegedi
