@@ -223,11 +223,7 @@ public class TypeConverterFactory {
             final GuardedInvocation next = factories[i].convertToType(sourceType, targetType);
             if(next != null) {
                 next.assertType(type);
-                if(next.getGuard() == null) {
-                    // If a converter is unconditional, choose it as the only converter
-                    return next.getInvocation();
-                }
-                last = MethodHandles.guardWithTest(next.getGuard(), next.getInvocation(), last);
+                last = next.compose(last);
             }
         }
         return last == identity ? IDENTITY_CONVERSION : last;
