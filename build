@@ -1,0 +1,3 @@
+mvn package
+mvn source:jar
+cp -v target/dynalink-0.3-SNAPSHOT* ../nashorn/dynalink/target/
