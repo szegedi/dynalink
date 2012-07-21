@@ -1,17 +1,14 @@
-This is an implementation of invokedynamic-based multi-language linking and
-metaobject protocol framework. Such framework allows JVM classes emitted by
-one language runtime to invoke methods, read and write properties, and so
-forth, on objects from a different language runtime, within a single JVM
-instance.
+Dynalink is an invokedynamic-based high-level linking and metaobject 
+protocol library. It enables creation of languages on the JVM that can 
+easily interoperate with plain Java objects and each other.
 
-See the [User guide](https://github.com/szegedi/dynalink/wiki) and the
-[Javadoc](http://szegedi.github.com/dynalink/0.2/javadoc/index.html) for details
-on the last released version (0.2). Both are fairly comprehensive and should get 
+It lets you write your language runtime in a way where you can think in
+higher-level abstractions than the invokedynamic bytecode instruction.
+
+See the [User guide](https://github.com/szegedi/dynalink/wiki/User-Guide-0.3) and the
+[Javadoc](http://szegedi.github.com/dynalink/0.3/javadoc/index.html) for details
+on the last released version (0.3). Both are fairly comprehensive and should get 
 you started quickly.
-
-You can also check the [User guide](https://github.com/szegedi/dynalink/wiki/Home-0.3)
-and the [Javadoc](http://szegedi.github.com/dynalink/0.3/javadoc/index.html) for the
-next, not yet released version (0.3) if you're interested in the bleeding edge.
 
 You can also check out the [video](http://medianetwork.oracle.com/media/show/17012)
 of the talk given on Dynalink on the 2011 JVM Language Summit.
