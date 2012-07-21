@@ -10,7 +10,7 @@ See the [User guide](https://github.com/szegedi/dynalink/wiki/User-Guide-0.3) an
 on the last released version (0.3). Both are fairly comprehensive and should get 
 you started quickly.
 
-You can also check out the [video](http://medianetwork.oracle.com/media/show/17012)
+You can also check out the [video](http://medianetwork.oracle.com/video/player/1113272541001)
 of the talk given on Dynalink on the 2011 JVM Language Summit.
 
 If you just want the binaries, you can get them from the 
