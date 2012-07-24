@@ -28,7 +28,9 @@ import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
  * descriptor classes, especially if you need to add further information (values passed in additional parameters to the
  * bootstrap method) to them. Call site descriptors are used in this library in place of passing a real call site to
  * guarding linkers so they aren't tempted to directly manipulate the call sites. The constructors of built-in
- * {@link RelinkableCallSite} implementations all need a call site descriptor.
+ * {@link RelinkableCallSite} implementations all need a call site descriptor. Even if you create your own call site
+ * descriptors consider using {@link CallSiteDescriptorFactory#tokenizeName(String)} in your implementation.
+ * consider
  *
  * @author Attila Szegedi
  */
