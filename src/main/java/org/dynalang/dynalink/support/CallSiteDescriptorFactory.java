@@ -80,15 +80,21 @@ public class CallSiteDescriptorFactory {
     }
 
     /**
-     * Tokenizes the composite name along semicolons and interns the tokens.
-     * @param name the composite name
+     * Tokenizes the composite name along colons, as well as {@link NameCodec#decode(String) demangles} and interns
+     * the tokens. The first two tokens are not demangled as they are supposed to be the naming scheme and the name of
+     * the operation which can be expected to consist of just alphabetical characters.
+     * @param name the composite name consisting of colon-separated, possibly mangled tokens.
      * @return an array of tokens
      */
     public static String[] tokenizeName(String name) {
         final StringTokenizer tok = new StringTokenizer(name, TOKEN_DELIMITER);
         final String[] tokens = new String[tok.countTokens()];
         for(int i = 0; i < tokens.length; ++i) {
-            tokens[i] = tok.nextToken().intern();
+            String token = tok.nextToken();
+            if(i > 1) {
+                token = NameCodec.decode(token);
+            }
+            tokens[i] = token.intern();
         }
         return tokens;
     }
