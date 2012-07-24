@@ -5,10 +5,8 @@ easily interoperate with plain Java objects and each other.
 It lets you write your language runtime in a way where you can think in
 higher-level abstractions than the invokedynamic bytecode instruction.
 
-See the [User guide](https://github.com/szegedi/dynalink/wiki/User-Guide-0.3) and the
-[Javadoc](http://szegedi.github.com/dynalink/0.3/javadoc/index.html) for details
-on the last released version (0.3). Both are fairly comprehensive and should get 
-you started quickly.
+See the [Online documentation](https://github.com/szegedi/dynalink/wiki) to 
+get started.
 
 You can also check out the [video](http://medianetwork.oracle.com/video/player/1113272541001)
 of the talk given on Dynalink on the 2011 JVM Language Summit.
