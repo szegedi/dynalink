@@ -45,22 +45,17 @@ abstract class DynamicMethod {
      * @param linkerServices linker services. Used for language-specific type conversions.
      * @return an invocation suitable for calling the method from the specified call site.
      */
-    MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
-        return getInvocation(callSiteDescriptor, linkerServices, null);
-    }
+    abstract MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices);
 
     /**
-     * Creates an invocation for the dynamic method. It will select the method with the explicit specified signature. If
-     * the method doesn't have an overload with the exact specified signature, null is returned.
-     *
-     * @param callSiteDescriptor descriptor of the call site
-     * @param linkerServices linker services. Used for language-specific type conversions.
-     * @param explicitSignature the explicitly requested signature for the method. Can be null in which case no explicit
-     * signature is requested.
-     * @return an invocation suitable for calling the method from the specified call site.
+     * Returns a simple dynamic method representing a single underlying Java method (possibly selected among several
+     * overloads) with formal parameter types exactly matching the passed signature.
+     * @param paramTypes the requested parameter types
+     * @return a simple dynamic method representing a single Java method, or null if none of the overloaded Java methods
+     * behind this dynamic method exactly match the requested parameter types.
      */
-    abstract MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            List<Class<?>> explicitSignature);
+    abstract SimpleDynamicMethod getMethodForExactParamTypes(List<Class<?>> paramTypes);
+
     /**
      * True if this dynamic method already contains a method handle with an identical signature as the passed in method
      * handle.

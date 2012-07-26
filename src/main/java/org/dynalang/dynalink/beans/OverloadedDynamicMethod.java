@@ -52,11 +52,13 @@ class OverloadedDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices,
-            List<Class<?>> explicitSignature) {
-        if(explicitSignature != null) {
-            return getExplicitInvocation(callSiteDescriptor, linkerServices, explicitSignature);
-        }
+    SimpleDynamicMethod getMethodForExactParamTypes(List<Class<?>> paramTypes) {
+        final MethodHandle mh = getExplicitMethod(paramTypes);
+        return mh == null ? null : new SimpleDynamicMethod(mh);
+    }
+
+    @Override
+    public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices) {
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
 
         // First, find all methods applicable to the call site by subtyping (JLS 15.12.2.2)
@@ -125,12 +127,6 @@ class OverloadedDynamicMethod extends DynamicMethod {
         // way to candidate selection.
         // TODO: cache per call site type
         return new OverloadedMethod(invokables, this, callSiteType, linkerServices).getInvoker();
-    }
-
-    private MethodHandle getExplicitInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            List<Class<?>> explicitSignature) {
-        final MethodHandle mh = getExplicitMethod(explicitSignature);
-        return mh == null ? null : new SimpleDynamicMethod(mh).getInvocation(callSiteDescriptor, linkerServices);
     }
 
     @Override

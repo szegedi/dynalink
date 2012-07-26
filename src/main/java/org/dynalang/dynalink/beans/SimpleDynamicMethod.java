@@ -53,20 +53,17 @@ class SimpleDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    public MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            List<Class<?>> explicitSignature) {
-        return getInvocation(callSiteDescriptor.getMethodType(), linkerServices, explicitSignature);
+    SimpleDynamicMethod getMethodForExactParamTypes(List<Class<?>> paramTypes) {
+        return paramTypes.equals(getParameterListNoReceiver(target.type())) ? this : null;
+    }
+
+    @Override
+    MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
+        return getInvocation(callSiteDescriptor.getMethodType(), linkerServices);
     }
 
     MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices) {
-        return getInvocation(callSiteType, linkerServices, null);
-    }
-
-    private MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices, List<Class<?>> explicitSignature) {
         final MethodType methodType = target.type();
-        if(explicitSignature != null && !explicitSignature.equals(getParameterListNoReceiver(methodType))) {
-            return null;
-        }
         final int paramsLen = methodType.parameterCount();
         final boolean varArgs = target.isVarargsCollector();
         final MethodHandle fixTarget = varArgs ? target.asFixedArity() : target;

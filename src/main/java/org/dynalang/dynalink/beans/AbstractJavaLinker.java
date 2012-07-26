@@ -278,24 +278,13 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             return null;
         }
 
-        // Try to get the handle for the explicit parameter types. Note that any formal parameter types on the method
-        // must be visible to declaring class' loader, so we can use it for class name resolution.
-        final MethodHandle explicitHandle = simpleNamedMethod.getInvocation(callSiteDescriptor, linkerServices,
-                getTypes(methodName.substring(openBrace + 1, lastChar), clazz.getClassLoader()));
-        if(explicitHandle == null) {
-            return null;
-        }
-
-        // Encapsulate the handle in a SimpleDynamicMethod
-        final DynamicMethod simpleDynaMethod;
-        if(simpleNamedMethod instanceof SimpleDynamicMethod) {
-            simpleDynaMethod = simpleNamedMethod;
-        } else {
-            simpleDynaMethod = new SimpleDynamicMethod(explicitHandle);
-        }
+        // Try to get a simple dynamic method for the explicit parameter types. Note that any formal parameter types on
+        // the method must be visible to declaring class' loader, so we can use it for class name resolution.
+        final SimpleDynamicMethod simpleDynaMethod = simpleNamedMethod.getMethodForExactParamTypes(getTypes(
+                methodName.substring(openBrace + 1, lastChar), clazz.getClassLoader()));
 
         // Save it for subsequent lookups
-        methodsMap.put(methodName, simpleDynaMethod );
+        methodsMap.put(methodName, simpleDynaMethod);
 
         return simpleDynaMethod;
     }
