@@ -242,18 +242,17 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     private MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
             LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap)
     throws ClassNotFoundException {
-        DynamicMethod dynaMethod = methodMap.get(methodName);
-        if(dynaMethod == null) {
-            dynaMethod = getExplicitSignatureDynamicMethod(callSiteDescriptor, linkerServices, methodName, methodMap);
-            if(dynaMethod == null) {
-                return null;
-            }
-        }
-        return dynaMethod.getInvocation(callSiteDescriptor, linkerServices);
+        final DynamicMethod dynaMethod = getDynamicMethod(methodName, methodMap);
+        return dynaMethod != null ? dynaMethod.getInvocation(callSiteDescriptor, linkerServices) : null;
     }
 
-    private DynamicMethod getExplicitSignatureDynamicMethod(CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodsMap)
+    private DynamicMethod getDynamicMethod(String methodName, Map<String, DynamicMethod> methodMap)
+            throws ClassNotFoundException {
+        final DynamicMethod dynaMethod = methodMap.get(methodName);
+        return dynaMethod != null ? dynaMethod : getExplicitSignatureDynamicMethod(methodName, methodMap);
+    }
+
+    private DynamicMethod getExplicitSignatureDynamicMethod(String methodName, Map<String, DynamicMethod> methodsMap)
     throws ClassNotFoundException {
         // What's below is meant to support the "name(type, type, ...)" syntax that programmers can use in a method name
         // to manually pin down an exact overloaded variant. This is not usually required, as the overloaded method
