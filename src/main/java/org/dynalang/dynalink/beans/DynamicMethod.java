@@ -20,7 +20,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
@@ -35,17 +34,17 @@ import org.dynalang.dynalink.linker.LinkerServices;
 abstract class DynamicMethod {
     /**
      * Creates an invocation for the dynamic method. If the method is overloaded, it will perform overloaded method
-     * resolution based on the formal argument types in the call site. The resulting resolution can either identify a
-     * single method to be invoked among the overloads, or it can identify multiple ones. In the latter case, the
-     * returned method handle will perform further overload resolution among these candidates at every invocation. If
-     * the method to be invoked is a variable arguments (vararg) method, it will pack the extra arguments in an array
-     * before the invocation of the underlying method if it is not already done.
+     * resolution based on the specified method type. The resulting resolution can either identify a single method to be
+     * invoked among the overloads, or it can identify multiple ones. In the latter case, the returned method handle
+     * will perform further overload resolution among these candidates at every invocation. If the method to be invoked
+     * is a variable arguments (vararg) method, it will pack the extra arguments in an array before the invocation of
+     * the underlying method if it is not already done.
      *
-     * @param callSiteDescriptor descriptor of the call site
+     * @param callSiteType the method type at a call site
      * @param linkerServices linker services. Used for language-specific type conversions.
      * @return an invocation suitable for calling the method from the specified call site.
      */
-    abstract MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices);
+    abstract MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices);
 
     /**
      * Returns a simple dynamic method representing a single underlying Java method (possibly selected among several

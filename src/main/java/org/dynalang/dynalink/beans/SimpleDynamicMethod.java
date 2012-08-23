@@ -22,7 +22,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
 
@@ -58,10 +57,6 @@ class SimpleDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    MethodHandle getInvocation(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
-        return getInvocation(callSiteDescriptor.getMethodType(), linkerServices);
-    }
-
     MethodHandle getInvocation(MethodType callSiteType, LinkerServices linkerServices) {
         final MethodType methodType = target.type();
         final int paramsLen = methodType.parameterCount();

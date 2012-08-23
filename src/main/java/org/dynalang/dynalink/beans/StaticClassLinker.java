@@ -93,7 +93,9 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
             final CallSiteDescriptor desc = request.getCallSiteDescriptor();
             final String op = desc.getNameToken(1);
             if("new" == op && constructor != null) {
-                return new GuardedInvocation(constructor.getInvocation(desc, linkerServices), getClassGuard(desc));
+                final MethodType methodType = desc.getMethodType();
+                return new GuardedInvocation(constructor.getInvocation(methodType, linkerServices), getClassGuard(
+                        methodType));
             }
             return null;
         }

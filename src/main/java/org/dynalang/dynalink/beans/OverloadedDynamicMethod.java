@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.beans.ApplicableOverloadedMethods.ApplicabilityTest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.TypeUtilities;
@@ -58,9 +57,7 @@ class OverloadedDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    public MethodHandle getInvocation(final CallSiteDescriptor callSiteDescriptor, final LinkerServices linkerServices) {
-        final MethodType callSiteType = callSiteDescriptor.getMethodType();
-
+    public MethodHandle getInvocation(final MethodType callSiteType, final LinkerServices linkerServices) {
         // First, find all methods applicable to the call site by subtyping (JLS 15.12.2.2)
         final ApplicableOverloadedMethods subtypingApplicables = getApplicables(callSiteType,
                 ApplicableOverloadedMethods.APPLICABLE_BY_SUBTYPING);

@@ -221,7 +221,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             throws ClassNotFoundException {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
-                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
+                return createGuardedDynamicMethodInvocation(callSiteDescriptor.getMethodType(), linkerServices,
                         callSiteDescriptor.getNameToken(2), methods);
             }
             default: {
@@ -230,20 +230,18 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         }
     }
 
-    private GuardedInvocation createGuardedDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
+    private GuardedInvocation createGuardedDynamicMethodInvocation(MethodType callSiteType,
             LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap)
     throws ClassNotFoundException {
         final MethodHandle invocation =
-                getDynamicMethodInvocation(callSiteDescriptor, linkerServices, methodName, methodMap);
-        return invocation == null ? null : new GuardedInvocation(invocation,
-                getClassGuard(callSiteDescriptor));
+                getDynamicMethodInvocation(callSiteType, linkerServices, methodName, methodMap);
+        return invocation == null ? null : new GuardedInvocation(invocation, getClassGuard(callSiteType));
     }
 
-    private MethodHandle getDynamicMethodInvocation(CallSiteDescriptor callSiteDescriptor,
-            LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap)
-    throws ClassNotFoundException {
+    private MethodHandle getDynamicMethodInvocation(MethodType callSiteType, LinkerServices linkerServices,
+            String methodName, Map<String, DynamicMethod> methodMap) throws ClassNotFoundException {
         final DynamicMethod dynaMethod = getDynamicMethod(methodName, methodMap);
-        return dynaMethod != null ? dynaMethod.getInvocation(callSiteDescriptor, linkerServices) : null;
+        return dynaMethod != null ? dynaMethod.getInvocation(callSiteType, linkerServices) : null;
     }
 
     private DynamicMethod getDynamicMethod(String methodName, Map<String, DynamicMethod> methodMap)
@@ -318,12 +316,12 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // method lookup.
                 final CallSiteDescriptor newDescriptor = callSiteDescriptor.dropParameterTypes(1, 2);
                 return new GuardedInvocation(MethodHandles.insertArguments(SET_PROPERTY_WITH_VARIABLE_ID, 0,
-                        newDescriptor, linkerServices).asType(type), getClassGuard(type));
+                        newDescriptor.getMethodType(), linkerServices).asType(type), getClassGuard(type));
             }
             case 3: {
                 // Must have two arguments: target object and property value
                 assertParameterCount(callSiteDescriptor, 2);
-                return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
+                return createGuardedDynamicMethodInvocation(callSiteDescriptor.getMethodType(), linkerServices,
                         callSiteDescriptor.getNameToken(2), propertySetters);
             }
             default: {
@@ -394,13 +392,13 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return getter.handle.invokeWithArguments(obj);
     }
     //TODO: WHY IS THIS INSTANCE METHOD?
-    private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findSpecial(AbstractJavaLinker.class,
-            "_setPropertyWithVariableId", MethodType.methodType(Results.class, CallSiteDescriptor.class,
-                    LinkerServices.class, Object.class, Object.class, Object.class)).bindTo(this);
+    private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findOwnSpecial("setPropertyWithVariableId",
+            Results.class, MethodType.class, LinkerServices.class, Object.class, Object.class, Object.class)
+            .bindTo(this);
 
     /**
-     * This method is public for implementation reasons. Do not invoke it directly. Sets a property on an object.
-     * @param callSiteDescriptor the descriptor of the setter call site
+     * Sets a property on an object.
+     * @param callSiteType the method type of the setter call site
      * @param linkerServices the linker services used for value conversion
      * @param obj the object
      * @param id the property ID
@@ -409,11 +407,11 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
      * writable.
      * @throws Throwable rethrown underlying method handle invocation throwable.
      */
-    public Results _setPropertyWithVariableId(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            Object obj, Object id, Object value) throws Throwable {
+    private Results setPropertyWithVariableId(MethodType callSiteType, LinkerServices linkerServices, Object obj,
+            Object id, Object value) throws Throwable {
         // TODO: this is quite likely terribly inefficient. Optimize.
         final MethodHandle invocation =
-                getDynamicMethodInvocation(callSiteDescriptor, linkerServices, String.valueOf(id), propertySetters);
+                getDynamicMethodInvocation(callSiteType, linkerServices, String.valueOf(id), propertySetters);
         if(invocation != null) {
             invocation.invokeWithArguments(obj, value);
             return Results.ok;
