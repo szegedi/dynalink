@@ -70,19 +70,18 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         // BeansLinker already checked that the name is at least 2 elements long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getNameToken(1);
-        final Object[] arguments = ncrequest.getArguments();
         // dyn:getElem(this, id)
         // id is typically either an int (for arrays and lists) or an object (for maps). linkerServices can provide
         // conversion from call site argument type though.
         if("getElem" == op) {
-            return getElementGetter(callSiteDescriptor, linkerServices, arguments);
+            return getElementGetter(callSiteDescriptor, linkerServices);
         }
         if("setElem" == op) {
-            return getElementSetter(callSiteDescriptor, linkerServices, arguments);
+            return getElementSetter(callSiteDescriptor, linkerServices);
         }
         // dyn:getLength(this) (works on Java arrays, collections, and maps)
         if("getLength" == op) {
-            return getLengthGetter(callSiteDescriptor, arguments);
+            return getLengthGetter(callSiteDescriptor);
         }
         return null;
     }
@@ -97,7 +96,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
     private static MethodHandle MAP_GUARD = Guards.getInstanceOfGuard(Map.class);
 
     private GuardedInvocation getElementGetter(final CallSiteDescriptor callSiteDescriptor,
-            final LinkerServices linkerServices, final Object... arguments) {
+            final LinkerServices linkerServices) {
         assertParameterCount(callSiteDescriptor, 2);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
@@ -135,8 +134,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
     private static MethodHandle PUT_MAP_ELEMENT = Lookup.PUBLIC.findVirtual(Map.class, "put",
             MethodType.methodType(Object.class, Object.class, Object.class));
 
-    private GuardedInvocation getElementSetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            Object... arguments) {
+    private GuardedInvocation getElementSetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
         assertParameterCount(callSiteDescriptor, 3);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);
@@ -182,7 +180,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
 
     private static MethodHandle COLLECTION_GUARD = Guards.getInstanceOfGuard(Collection.class);
 
-    private GuardedInvocation getLengthGetter(CallSiteDescriptor callSiteDescriptor, Object... arguments) {
+    private GuardedInvocation getLengthGetter(CallSiteDescriptor callSiteDescriptor) {
         assertParameterCount(callSiteDescriptor, 1);
         final MethodType callSiteType = callSiteDescriptor.getMethodType();
         final Class<?> declaredType = callSiteType.parameterType(0);

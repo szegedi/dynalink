@@ -195,12 +195,12 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         // Either dyn:setProp:name(this, value) or dyn:setProp(this, name,
         // value)
         if("setProp" == op) {
-            return getPropertySetter(callSiteDescriptor, linkerServices, ncrequest.getArguments());
+            return getPropertySetter(callSiteDescriptor, linkerServices);
         }
         // Either dyn:callPropWithThis:name(this[,args]) or
         // dyn:callPropWithThis(this,name[,args]).
         if("callPropWithThis" == op) {
-            return getCallPropWithThis(callSiteDescriptor, linkerServices, ncrequest.getArguments());
+            return getCallPropWithThis(callSiteDescriptor, linkerServices);
         }
         return null;
     }
@@ -217,8 +217,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return Guards.asType(assignableGuard, type);
     }
 
-    private GuardedInvocation getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            Object... args) throws ClassNotFoundException {
+    private GuardedInvocation getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices)
+            throws ClassNotFoundException {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
                 return createGuardedDynamicMethodInvocation(callSiteDescriptor, linkerServices,
@@ -307,8 +307,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return list;
     }
 
-    private GuardedInvocation getPropertySetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices,
-            Object... arguments) throws ClassNotFoundException {
+    private GuardedInvocation getPropertySetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices)
+            throws ClassNotFoundException {
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
