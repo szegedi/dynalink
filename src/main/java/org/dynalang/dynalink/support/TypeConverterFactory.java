@@ -47,7 +47,13 @@ public class TypeConverterFactory {
             return new ClassMap<MethodHandle>(sourceType.getClassLoader()) {
                 @Override
                 protected MethodHandle computeValue(Class<?> targetType) {
-                    return createConverter(sourceType, targetType);
+                    try {
+                        return createConverter(sourceType, targetType);
+                    } catch (RuntimeException e) {
+                        throw e;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             };
         }
@@ -215,7 +221,7 @@ public class TypeConverterFactory {
         return converterIdentityMap.get(sourceType).get(targetType);
     }
 
-    private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) {
+    private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) throws Exception {
         final MethodType type = MethodType.methodType(targetType, sourceType);
         final MethodHandle identity = IDENTITY_CONVERSION.asType(type);
         MethodHandle last = identity;
