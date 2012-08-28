@@ -41,6 +41,7 @@ public interface GuardingTypeConverterFactory {
      * representation coerced into the target type. In case the factory is certain it is unable to handle a conversion,
      * it can return null. In case the factory is certain that it can always handle the conversion, it can return an
      * unconditional invocation (one whose guard is null).
+     * @throws Exception if there was an error during creation of the converter
      */
-    public GuardedInvocation convertToType(Class<?> sourceType, Class<?> targetType);
+    public GuardedInvocation convertToType(Class<?> sourceType, Class<?> targetType) throws Exception;
 }
