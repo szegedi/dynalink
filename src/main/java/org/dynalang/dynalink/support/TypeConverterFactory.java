@@ -102,8 +102,7 @@ public class TypeConverterFactory {
      * parameters. It will apply {@link MethodHandle#asType(MethodType)} for all primitive-to-primitive,
      * wrapper-to-primitive, primitive-to-wrapper conversions as well as for all upcasts. For all other conversions,
      * it'll insert {@link MethodHandles#filterArguments(MethodHandle, int, MethodHandle...)} with composite filters
-     * provided by {@link GuardingTypeConverterFactory} implementations. It doesn't use language-specific conversions on
-     * the return type.
+     * provided by {@link GuardingTypeConverterFactory} implementations.
      *
      * @param handle target method handle
      * @param fromType the types of source arguments
@@ -137,7 +136,22 @@ public class TypeConverterFactory {
                 }
             }
         }
-        return applyConverters(newHandle, pos, converters).asType(fromType);
+        newHandle = applyConverters(newHandle, pos, converters);
+
+        // Convert return type
+        final Class<?> fromRetType = fromType.returnType();
+        final Class<?> toRetType = toType.returnType();
+        if(fromRetType != Void.TYPE && toRetType != Void.TYPE) {
+            if(!canAutoConvert(toRetType, fromRetType)) {
+                final MethodHandle converter = getTypeConverterNull(toRetType, fromRetType);
+                if(converter != null) {
+                    newHandle = MethodHandles.filterReturnValue(newHandle, converter);
+                }
+            }
+        }
+
+        // Take care of automatic conversions
+        return newHandle.asType(fromType);
     }
 
     private static MethodHandle applyConverters(MethodHandle handle, int pos, List<MethodHandle> converters) {
