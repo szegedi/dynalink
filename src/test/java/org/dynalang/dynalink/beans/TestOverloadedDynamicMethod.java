@@ -22,11 +22,11 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
+import org.dynalang.dynalink.LinkerServicesFactory;
 import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
@@ -53,8 +53,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         linker = new BeanLinker(Test1.class);
-        linkerServices =
-                new LinkerServicesImpl(new TypeConverterFactory(new LinkedList<GuardingTypeConverterFactory>()), linker);
+        linkerServices = LinkerServicesFactory.getLinkerServices(linker);
     }
 
     public void testNoneMatchSignature() {
@@ -170,7 +169,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
 
     public static void main(String[] args) throws Throwable {
         TypeBasedGuardingDynamicLinker linker = BeansLinker.getLinkerForClass(Test1.class);
-        LinkerServices ls = new LinkerServicesImpl(new TypeConverterFactory(new ArrayList<GuardingTypeConverterFactory>()), linker);
+        LinkerServices ls = LinkerServicesFactory.getLinkerServices(linker);
 
 
         Test1 test1 = new Test1();

@@ -29,14 +29,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.Results;
@@ -46,7 +41,6 @@ import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
-import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * A base class for both {@link StaticClassLinker} and {@link BeanLinker}. Deals with common aspects of property
@@ -190,7 +184,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         final String op = callSiteDescriptor.getNameToken(1);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
         if("getProp" == op) {
-            return getPropertyGetter(callSiteDescriptor);
+            return getPropertyGetter(callSiteDescriptor, linkerServices);
         }
         // Either dyn:setProp:name(this, value) or dyn:setProp(this, name,
         // value)
@@ -201,6 +195,11 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         // dyn:callPropWithThis(this,name[,args]).
         if("callPropWithThis" == op) {
             return getCallPropWithThis(callSiteDescriptor, linkerServices);
+        }
+        // Either dyn:getMethod:name(this), or
+        // dyn:getMethod(this, name)
+        if("getMethod" == op) {
+            return getMethodGetter(callSiteDescriptor, linkerServices);
         }
         return null;
     }
@@ -285,7 +284,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // Create a new call site descriptor that drops the ID argument. This is used for embedded overloaded
                 // method lookup.
                 final CallSiteDescriptor newDescriptor = callSiteDescriptor.dropParameterTypes(1, 2);
-                return new GuardedInvocation(MethodHandles.insertArguments(SET_PROPERTY_WITH_VARIABLE_ID, 0,
+                return new GuardedInvocation(MethodHandles.insertArguments(setPropertyWithVariableId, 0,
                         newDescriptor.getMethodType(), linkerServices).asType(type), getClassGuard(type));
             }
             case 3: {
@@ -301,13 +300,13 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         }
     }
 
-    private GuardedInvocation getPropertyGetter(CallSiteDescriptor callSiteDescriptor) {
+    private GuardedInvocation getPropertyGetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
         final MethodType type = callSiteDescriptor.getMethodType();
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 2: {
                 // Must have exactly two arguments: receiver and name
                 assertParameterCount(callSiteDescriptor, 2);
-                return new GuardedInvocation(GET_PROPERTY_WITH_VARIABLE_ID.asType(type), getClassGuard(type));
+                return new GuardedInvocation(linkerServices.asType(getPropertyWithVariableId, type), getClassGuard(type));
             }
             case 3: {
                 // Must have exactly one argument: receiver
@@ -323,8 +322,33 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // overloaded in a subclass. Therefore, we can discover the most abstract superclass that has the
                 // method, and use that as the guard with Guards.isInstance() for a more stably linked call site. If
                 // we're linking against a field getter, don't make the assumption.
-                return new GuardedInvocation(getter.asType(type), annGetter.overloadSafe ? getAssignableGuard(type) :
-                    getClassGuard(type));
+                return new GuardedInvocation(linkerServices.asType(getter, type), annGetter.overloadSafe ?
+                        getAssignableGuard(type) : getClassGuard(type));
+            }
+            default: {
+                // Can't do anything with more than 3 name components
+                return null;
+            }
+        }
+    }
+
+    private GuardedInvocation getMethodGetter(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
+        final MethodType type = callSiteDescriptor.getMethodType();
+        switch(callSiteDescriptor.getNameTokenCount()) {
+            case 2: {
+                // Must have exactly two arguments: receiver and name
+                assertParameterCount(callSiteDescriptor, 2);
+                return new GuardedInvocation(linkerServices.asType(getMethodWithVariableId, type), getClassGuard(type));
+            }
+            case 3: {
+                // Must have exactly one argument: receiver
+                assertParameterCount(callSiteDescriptor, 1);
+                final DynamicMethod method = getDynamicMethod(callSiteDescriptor.getNameToken(2));
+                if(method == null) {
+                    return null;
+                }
+                return new GuardedInvocation(linkerServices.asType(MethodHandles.constant(method.getClass(), method),
+                        type), getClassGuard(type));
             }
             default: {
                 // Can't do anything with more than 3 name components
@@ -340,31 +364,30 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     private static final Lookup privateLookup = new Lookup(MethodHandles.lookup());
-    // TODO: WHY IS THIS INSTANCE METHOD?
-    private MethodHandle GET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findSpecial(AbstractJavaLinker.class,
-            "_getPropertyWithVariableId", MethodType.methodType(Object.class, Object.class, Object.class)).bindTo(this);
+
+    private static MethodHandle GET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findOwnSpecial(
+            "getPropertyWithVariableId", Object.class, Object.class, String.class);
+    private final MethodHandle getPropertyWithVariableId = GET_PROPERTY_WITH_VARIABLE_ID.bindTo(this);
 
     /**
-     * This method is public for implementation reasons. Do not invoke it directly. Retrieves a property value from an
-     * object.
-     *
      * @param obj the object
      * @param id the property ID
      * @return the value of the property, or {@link Results#doesNotExist} if the property does not exist, or
      * {@link Results#notReadable} if the property is not readable.
      * @throws Throwable rethrown underlying method handle invocation throwable.
      */
-    public Object _getPropertyWithVariableId(Object obj, Object id) throws Throwable {
-        AnnotatedMethodHandle getter = propertyGetters.get(String.valueOf(id));
+    private Object getPropertyWithVariableId(Object obj, String id) throws Throwable {
+        AnnotatedMethodHandle getter = propertyGetters.get(id);
         if(getter == null) {
             return Results.notReadable;
         }
-        return getter.handle.invokeWithArguments(obj);
+        return getter.handle.invoke(obj);
     }
-    //TODO: WHY IS THIS INSTANCE METHOD?
-    private MethodHandle SET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findOwnSpecial("setPropertyWithVariableId",
-            Results.class, MethodType.class, LinkerServices.class, Object.class, Object.class, Object.class)
-            .bindTo(this);
+
+    private static final MethodHandle SET_PROPERTY_WITH_VARIABLE_ID = privateLookup.findOwnSpecial(
+            "setPropertyWithVariableId", Results.class, MethodType.class, LinkerServices.class, Object.class,
+            String.class, Object.class);
+    private final MethodHandle setPropertyWithVariableId = SET_PROPERTY_WITH_VARIABLE_ID.bindTo(this);
 
     /**
      * Sets a property on an object.
@@ -377,16 +400,25 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
      * writable.
      * @throws Throwable rethrown underlying method handle invocation throwable.
      */
+    @SuppressWarnings("unused")
     private Results setPropertyWithVariableId(MethodType callSiteType, LinkerServices linkerServices, Object obj,
-            Object id, Object value) throws Throwable {
+            String id, Object value) throws Throwable {
         // TODO: this is quite likely terribly inefficient. Optimize.
         final MethodHandle invocation =
-                getDynamicMethodInvocation(callSiteType, linkerServices, String.valueOf(id), propertySetters);
+                getDynamicMethodInvocation(callSiteType, linkerServices, id, propertySetters);
         if(invocation != null) {
             invocation.invokeWithArguments(obj, value);
             return Results.ok;
         }
         return Results.notWritable;
+    }
+
+    private static MethodHandle GET_METHOD_WITH_VARIABLE_ID = MethodHandles.dropArguments(privateLookup.findOwnSpecial(
+            "getDynamicMethod", DynamicMethod.class, String.class), 1, Object.class);
+    private final MethodHandle getMethodWithVariableId = GET_METHOD_WITH_VARIABLE_ID.bindTo(this);
+
+    private DynamicMethod getDynamicMethod(String methodName) {
+        return getDynamicMethod(methodName, methods);
     }
 
     private static Method getMostGenericGetter(Method getter) {

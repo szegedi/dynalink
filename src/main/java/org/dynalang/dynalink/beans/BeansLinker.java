@@ -57,7 +57,11 @@ public class BeansLinker implements GuardingDynamicLinker {
     private static final ClassValue<TypeBasedGuardingDynamicLinker> linkers = new ClassValue<TypeBasedGuardingDynamicLinker>() {
         @Override
         protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
-            return clazz == Class.class ? new ClassLinker() : clazz == StaticClass.class ? new StaticClassLinker() :
+            // If ClassValue.put() were public, we could just pre-populate with these known mappings...
+            return
+                clazz == Class.class ? new ClassLinker() :
+                clazz == StaticClass.class ? new StaticClassLinker() :
+                DynamicMethod.class.isAssignableFrom(clazz) ? new DynamicMethodLinker() :
                 new BeanLinker(clazz);
         }
     };

@@ -15,6 +15,7 @@ import java.util.Map;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
+import org.dynalang.dynalink.LinkerServicesFactory;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;
@@ -36,7 +37,8 @@ public class TestLengthGetter extends TestCase {
 
     private static GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker, CallSiteDescriptor descriptor,
             Object... args) throws Exception {
-        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args), null);
+        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args),
+                LinkerServicesFactory.getLinkerServices(linker));
     }
 
     private static void testEarlyBoundArrayLengthGetter(Class<?> arrayClass) throws Throwable {
