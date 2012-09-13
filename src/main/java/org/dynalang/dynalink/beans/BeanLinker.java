@@ -104,7 +104,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         // is, it'd be quite stupid of a call site creator to go though invokedynamic when it knows in advance they're
         // dealing with an array, or a list or map, but hey...
         if(declaredType.isArray()) {
-            return new GuardedInvocation(MethodHandles.arrayElementGetter(declaredType).asType(callSiteType), null);
+            return new GuardedInvocation(linkerServices.asType(MethodHandles.arrayElementGetter(declaredType), callSiteType), null);
         }
         if(List.class.isAssignableFrom(declaredType)) {
             return new GuardedInvocation(linkerServices.asType(GET_LIST_ELEMENT, callSiteType), null);
