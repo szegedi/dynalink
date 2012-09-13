@@ -20,7 +20,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
-import java.util.List;
 
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Guards;
@@ -52,8 +51,8 @@ class SimpleDynamicMethod extends DynamicMethod {
     }
 
     @Override
-    SimpleDynamicMethod getMethodForExactParamTypes(List<Class<?>> paramTypes) {
-        return paramTypes.equals(getParameterListNoReceiver(target.type())) ? this : null;
+    SimpleDynamicMethod getMethodForExactParamTypes(String paramTypes) {
+        return typeMatchesDescription(paramTypes, target.type()) ? this : null;
     }
 
     @Override

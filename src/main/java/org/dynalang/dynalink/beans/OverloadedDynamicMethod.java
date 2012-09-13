@@ -35,7 +35,7 @@ class OverloadedDynamicMethod extends DynamicMethod {
     /**
      * Holds a list of all methods.
      */
-    private final LinkedList<MethodHandle> methods = new LinkedList<MethodHandle>();
+    private final LinkedList<MethodHandle> methods;
     private final ClassLoader classLoader;
     private final String name;
 
@@ -46,14 +46,35 @@ class OverloadedDynamicMethod extends DynamicMethod {
      * @param name the name of the method
      */
     public OverloadedDynamicMethod(Class<?> clazz, String name) {
-        this.classLoader = clazz.getClassLoader();
-        this.name = clazz.getName() + "." + name;
+        this(new LinkedList<MethodHandle>(), clazz.getClassLoader(), clazz.getName() + "." + name);
+    }
+
+    private OverloadedDynamicMethod(LinkedList<MethodHandle> methods, ClassLoader classLoader, String name) {
+        this.methods = methods;
+        this.classLoader = classLoader;
+        this.name = name;
     }
 
     @Override
-    SimpleDynamicMethod getMethodForExactParamTypes(List<Class<?>> paramTypes) {
-        final MethodHandle mh = getExplicitMethod(paramTypes);
-        return mh == null ? null : new SimpleDynamicMethod(mh);
+    SimpleDynamicMethod getMethodForExactParamTypes(String paramTypes) {
+        final LinkedList<MethodHandle> matchingMethods = new LinkedList<>();
+        for(MethodHandle method: methods) {
+            if(typeMatchesDescription(paramTypes, method.type())) {
+                matchingMethods.add(method);
+            }
+        }
+        switch(matchingMethods.size()) {
+            case 0: {
+                return null;
+            }
+            case 1: {
+                return new SimpleDynamicMethod(matchingMethods.get(0));
+            }
+            default: {
+                throw new BootstrapMethodError("Can't choose among " + matchingMethods + " for argument types "
+                        + paramTypes);
+            }
+        }
     }
 
     @Override
@@ -128,16 +149,26 @@ class OverloadedDynamicMethod extends DynamicMethod {
 
     @Override
     public boolean contains(MethodHandle mh) {
-        return getExplicitMethod(getParameterListNoReceiver(mh.type())) != null;
-    }
-
-    private MethodHandle getExplicitMethod(List<Class<?>> signature) {
+        final MethodType type = mh.type();
         for(MethodHandle method: methods) {
-            if(getParameterListNoReceiver(method.type()).equals(signature)) {
-                return method;
+            if(typesEqualNoReceiver(type, method.type())) {
+                return true;
             }
         }
-        return null;
+        return false;
+    }
+
+    private static boolean typesEqualNoReceiver(MethodType type1, MethodType type2) {
+        final int pc = type1.parameterCount();
+        if(pc != type2.parameterCount()) {
+            return false;
+        }
+        for(int i = 1; i < pc; ++i) { // i = 1: ignore receiver
+            if(type1.parameterType(i) != type2.parameterType(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     ClassLoader getClassLoader() {

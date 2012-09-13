@@ -18,7 +18,7 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.util.List;
+import java.util.StringTokenizer;
 
 import org.dynalang.dynalink.linker.LinkerServices;
 
@@ -49,11 +49,12 @@ abstract class DynamicMethod {
     /**
      * Returns a simple dynamic method representing a single underlying Java method (possibly selected among several
      * overloads) with formal parameter types exactly matching the passed signature.
-     * @param paramTypes the requested parameter types
-     * @return a simple dynamic method representing a single Java method, or null if none of the overloaded Java methods
+     * @param paramTypes the comma-separated list of requested parameter type names. The names will match both
+     * qualified and unqualified type names.
+     * @return a simple dynamic method representing a single underlying Java method, or null if none of the Java methods
      * behind this dynamic method exactly match the requested parameter types.
      */
-    abstract SimpleDynamicMethod getMethodForExactParamTypes(List<Class<?>> paramTypes);
+    abstract SimpleDynamicMethod getMethodForExactParamTypes(String paramTypes);
 
     /**
      * True if this dynamic method already contains a method handle with an identical signature as the passed in method
@@ -63,7 +64,22 @@ abstract class DynamicMethod {
      */
     abstract boolean contains(MethodHandle mh);
 
-    static List<Class<?>> getParameterListNoReceiver(MethodType type) {
-        return type.parameterList().subList(1, type.parameterCount());
+    static boolean typeMatchesDescription(String paramTypes, MethodType type) {
+        final StringTokenizer tok = new StringTokenizer(paramTypes, ", ");
+        for(int i = 1; i < type.parameterCount(); ++i) { // i = 1 as we ignore the receiver
+            if(!tok.hasMoreTokens()) {
+                return false;
+            }
+            if(!typeNameMatches(tok.nextToken(), type.parameterType(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean typeNameMatches(String typeName, Class<?> type) {
+        final int lastDot = typeName.lastIndexOf('.');
+        final String fullTypeName = type.getCanonicalName();
+        return lastDot != -1 && fullTypeName.endsWith(typeName.substring(lastDot)) || typeName.equals(fullTypeName);
     }
 }
