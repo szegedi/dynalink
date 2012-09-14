@@ -103,6 +103,8 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         // If declared type of receiver at the call site is already an array, a list or map, bind without guard. Thing
         // is, it'd be quite stupid of a call site creator to go though invokedynamic when it knows in advance they're
         // dealing with an array, or a list or map, but hey...
+        // Note that for arrays and lists, using LinkerServices.asType() will ensure that any language specific linkers
+        // in use will get a chance to perform any (if there's any) implicit conversion to integer for the indices.
         if(declaredType.isArray()) {
             return new GuardedInvocation(linkerServices.asType(MethodHandles.arrayElementGetter(declaredType), callSiteType), null);
         }

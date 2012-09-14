@@ -7,6 +7,10 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.Guards;
 
+/**
+ * Simple linker that implements the "dyn:call" operation for {@link DynamicMethod} objects - the objects returned by
+ * "dyn:getMethod" from {@link AbstractJavaLinker}.
+ */
 class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
     @Override
     public boolean canLinkType(Class<?> type) {
@@ -20,11 +24,10 @@ class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
             return null;
         }
         final CallSiteDescriptor desc = linkRequest.getCallSiteDescriptor();
-        if(desc.getNameTokenCount() != 2 || desc.getNameToken(0) != "dyn" || desc.getNameToken(1) != "call") {
-            return null;
+        if(desc.getNameTokenCount() == 2 && desc.getNameToken(0) == "dyn" && desc.getNameToken(1) == "call") {
+            return new GuardedInvocation(((DynamicMethod)receiver).getInvocation(desc.getMethodType(), linkerServices),
+                    Guards.getIdentityGuard(receiver));
         }
-        return new GuardedInvocation(((DynamicMethod)receiver).getInvocation(desc.getMethodType(), linkerServices),
-                Guards.getIdentityGuard(receiver));
+        return null;
     }
-
 }
