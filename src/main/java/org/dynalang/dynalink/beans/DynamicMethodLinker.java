@@ -24,7 +24,8 @@ class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
             return null;
         }
         final CallSiteDescriptor desc = linkRequest.getCallSiteDescriptor();
-        if(desc.getNameTokenCount() == 2 && desc.getNameToken(0) == "dyn" && desc.getNameToken(1) == "call") {
+        if(desc.getNameTokenCount() == 2 && desc.getNameToken(CallSiteDescriptor.SCHEME) == "dyn" &&
+                desc.getNameToken(CallSiteDescriptor.OPERATOR) == "call") {
             return new GuardedInvocation(((DynamicMethod)receiver).getInvocation(desc.getMethodType(), linkerServices),
                     Guards.getIdentityGuard(receiver));
         }

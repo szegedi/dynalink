@@ -69,7 +69,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         final LinkRequest ncrequest = request.withoutRuntimeContext();
         // BeansLinker already checked that the name is at least 2 elements long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
-        final String op = callSiteDescriptor.getNameToken(1);
+        final String op = callSiteDescriptor.getNameToken(CallSiteDescriptor.OPERATOR);
         // dyn:getElem(this, id)
         // id is typically either an int (for arrays and lists) or an object (for maps). linkerServices can provide
         // conversion from call site argument type though.

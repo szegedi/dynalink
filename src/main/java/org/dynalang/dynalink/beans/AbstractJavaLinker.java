@@ -181,7 +181,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         // BeansLinker already checked that the name is at least 2 elements
         // long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
-        final String op = callSiteDescriptor.getNameToken(1);
+        final String op = callSiteDescriptor.getNameToken(CallSiteDescriptor.OPERATOR);
         // Either dyn:getProp:name(this) or dyn:getProp(this, name)
         if("getProp" == op) {
             return getPropertyGetter(callSiteDescriptor, linkerServices);
@@ -220,7 +220,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
                 return createGuardedDynamicMethodInvocation(callSiteDescriptor.getMethodType(), linkerServices,
-                        callSiteDescriptor.getNameToken(2), methods);
+                        callSiteDescriptor.getNameToken(CallSiteDescriptor.NAME_OPERAND), methods);
             }
             default: {
                 return null;
@@ -291,7 +291,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // Must have two arguments: target object and property value
                 assertParameterCount(callSiteDescriptor, 2);
                 return createGuardedDynamicMethodInvocation(callSiteDescriptor.getMethodType(), linkerServices,
-                        callSiteDescriptor.getNameToken(2), propertySetters);
+                        callSiteDescriptor.getNameToken(CallSiteDescriptor.NAME_OPERAND), propertySetters);
             }
             default: {
                 // More than two name components; don't know what to do with it.
@@ -312,7 +312,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // Must have exactly one argument: receiver
                 assertParameterCount(callSiteDescriptor, 1);
                 // Fixed name
-                final AnnotatedMethodHandle annGetter = propertyGetters.get(callSiteDescriptor.getNameToken(2));
+                final AnnotatedMethodHandle annGetter = propertyGetters.get(callSiteDescriptor.getNameToken(
+                        CallSiteDescriptor.NAME_OPERAND));
                 if(annGetter == null) {
                     // Property has no getter
                     return null;
@@ -343,7 +344,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             case 3: {
                 // Must have exactly one argument: receiver
                 assertParameterCount(callSiteDescriptor, 1);
-                final DynamicMethod method = getDynamicMethod(callSiteDescriptor.getNameToken(2));
+                final DynamicMethod method = getDynamicMethod(callSiteDescriptor.getNameToken(
+                        CallSiteDescriptor.NAME_OPERAND));
                 if(method == null) {
                     return null;
                 }

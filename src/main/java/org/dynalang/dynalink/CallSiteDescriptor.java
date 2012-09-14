@@ -30,11 +30,24 @@ import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
  * guarding linkers so they aren't tempted to directly manipulate the call sites. The constructors of built-in
  * {@link RelinkableCallSite} implementations all need a call site descriptor. Even if you create your own call site
  * descriptors consider using {@link CallSiteDescriptorFactory#tokenizeName(String)} in your implementation.
- * consider
  *
  * @author Attila Szegedi
  */
 public interface CallSiteDescriptor {
+    /**
+     * The index of the name token that will carry the operation scheme prefix (usually, "dyn").
+     */
+    public static final int SCHEME = 0;
+    /**
+     * The index of the name token that will usually carry the operation name.
+     */
+
+    public static final int OPERATOR=1;
+    /**
+     * The index of the name token that will usually carry a name of an operand (of a property, method, etc.)
+     */
+
+    public static final int NAME_OPERAND=2;
 
     /**
      * Returns the number of tokens in the name of the method at the call site. Method names are tokenized with the
