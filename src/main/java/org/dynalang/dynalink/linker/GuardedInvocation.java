@@ -155,7 +155,7 @@ public class GuardedInvocation {
         if(newInvocation == invocation) {
             return this;
         }
-        return replaceMethods(newInvocation, guardAsType(newType));
+        return replaceMethods(newInvocation, guard == null ? null : Guards.asType(guard, newType));
     }
 
     /**
@@ -169,13 +169,6 @@ public class GuardedInvocation {
         return asType(desc.getMethodType());
     }
 
-    private MethodHandle guardAsType(MethodType newType) {
-        if(guard == null) {
-            return null;
-        }
-        return guard.asType(newType.changeReturnType(Boolean.TYPE).dropParameterTypes(guard.type().parameterCount(),
-                newType.parameterCount()));
-    }
     /**
      * Applies argument filters to both the invocation and the guard (if there is one).
      * @param pos the position of the first argumen being filtered

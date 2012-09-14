@@ -159,7 +159,8 @@ public class Guards {
      * @return the adapted method handle
      */
     public static MethodHandle asType(MethodHandle test, MethodType type) {
-        return asType(test, 0, type);
+        return test.asType(type.dropParameterTypes(test.type().parameterCount(),
+                type.parameterCount()).changeReturnType(boolean.class));
     }
 
     private static MethodHandle asType(MethodHandle test, int pos, MethodType type) {
