@@ -339,7 +339,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             case 2: {
                 // Must have exactly two arguments: receiver and name
                 assertParameterCount(callSiteDescriptor, 2);
-                return new GuardedInvocation(linkerServices.asType(getMethodWithVariableId, type), getClassGuard(type));
+                return new GuardedInvocation(linkerServices.asType(getDynamicMethod, type), getClassGuard(type));
             }
             case 3: {
                 // Must have exactly one argument: receiver
@@ -415,9 +415,10 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return Results.notWritable;
     }
 
-    private static MethodHandle GET_METHOD_WITH_VARIABLE_ID = MethodHandles.dropArguments(privateLookup.findOwnSpecial(
+    private static MethodHandle GET_DYNAMIC_METHOD = MethodHandles.dropArguments(privateLookup.findOwnSpecial(
             "getDynamicMethod", DynamicMethod.class, String.class), 1, Object.class);
-    private final MethodHandle getMethodWithVariableId = GET_METHOD_WITH_VARIABLE_ID.bindTo(this);
+    private final MethodHandle getDynamicMethod = GET_DYNAMIC_METHOD.bindTo(this);
+
 
     private DynamicMethod getDynamicMethod(String methodName) {
         return getDynamicMethod(methodName, methods);
