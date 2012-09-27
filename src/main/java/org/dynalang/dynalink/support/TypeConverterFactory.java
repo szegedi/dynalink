@@ -115,7 +115,7 @@ public class TypeConverterFactory {
         final MethodType toType = newHandle.type();
         final int l = toType.parameterCount();
         if(l != fromType.parameterCount()) {
-            throw new WrongMethodTypeException("Parameter counts differ");
+            throw new WrongMethodTypeException("Parameter counts differ: " + handle.type() + " vs. " + fromType);
         }
         int pos = 0;
         final List<MethodHandle> converters = new LinkedList<MethodHandle>();
