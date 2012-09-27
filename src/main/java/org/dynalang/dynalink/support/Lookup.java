@@ -70,6 +70,17 @@ public class Lookup {
         }
     }
 
+    public MethodHandle findGetter(Class<?>refc, String name, Class<?> type) {
+        try {
+            return lookup.findGetter(refc, name, type);
+        } catch(NoSuchFieldException | IllegalAccessException e) {
+            final IllegalAccessError ee = new IllegalAccessError("Failed to find getter for field " + refc.getName() +
+                    "." + name + " of type " + type.getName());
+            ee.initCause(e);
+            throw ee;
+        }
+    }
+
     public MethodHandle unreflectSetter(Field f) {
         try {
             return lookup.unreflectSetter(f);
