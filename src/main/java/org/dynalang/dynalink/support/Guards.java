@@ -189,6 +189,9 @@ public class Guards {
     private static final MethodHandle IS_NULL = new Lookup(MethodHandles.lookup()).findStatic(Guards.class,
             "isNull", MethodType.methodType(Boolean.TYPE, Object.class));
 
+    private static final MethodHandle IS_NOT_NULL = new Lookup(MethodHandles.lookup()).findStatic(Guards.class,
+            "isNotNull", MethodType.methodType(Boolean.TYPE, Object.class));
+
     /**
      * Creates a guard method that tests its only argument for being of an exact particular class.
      * @param clazz the class to test for.
@@ -224,9 +227,18 @@ public class Guards {
         return IS_NULL;
     }
 
+    public static MethodHandle isNotNull() {
+        return IS_NOT_NULL;
+    }
+
     @SuppressWarnings("unused")
     private static boolean isNull(Object obj) {
         return obj == null;
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isNotNull(Object obj) {
+        return obj != null;
     }
 
     @SuppressWarnings("unused")
