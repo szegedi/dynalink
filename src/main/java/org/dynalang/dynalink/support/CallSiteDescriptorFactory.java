@@ -4,6 +4,9 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 
@@ -97,5 +100,19 @@ public class CallSiteDescriptorFactory {
             tokens[i] = token.intern();
         }
         return tokens;
+    }
+
+    public static List<String> tokenizeOperators(CallSiteDescriptor desc) {
+        final String ops = desc.getNameToken(CallSiteDescriptor.OPERATOR);
+        final StringTokenizer tok = new StringTokenizer(ops, "|");
+        final int count = tok.countTokens();
+        if(count == 1) {
+            return Collections.singletonList(ops);
+        }
+        final String[] tokens = new String[count];
+        for(int i = 0; i < count; ++i) {
+            tokens[i] = tok.nextToken();
+        }
+        return Arrays.asList(tokens);
     }
 }
