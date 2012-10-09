@@ -1,11 +1,14 @@
 package org.dynalang.dynalink.beans;
 
+import java.lang.invoke.MethodHandle;
+
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.Guards;
+import org.dynalang.dynalink.support.UsefulHandles;
 
 /**
  * Simple linker that implements the "dyn:call" operation for {@link DynamicMethod} objects - the objects returned by
@@ -24,11 +27,22 @@ class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
             return null;
         }
         final CallSiteDescriptor desc = linkRequest.getCallSiteDescriptor();
-        if(desc.getNameTokenCount() == 2 && desc.getNameToken(CallSiteDescriptor.SCHEME) == "dyn" &&
-                desc.getNameToken(CallSiteDescriptor.OPERATOR) == "call") {
+        if(desc.getNameTokenCount() != 2 && desc.getNameToken(CallSiteDescriptor.SCHEME) != "dyn")  {
+            return null;
+        }
+        final String operator = desc.getNameToken(CallSiteDescriptor.OPERATOR);
+        if(operator == "call") {
             return new GuardedInvocation(((DynamicMethod)receiver).getInvocation(desc.getMethodType(), linkerServices),
                     Guards.getIdentityGuard(receiver));
+        } else if(operator == "canCall") {
+            return YES.asType(desc);
+        } else if(operator == "canNew") {
+            return NO.asType(desc);
         }
         return null;
     }
+
+    private static final MethodHandle IS_DYNAMIC_METHOD = Guards.getInstanceOfGuard(DynamicMethod.class);
+    private static final GuardedInvocation YES = new GuardedInvocation(UsefulHandles.RETURN_TRUE_DROP_ARG, IS_DYNAMIC_METHOD);
+    private static final GuardedInvocation NO = new GuardedInvocation(UsefulHandles.RETURN_FALSE_DROP_ARG, IS_DYNAMIC_METHOD);
 }

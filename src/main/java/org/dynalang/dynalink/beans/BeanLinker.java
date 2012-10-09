@@ -120,8 +120,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
             gic = new GuardedInvocationComponent(GET_MAP_ELEMENT);
             isMap = true;
         } else if(clazz.isArray()) {
-            gic = new GuardedInvocationComponent(MethodHandles.arrayElementGetter(clazz), getClassGuard(
-                    callSiteType), clazz, ValidationType.EXACT_CLASS);
+            gic = getClassGuardedInvocationComponent(MethodHandles.arrayElementGetter(clazz), callSiteType);
             isMap = false;
         } else if(List.class.isAssignableFrom(clazz)) {
             gic = new GuardedInvocationComponent(GET_LIST_ELEMENT, Guards.asType(LIST_GUARD, callSiteType), List.class,
@@ -282,8 +281,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
             gic = new GuardedInvocationComponent(PUT_MAP_ELEMENT);
             isMap = true;
         } else if(clazz.isArray()) {
-            gic = new GuardedInvocationComponent(MethodHandles.arrayElementSetter(clazz), getClassGuard(
-                    callSiteType), clazz, ValidationType.EXACT_CLASS);
+            gic = getClassGuardedInvocationComponent(MethodHandles.arrayElementSetter(clazz), callSiteType);
             isMap = false;
         } else if(List.class.isAssignableFrom(clazz)) {
             gic = new GuardedInvocationComponent(SET_LIST_ELEMENT, Guards.asType(LIST_GUARD, callSiteType), List.class,

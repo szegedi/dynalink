@@ -36,6 +36,11 @@ class GuardedInvocationComponent {
         this(invocation, guard, new Validator(validatorClass, validationType));
     }
 
+    GuardedInvocationComponent(GuardedInvocation guardedInvocation, Class<?> validatorClass,
+            ValidationType validationType) {
+        this(guardedInvocation, new Validator(validatorClass, validationType));
+    }
+
     GuardedInvocationComponent replaceInvocation(MethodHandle newInvocation) {
         return replaceInvocation(newInvocation, guardedInvocation.getGuard());
     }

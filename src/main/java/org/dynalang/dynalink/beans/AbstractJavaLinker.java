@@ -43,6 +43,7 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.UsefulHandles;
 
 /**
  * A base class for both {@link StaticClassLinker} and {@link BeanLinker}. Deals with common aspects of property
@@ -171,6 +172,16 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         final LinkRequest ncrequest = request.withoutRuntimeContext();
         // BeansLinker already checked that the name is at least 2 elements long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
+        final String op = callSiteDescriptor.getNameToken(CallSiteDescriptor.OPERATOR);
+        // Either dyn:callPropWithThis:name(this[,args]) or dyn:callPropWithThis(this,name[,args]).
+        if("callPropWithThis" == op) {
+            return getCallPropWithThis(callSiteDescriptor, linkerServices);
+        }
+        if("canCall" == op || "canNew" == op) {
+            // Generally, beans can't be used as first-class functions or constructors
+            return new GuardedInvocation(UsefulHandles.RETURN_FALSE_DROP_ARG, getClassGuard(
+                    callSiteDescriptor)).asType(callSiteDescriptor);
+        }
         final GuardedInvocationComponent gic = getGuardedInvocationComponent(callSiteDescriptor, linkerServices,
                 CallSiteDescriptorFactory.tokenizeOperators(callSiteDescriptor));
         return gic == null ? null : gic.getGuardedInvocation();
@@ -189,10 +200,6 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         // Either dyn:setProp:name(this, value) or dyn:setProp(this, name, value)
         if("setProp".equals(op)) {
             return getPropertySetter(callSiteDescriptor, linkerServices, pop(operations));
-        }
-        // Either dyn:callPropWithThis:name(this[,args]) or dyn:callPropWithThis(this,name[,args]).
-        if("callPropWithThis".equals(op)) {
-            return getCallPropWithThis(callSiteDescriptor, linkerServices);
         }
         // Either dyn:getMethod:name(this), or dyn:getMethod(this, name)
         if("getMethod".equals(op)) {
@@ -213,11 +220,15 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return Guards.asType(classGuard, type);
     }
 
+    GuardedInvocationComponent getClassGuardedInvocationComponent(MethodHandle invocation, MethodType type) {
+        return new GuardedInvocationComponent(invocation, getClassGuard(type), clazz, ValidationType.EXACT_CLASS);
+    }
+
     private MethodHandle getAssignableGuard(MethodType type) {
         return Guards.asType(assignableGuard, type);
     }
 
-    private GuardedInvocationComponent getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
+    private GuardedInvocation getCallPropWithThis(CallSiteDescriptor callSiteDescriptor, LinkerServices linkerServices) {
         switch(callSiteDescriptor.getNameTokenCount()) {
             case 3: {
                 return createGuardedDynamicMethodInvocation(callSiteDescriptor.getMethodType(), linkerServices,
@@ -229,12 +240,11 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         }
     }
 
-    private GuardedInvocationComponent createGuardedDynamicMethodInvocation(MethodType callSiteType,
+    private GuardedInvocation createGuardedDynamicMethodInvocation(MethodType callSiteType,
             LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap){
-        final MethodHandle invocation =
-                getDynamicMethodInvocation(callSiteType, linkerServices, methodName, methodMap);
-        return invocation == null ? null : new GuardedInvocationComponent(invocation, getClassGuard(callSiteType),
-                clazz, ValidationType.EXACT_CLASS);
+
+        return new GuardedInvocation(getDynamicMethodInvocation(callSiteType, linkerServices, methodName, methodMap),
+                getClassGuard(callSiteType));
     }
 
     private static MethodHandle getDynamicMethodInvocation(MethodType callSiteType, LinkerServices linkerServices,
@@ -334,8 +344,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 final MethodHandle compositeSetter = MethodHandles.foldArguments(MethodHandles.guardWithTest(
                             IS_METHOD_HANDLE_NOT_NULL, invokeHandleFolded, fallbackFolded), typedGetter);
                 if(nextComponent == null) {
-                    return new GuardedInvocationComponent(compositeSetter, getClassGuard(type), clazz,
-                            ValidationType.EXACT_CLASS);
+                    return getClassGuardedInvocationComponent(compositeSetter, type);
                 } else {
                     return nextComponent.compose(compositeSetter, getClassGuard(type), clazz,
                             ValidationType.EXACT_CLASS);
@@ -344,12 +353,12 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             case 3: {
                 // Must have two arguments: target object and property value
                 assertParameterCount(callSiteDescriptor, 2);
-                GuardedInvocationComponent gic = createGuardedDynamicMethodInvocation(
-                        callSiteDescriptor.getMethodType(), linkerServices, callSiteDescriptor.getNameToken(
-                                CallSiteDescriptor.NAME_OPERAND), propertySetters);
+                final GuardedInvocation gi = createGuardedDynamicMethodInvocation(callSiteDescriptor.getMethodType(),
+                        linkerServices, callSiteDescriptor.getNameToken(CallSiteDescriptor.NAME_OPERAND),
+                        propertySetters);
                 // If we have a property setter with this name, this composite operation will always stop here
-                if(gic != null) {
-                    return gic;
+                if(gi != null) {
+                    return new GuardedInvocationComponent(gi, clazz, ValidationType.EXACT_CLASS);
                 }
                 // If we don't have a property setter with this name, always fall back to the next operation in the
                 // composite (if any)
@@ -416,8 +425,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 final MethodHandle compositeGetter = MethodHandles.foldArguments(MethodHandles.guardWithTest(
                             IS_ANNOTATED_HANDLE_NOT_NULL, invokeHandleFolded, fallbackFolded), typedGetter);
                 if(nextComponent == null) {
-                    return new GuardedInvocationComponent(compositeGetter, getClassGuard(type), clazz,
-                            ValidationType.EXACT_CLASS);
+                    return getClassGuardedInvocationComponent(compositeGetter, type);
                 } else {
                     return nextComponent.compose(compositeGetter, getClassGuard(type), clazz,
                             ValidationType.EXACT_CLASS);
@@ -466,8 +474,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                         linkerServices, ops);
                 if(nextComponent == null) {
                     // No next component operation; just return a component for this operation.
-                    return new GuardedInvocationComponent(linkerServices.asType(getDynamicMethod, type), getClassGuard(
-                            type), clazz, ValidationType.EXACT_CLASS);
+                    return getClassGuardedInvocationComponent(linkerServices.asType(getDynamicMethod, type), type);
                 } else {
                     // What's below is basically:
                     //   foldArguments(guardWithTest(isNotNull, identity, nextComponent.invocation), getter)
@@ -506,9 +513,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 }
                 // No delegation to the next component of the composite operation; if we have a method with that name,
                 // we'll always return it at this point.
-                return new GuardedInvocationComponent(linkerServices.asType(MethodHandles.dropArguments(
-                        MethodHandles.constant(DynamicMethod.class, method), 0, type.parameterType(0)), type),
-                        getClassGuard(type), clazz, ValidationType.EXACT_CLASS);
+                return getClassGuardedInvocationComponent(linkerServices.asType(MethodHandles.dropArguments(
+                        MethodHandles.constant(DynamicMethod.class, method), 0, type.parameterType(0)), type), type);
             }
             default: {
                 // Can't do anything with more than 3 name components

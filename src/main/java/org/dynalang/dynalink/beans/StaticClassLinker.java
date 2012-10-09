@@ -30,7 +30,9 @@ import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
+import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.UsefulHandles;
 
 /**
  * Provides a linker for the {@link StaticClass} objects.
@@ -92,12 +94,19 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
             }
             final CallSiteDescriptor desc = request.getCallSiteDescriptor();
             final String op = desc.getNameToken(CallSiteDescriptor.OPERATOR);
+            final MethodType methodType = desc.getMethodType();
             if("new" == op && constructor != null) {
-                final MethodType methodType = desc.getMethodType();
                 final MethodHandle ctorInvocation = constructor.getInvocation(methodType, linkerServices);
                 if(ctorInvocation != null) {
                     return new GuardedInvocation(ctorInvocation, getClassGuard(methodType));
                 }
+            } else if("canNew" == op) {
+                // A static class answers to "dyn:new" if it has a constructor method
+                return new GuardedInvocation(UsefulHandles.returnBooleanDropArg(constructor != null), getClassGuard(
+                        methodType)).asType(desc);
+            } else if("canCall" == op) {
+                // A static class won't answer to "dyn:call"
+                return NO.asType(desc);
             }
             return null;
         }
@@ -124,6 +133,8 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
     private static final MethodHandle IS_CLASS = new Lookup(MethodHandles.lookup()).findStatic(StaticClassLinker.class,
             "isClass", MethodType.methodType(Boolean.TYPE, Class.class, Object.class));
 
+    private static final MethodHandle IS_STATIC_CLASS = Guards.getClassGuard(StaticClass.class);
+    private static final GuardedInvocation NO = new GuardedInvocation(UsefulHandles.RETURN_FALSE_DROP_ARG, IS_STATIC_CLASS);
 
     private static final MethodHandle ARRAY_CTOR = Lookup.PUBLIC.findStatic(Array.class, "newInstance",
             MethodType.methodType(Object.class, Class.class, int.class));
