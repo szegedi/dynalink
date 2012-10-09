@@ -74,7 +74,7 @@ abstract class DynamicMethod {
                 return false;
             }
         }
-        return true;
+        return !tok.hasMoreTokens();
     }
 
     private static boolean typeNameMatches(String typeName, Class<?> type) {

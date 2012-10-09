@@ -72,7 +72,7 @@ class OverloadedDynamicMethod extends DynamicMethod {
             }
             default: {
                 throw new BootstrapMethodError("Can't choose among " + matchingMethods + " for argument types "
-                        + paramTypes);
+                        + paramTypes + " for method " + name);
             }
         }
     }
