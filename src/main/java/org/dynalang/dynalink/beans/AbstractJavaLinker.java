@@ -242,9 +242,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     private GuardedInvocation createGuardedDynamicMethodInvocation(MethodType callSiteType,
             LinkerServices linkerServices, String methodName, Map<String, DynamicMethod> methodMap){
-
-        return new GuardedInvocation(getDynamicMethodInvocation(callSiteType, linkerServices, methodName, methodMap),
-                getClassGuard(callSiteType));
+        final MethodHandle inv = getDynamicMethodInvocation(callSiteType, linkerServices, methodName, methodMap);
+        return inv == null ? null : new GuardedInvocation(inv, getClassGuard(callSiteType));
     }
 
     private static MethodHandle getDynamicMethodInvocation(MethodType callSiteType, LinkerServices linkerServices,
