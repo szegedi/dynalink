@@ -67,10 +67,7 @@ abstract class DynamicMethod {
     static boolean typeMatchesDescription(String paramTypes, MethodType type) {
         final StringTokenizer tok = new StringTokenizer(paramTypes, ", ");
         for(int i = 1; i < type.parameterCount(); ++i) { // i = 1 as we ignore the receiver
-            if(!tok.hasMoreTokens()) {
-                return false;
-            }
-            if(!typeNameMatches(tok.nextToken(), type.parameterType(i))) {
+            if(!(tok.hasMoreTokens() && typeNameMatches(tok.nextToken(), type.parameterType(i)))) {
                 return false;
             }
         }
