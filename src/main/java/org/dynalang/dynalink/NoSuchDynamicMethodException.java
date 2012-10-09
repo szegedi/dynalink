@@ -26,9 +26,10 @@ import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 public class NoSuchDynamicMethodException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public NoSuchDynamicMethodException () {
-    }
-
+    /**
+     * Creates a new NoSuchDynamicMethodException
+     * @param message the message of the exception.
+     */
     public NoSuchDynamicMethodException(String message) {
         super(message);
     }

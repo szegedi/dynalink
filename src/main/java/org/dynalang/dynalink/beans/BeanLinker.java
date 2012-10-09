@@ -246,7 +246,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
     }
 
     @SuppressWarnings("unused")
-    private static final boolean rangeCheck(List list, Object index) {
+    private static final boolean rangeCheck(List<?> list, Object index) {
         if(!(index instanceof Number)) {
             return false;
         }

@@ -102,6 +102,12 @@ public class CallSiteDescriptorFactory {
         return tokens;
     }
 
+    /**
+     * Tokenizes a composite operation name along pipe characters. I.e. if you have a "dyn:getElem|getProp|getMethod"
+     * operation, returns a list of ["getElem", "getProp", "getMethod"]. The tokens are not interned.
+     * @param desc the call site descriptor with the operation
+     * @return a list of tokens
+     */
     public static List<String> tokenizeOperators(CallSiteDescriptor desc) {
         final String ops = desc.getNameToken(CallSiteDescriptor.OPERATOR);
         final StringTokenizer tok = new StringTokenizer(ops, "|");

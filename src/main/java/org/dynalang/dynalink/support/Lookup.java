@@ -41,11 +41,14 @@ public class Lookup {
         this.lookup = lookup;
     }
 
+    /**
+     * A canonical Lookup object that wraps {@link MethodHandles#publicLookup()}.
+     */
     public static final Lookup PUBLIC = new Lookup(MethodHandles.publicLookup());
 
     /**
      * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflect(Method)}, converting any encountered
-     * {@link IllegalAccessException} into a {@link BootstrapMethodError}.
+     * {@link IllegalAccessException} into an {@link IllegalAccessError}.
      *
      * @param m the method to unreflect
      * @return the unreflected method handle.
@@ -60,6 +63,14 @@ public class Lookup {
         }
     }
 
+
+    /**
+     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflectGetter(Field)}, converting any encountered
+     * {@link IllegalAccessException} into an {@link IllegalAccessError}.
+     *
+     * @param f the field for which a getter is unreflected
+     * @return the unreflected field getter handle.
+     */
     public MethodHandle unreflectGetter(Field f) {
         try {
             return lookup.unreflectGetter(f);
@@ -70,17 +81,41 @@ public class Lookup {
         }
     }
 
+    /**
+     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#findGetter(Class, String, Class)}, converting any
+     * encountered {@link IllegalAccessException} into an {@link IllegalAccessError} and {@link NoSuchFieldException}
+     * into a {@link NoSuchFieldError}.
+     *
+     * @param refc the class declaring the field
+     * @param name the name of the field
+     * @param type the type of the field
+     * @return the unreflected field getter handle.
+     * @throws IllegalAccessError if the field is inaccessible.
+     * @throws NoSuchFieldError if the field does not exist.
+     */
     public MethodHandle findGetter(Class<?>refc, String name, Class<?> type) {
         try {
             return lookup.findGetter(refc, name, type);
-        } catch(NoSuchFieldException | IllegalAccessException e) {
-            final IllegalAccessError ee = new IllegalAccessError("Failed to find getter for field " + refc.getName() +
+        } catch(IllegalAccessException e) {
+            final IllegalAccessError ee = new IllegalAccessError("Failed to access getter for field " + refc.getName() +
+                    "." + name + " of type " + type.getName());
+            ee.initCause(e);
+            throw ee;
+        } catch(NoSuchFieldException e) {
+            final NoSuchFieldError ee = new NoSuchFieldError("Failed to find getter for field " + refc.getName() +
                     "." + name + " of type " + type.getName());
             ee.initCause(e);
             throw ee;
         }
     }
 
+    /**
+     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflectSetter(Field)}, converting any encountered
+     * {@link IllegalAccessException} into an {@link IllegalAccessError}.
+     *
+     * @param f the field for which a setter is unreflected
+     * @return the unreflected field setter handle.
+     */
     public MethodHandle unreflectSetter(Field f) {
         try {
             return lookup.unreflectSetter(f);
@@ -91,7 +126,14 @@ public class Lookup {
         }
     }
 
-    public MethodHandle unreflectConstructor(Constructor c) {
+    /**
+     * Performs a {@link java.lang.invoke.MethodHandles.Lookup#unreflectConstructor(Constructor)}, converting any
+     * encountered {@link IllegalAccessException} into an {@link IllegalAccessError}.
+     *
+     * @param c the constructor to unreflect
+     * @return the unreflected constructor handle.
+     */
+    public MethodHandle unreflectConstructor(Constructor<?> c) {
         try {
             return lookup.unreflectConstructor(c);
         } catch(IllegalAccessException e) {
@@ -102,13 +144,16 @@ public class Lookup {
     }
 
     /**
-     * Performs a findSpecial on the underlying lookup, except for the backport where it rather uses unreflect.
+     * Performs a findSpecial on the underlying lookup, except for the backport where it rather uses unreflect. Converts
+     * any encountered {@link IllegalAccessException} into an {@link IllegalAccessError} and a
+     * {@link NoSuchMethodException} into a {@link NoSuchMethodError}.
      *
      * @param declaringClass class declaring the method
      * @param name the name of the method
      * @param type the type of the method
      * @return a method handle for the method
-     * @throws BootstrapMethodError if the method does not exist or is inaccessible.
+     * @throws IllegalAccessError if the method is inaccessible.
+     * @throws NoSuchMethodError if the method does not exist.
      */
     public MethodHandle findSpecial(Class<?> declaringClass, String name, MethodType type) {
         try {
@@ -138,6 +183,17 @@ public class Lookup {
         return declaringClass.getName() + "#" + name + type;
     }
 
+    /**
+     * Performs a findStatic on the underlying lookup. Converts any encountered {@link IllegalAccessException} into an
+     * {@link IllegalAccessError} and a {@link NoSuchMethodException} into a {@link NoSuchMethodError}.
+     *
+     * @param declaringClass class declaring the method
+     * @param name the name of the method
+     * @param type the type of the method
+     * @return a method handle for the method
+     * @throws IllegalAccessError if the method is inaccessible.
+     * @throws NoSuchMethodError if the method does not exist.
+     */
     public MethodHandle findStatic(Class<?> declaringClass, String name, MethodType type) {
         try {
             return lookup.findStatic(declaringClass, name, type);
@@ -154,6 +210,17 @@ public class Lookup {
         }
     }
 
+    /**
+     * Performs a findVirtual on the underlying lookup. Converts any encountered {@link IllegalAccessException} into an
+     * {@link IllegalAccessError} and a {@link NoSuchMethodException} into a {@link NoSuchMethodError}.
+     *
+     * @param declaringClass class declaring the method
+     * @param name the name of the method
+     * @param type the type of the method
+     * @return a method handle for the method
+     * @throws IllegalAccessError if the method is inaccessible.
+     * @throws NoSuchMethodError if the method does not exist.
+     */
     public MethodHandle findVirtual(Class<?> declaringClass, String name, MethodType type) {
         try {
             return lookup.findVirtual(declaringClass, name, type);

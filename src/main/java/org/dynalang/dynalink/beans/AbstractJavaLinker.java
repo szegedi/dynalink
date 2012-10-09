@@ -545,6 +545,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     // Type is MethodHandle(MethodType, LinkerServices, Object, String, Object)
     private final MethodHandle getPropertySetterHandle = GET_PROPERTY_SETTER_HANDLE.bindTo(this);
 
+    @SuppressWarnings("unused")
     private MethodHandle getPropertySetterHandle(MethodType setterType, LinkerServices linkerServices, Object id) {
         return getDynamicMethodInvocation(setterType, linkerServices, String.valueOf(id), propertySetters);
     }

@@ -10,7 +10,9 @@ package org.dynalang.dynalink.linker;
  * @author Attila Szegedi
  */
 public interface ConversionComparator {
-
+    /**
+     * Enumeration of possible outcomes of comparing one conversion to another.
+     */
     enum Comparison {
         INDETERMINATE,
         TYPE_1_BETTER,

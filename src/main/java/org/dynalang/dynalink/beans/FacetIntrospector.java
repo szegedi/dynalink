@@ -90,6 +90,7 @@ abstract class FacetIntrospector implements AutoCloseable {
      * @param mh the method handle to edit.
      * @return the edited method handle.
      */
+    @SuppressWarnings("static-method") // Meant to be overridden in a subclass
     MethodHandle editMethodHandle(MethodHandle mh) {
         return mh;
     }

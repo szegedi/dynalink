@@ -205,12 +205,13 @@ public class DynamicLinkerFactory {
             }
         }
 
-        final List<GuardingTypeConverterFactory> typeConverters = new LinkedList<GuardingTypeConverterFactory>();
+        final List<GuardingTypeConverterFactory> typeConverters = new LinkedList<>();
         for(GuardingDynamicLinker linker: linkers) {
             if(linker instanceof GuardingTypeConverterFactory) {
                 typeConverters.add((GuardingTypeConverterFactory)linker);
             }
         }
+
         return new DynamicLinker(new LinkerServicesImpl(new TypeConverterFactory(typeConverters), composite),
                 runtimeContextArgCount, syncOnRelink);
     }

@@ -339,6 +339,13 @@ public class TypeUtilities {
         return PRIMITIVE_WRAPPER_TYPES.contains(clazz);
     }
 
+    /**
+     * Given a name of a primitive type (except "void"), returns the class representing it. I.e. when invoked with
+     * "int", returns {@link Integer#TYPE}.
+     * @param name the name of the primitive type
+     * @return the class representing the primitive type, or null if the name does not correspond to a primitive type
+     * or is "void".
+     */
     public static Class<?> getPrimitiveTypeByName(String name) {
         return PRIMITIVE_TYPES_BY_NAME.get(name);
     }

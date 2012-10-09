@@ -227,6 +227,10 @@ public class Guards {
         return IS_NULL;
     }
 
+    /**
+     * Returns a guard that tests whether the first argument is not null.
+     * @return a guard that tests whether the first argument is not null.
+     */
     public static MethodHandle isNotNull() {
         return IS_NOT_NULL;
     }

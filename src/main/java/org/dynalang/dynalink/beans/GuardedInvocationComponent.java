@@ -108,6 +108,8 @@ class GuardedInvocationComponent {
                                 return this;
                             }
                             break;
+                        case NONE:
+                            throw new AssertionError(); // Not possible
                     }
                     break;
                 case EXACT_CLASS:
@@ -127,6 +129,8 @@ class GuardedInvocationComponent {
                                 return this;
                             }
                             break;
+                        case NONE:
+                            throw new AssertionError(); // Not possible
                     }
                     break;
                 case IS_ARRAY:
@@ -139,6 +143,8 @@ class GuardedInvocationComponent {
                             break;
                         case IS_ARRAY:
                             return this;
+                        case NONE:
+                            throw new AssertionError(); // Not possible
                     }
                     break;
             }
