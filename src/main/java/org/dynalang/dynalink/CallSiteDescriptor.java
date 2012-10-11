@@ -105,4 +105,15 @@ public interface CallSiteDescriptor {
      * @return a new call site descriptor, with the type of the parameter in the method type changed.
      */
     public CallSiteDescriptor changeParameterType(int num, Class<?> newType);
+
+
+    /**
+     * Creates a new call site descriptor from this descriptor, which is identical to this, except it changes the return
+     * type in the method type.
+     *
+     * @param newType the new return type
+     * @return a new call site descriptor, with the return type in the method type changed.
+     */
+    public CallSiteDescriptor changeReturnType(Class<?> newType);
+
 }

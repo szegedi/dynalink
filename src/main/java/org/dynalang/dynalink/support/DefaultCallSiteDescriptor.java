@@ -55,4 +55,10 @@ class DefaultCallSiteDescriptor extends AbstractCallSiteDescriptor {
         return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new DefaultCallSiteDescriptor(tokenizedName,
                 methodType.changeParameterType(num, newType)));
     }
+
+    @Override
+    public CallSiteDescriptor changeReturnType(Class<?> newType) {
+        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new DefaultCallSiteDescriptor(tokenizedName,
+                methodType.changeReturnType(newType)));
+    }
 }
