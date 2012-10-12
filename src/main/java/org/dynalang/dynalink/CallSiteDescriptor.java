@@ -50,6 +50,16 @@ public interface CallSiteDescriptor {
     public static final int NAME_OPERAND=2;
 
     /**
+     * Character used to delimit tokens in an call site name.
+     */
+    public static final String TOKEN_DELIMITER = ":";
+
+    /**
+     * Character used to delimit operation names in a composite operation specification.
+     */
+    public static final String OPERATOR_DELIMITER = "|";
+
+    /**
      * Returns the number of tokens in the name of the method at the call site. Method names are tokenized with the
      * colon ":" character, i.e. "dyn:getProp:color" would be the name used to describe a method that retrieves the
      * property named "color" on the object it is invoked on.

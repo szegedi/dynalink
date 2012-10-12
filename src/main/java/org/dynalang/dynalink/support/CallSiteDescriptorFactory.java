@@ -21,7 +21,6 @@ import org.dynalang.dynalink.CallSiteDescriptor;
  * @author Attila Szegedi
  */
 public class CallSiteDescriptorFactory {
-    private static final String TOKEN_DELIMITER = ":";
     private static final WeakHashMap<CallSiteDescriptor, WeakReference<CallSiteDescriptor>> publicDescs =
             new WeakHashMap<>();
 
@@ -90,7 +89,7 @@ public class CallSiteDescriptorFactory {
      * @return an array of tokens
      */
     public static String[] tokenizeName(String name) {
-        final StringTokenizer tok = new StringTokenizer(name, TOKEN_DELIMITER);
+        final StringTokenizer tok = new StringTokenizer(name, CallSiteDescriptor.TOKEN_DELIMITER);
         final String[] tokens = new String[tok.countTokens()];
         for(int i = 0; i < tokens.length; ++i) {
             String token = tok.nextToken();
@@ -110,7 +109,7 @@ public class CallSiteDescriptorFactory {
      */
     public static List<String> tokenizeOperators(CallSiteDescriptor desc) {
         final String ops = desc.getNameToken(CallSiteDescriptor.OPERATOR);
-        final StringTokenizer tok = new StringTokenizer(ops, "|");
+        final StringTokenizer tok = new StringTokenizer(ops, CallSiteDescriptor.OPERATOR_DELIMITER);
         final int count = tok.countTokens();
         if(count == 1) {
             return Collections.singletonList(ops);
