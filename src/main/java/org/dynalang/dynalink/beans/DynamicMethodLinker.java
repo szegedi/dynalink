@@ -1,6 +1,8 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -32,8 +34,10 @@ class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
         }
         final String operator = desc.getNameToken(CallSiteDescriptor.OPERATOR);
         if(operator == "call") {
-            return new GuardedInvocation(((DynamicMethod)receiver).getInvocation(desc.getMethodType(), linkerServices),
-                    Guards.getIdentityGuard(receiver));
+            final MethodType type = desc.getMethodType();
+            return new GuardedInvocation(MethodHandles.dropArguments(((DynamicMethod)receiver).getInvocation(
+                    type.dropParameterTypes(0, 1), linkerServices), 0, type.parameterType(0)), Guards.getIdentityGuard(
+                            receiver));
         } else if(operator == "canCall") {
             return YES.asType(desc);
         } else if(operator == "canNew") {
