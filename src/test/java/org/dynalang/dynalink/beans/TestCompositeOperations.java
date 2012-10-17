@@ -125,9 +125,11 @@ public class TestCompositeOperations extends TestCase {
             fail();
         } catch(IndexOutOfBoundsException e) {
         }
-        // OTOH, if the key is not fixed, we'll just fall back through all of the alternatives and return null.
-        // TODO: figure out if this is the desired behavior.
-        assertNull(invoke(op, list, 0));
+        try {
+            invoke(op, list, 0);
+            fail();
+        } catch(IndexOutOfBoundsException e) {
+        }
 
 
         // We can decide with 100% certainty that there's neither an element, property, nor method named "foo" at link
