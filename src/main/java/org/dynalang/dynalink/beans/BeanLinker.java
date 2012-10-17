@@ -254,7 +254,10 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
             return false;
         }
         final int intIndex = ((Number)index).intValue();
-        return 0 <= intIndex && intIndex < Array.getLength(array);
+        if(0 <= intIndex && intIndex < Array.getLength(array)) {
+            return true;
+        }
+        throw new ArrayIndexOutOfBoundsException(intIndex);
     }
 
     @SuppressWarnings("unused")
@@ -263,7 +266,10 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
             return false;
         }
         final int intIndex = ((Number)index).intValue();
-        return 0 <= intIndex && intIndex < list.size();
+        if(0 <= intIndex && intIndex < list.size()) {
+            return true;
+        }
+        throw new IndexOutOfBoundsException("Index: " + intIndex + ", Size: " + list.size());
     }
 
     private static MethodHandle SET_LIST_ELEMENT = Lookup.PUBLIC.findVirtual(List.class, "set",
