@@ -330,7 +330,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 final MethodHandle fallbackFolded;
                 if(nextComponent == null) {
                     // Object(MethodHandle)->R(MethodHandle, O, N, V); returns constant null
-                    fallbackFolded = MethodHandles.dropArguments(CONSTANT_NULL_DROP_METHOD_HANDLE, 0,
+                    fallbackFolded = MethodHandles.dropArguments(CONSTANT_NULL_DROP_METHOD_HANDLE, 1,
                             type.parameterList()).asType(type.insertParameterTypes(0, MethodHandle.class));
                 } else {
                     // R(O, N, V)->R(MethodHandle, O, N, V); adapts the next component's invocation to drop the
@@ -411,7 +411,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 final MethodHandle fallbackFolded;
                 if(nextComponent == null) {
                     // Object(AnnotatedMethodHandle)->R(AnnotatedMethodHandle, T0, T1); returns constant null
-                    fallbackFolded = MethodHandles.dropArguments(CONSTANT_NULL_DROP_ANNOTATED_HANDLE, 0,
+                    fallbackFolded = MethodHandles.dropArguments(CONSTANT_NULL_DROP_ANNOTATED_HANDLE, 1,
                             type.parameterList()).asType(type.insertParameterTypes(0, AnnotatedMethodHandle.class));
                 } else {
                     // R(T0, T1)->R(AnnotatedMethodHAndle, T0, T1); adapts the next component's invocation to drop the
