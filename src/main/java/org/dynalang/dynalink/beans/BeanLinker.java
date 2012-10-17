@@ -31,6 +31,7 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * A class that provides linking capabilities for a single POJO class. Normally not used directly, but managed by
@@ -158,14 +159,14 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         } else {
             final MethodHandle checkGuard;
             if(invocation == GET_LIST_ELEMENT) {
-                checkGuard = RANGE_CHECK_LIST;
+                checkGuard = convertArgToInt(RANGE_CHECK_LIST, linkerServices, callSiteDescriptor);
             } else if(invocation == GET_MAP_ELEMENT) {
                 // TODO: A more complex solution could be devised for maps, one where we do a get() first, and fold it
                 // into a GWT that tests if it returned null, and if it did, do another GWT with containsKey()
                 // that returns constant null (on true), or falls back to next component (on false)
                 checkGuard = CONTAINS_MAP;
             } else {
-                checkGuard = RANGE_CHECK_ARRAY;
+                checkGuard = convertArgToInt(RANGE_CHECK_ARRAY, linkerServices, callSiteDescriptor);
             }
             return nextComponent.compose(MethodHandles.guardWithTest(binder.bindTest(checkGuard),
                     binder.bind(invocation), nextComponent.getGuardedInvocation().getInvocation()), gi.getGuard(),
@@ -194,6 +195,18 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
             // key is not a number
             return null;
         }
+    }
+
+    private static MethodHandle convertArgToInt(MethodHandle mh, LinkerServices ls, CallSiteDescriptor desc) {
+        final Class<?> sourceType = desc.getMethodType().parameterType(1);
+        if(TypeUtilities.isMethodInvocationConvertible(sourceType, Number.class)) {
+            return mh;
+        } else if(ls.canConvert(sourceType, Number.class)) {
+            final MethodHandle converter = ls.getTypeConverter(sourceType, Number.class);
+            return MethodHandles.filterArguments(mh, 1, converter.asType(converter.type().changeReturnType(
+                    mh.type().parameterType(1))));
+        }
+        return mh;
     }
 
     /**
@@ -327,7 +340,8 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         if(nextComponent == null) {
             return gic.replaceInvocation(binder.bind(invocation));
         } else {
-            final MethodHandle checkGuard = invocation == SET_LIST_ELEMENT ? RANGE_CHECK_LIST : RANGE_CHECK_ARRAY;
+            final MethodHandle checkGuard = convertArgToInt(invocation == SET_LIST_ELEMENT ? RANGE_CHECK_LIST :
+                RANGE_CHECK_ARRAY, linkerServices, callSiteDescriptor);
             return nextComponent.compose(MethodHandles.guardWithTest(binder.bindTest(checkGuard),
                     binder.bind(invocation), nextComponent.getGuardedInvocation().getInvocation()), gi.getGuard(),
                     gic.getValidatorClass(), gic.getValidationType());
