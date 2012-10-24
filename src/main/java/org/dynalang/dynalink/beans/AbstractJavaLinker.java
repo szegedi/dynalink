@@ -182,9 +182,16 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             return new GuardedInvocation(UsefulHandles.RETURN_FALSE_DROP_ARG, getClassGuard(
                     callSiteDescriptor)).asType(callSiteDescriptor);
         }
-        final GuardedInvocationComponent gic = getGuardedInvocationComponent(callSiteDescriptor, linkerServices,
-                CallSiteDescriptorFactory.tokenizeOperators(callSiteDescriptor));
-        return gic == null ? null : gic.getGuardedInvocation();
+        List<String> operations = CallSiteDescriptorFactory.tokenizeOperators(callSiteDescriptor);
+        while(!operations.isEmpty()) {
+            final GuardedInvocationComponent gic = getGuardedInvocationComponent(callSiteDescriptor, linkerServices,
+                    operations);
+            if(gic != null) {
+                return gic.getGuardedInvocation();
+            }
+            operations = pop(operations);
+        }
+        return null;
     }
 
     protected GuardedInvocationComponent getGuardedInvocationComponent(CallSiteDescriptor callSiteDescriptor,
@@ -394,7 +401,6 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // only with a bunch of method signature adjustments. Basically, retrieve method getter
                 // AnnotatedMethodHandle; if it is non-null, invoke its "handle" field, otherwise either return null,
                 // or delegate to next component's invocation.
-
 
                 final MethodHandle typedGetter = linkerServices.asType(getPropertyGetterHandle, type.changeReturnType(
                         AnnotatedMethodHandle.class));
