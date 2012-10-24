@@ -141,7 +141,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         // Convert the key to a number if we're working with a list or array
         final Object typedFixedKey;
         if(!isMap && fixedKey != null) {
-            typedFixedKey = convertKey(fixedKey, linkerServices);
+            typedFixedKey = convertKeyToInteger(fixedKey, linkerServices);
             if(typedFixedKey == null) {
                 // key is not numeric, it can never succeed
                 return nextComponent;
@@ -179,11 +179,24 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
                 CallSiteDescriptor.NAME_OPERAND);
     }
 
-    private static Object convertKey(String fixedKey, LinkerServices linkerServices) throws Exception {
+    private static Object convertKeyToInteger(String fixedKey, LinkerServices linkerServices) throws Exception {
         try {
-            if(linkerServices.canConvert(String.class, Integer.class)) {
+            if(linkerServices.canConvert(String.class, Number.class)) {
                 try {
-                    return linkerServices.getTypeConverter(String.class, Integer.class).invoke(fixedKey);
+                    final Object val = linkerServices.getTypeConverter(String.class, Number.class).invoke(fixedKey);
+                    if(!(val instanceof Number)) {
+                        return null; // not a number
+                    }
+                    final Number n = (Number)val;
+                    if(n instanceof Integer) {
+                        return n;
+                    }
+                    final int intIndex = n.intValue();
+                    final double doubleValue = n.doubleValue();
+                    if(intIndex != doubleValue && !Double.isInfinite(doubleValue)) { // let infinites trigger IOOBE
+                        return null; // not an exact integer
+                    }
+                    return Integer.valueOf(intIndex);
                 } catch(Exception|Error e) {
                     throw e;
                 } catch(Throwable t) {
@@ -253,11 +266,16 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         if(!(index instanceof Number)) {
             return false;
         }
-        final int intIndex = ((Number)index).intValue();
+        final Number n = (Number)index;
+        final int intIndex = n.intValue();
+        final double doubleValue = n.doubleValue();
+        if(intIndex != doubleValue && !Double.isInfinite(doubleValue)) { // let infinite trigger IOOBE
+            return false;
+        }
         if(0 <= intIndex && intIndex < Array.getLength(array)) {
             return true;
         }
-        throw new ArrayIndexOutOfBoundsException(intIndex);
+        throw new ArrayIndexOutOfBoundsException("Array index out of range: " + n);
     }
 
     @SuppressWarnings("unused")
@@ -265,11 +283,16 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         if(!(index instanceof Number)) {
             return false;
         }
-        final int intIndex = ((Number)index).intValue();
+        final Number n = (Number)index;
+        final int intIndex = n.intValue();
+        final double doubleValue = n.doubleValue();
+        if(intIndex != doubleValue && !Double.isInfinite(doubleValue)) { // let infinite trigger IOOBE
+            return false;
+        }
         if(0 <= intIndex && intIndex < list.size()) {
             return true;
         }
-        throw new IndexOutOfBoundsException("Index: " + intIndex + ", Size: " + list.size());
+        throw new IndexOutOfBoundsException("Index: " + n + ", Size: " + list.size());
     }
 
     private static MethodHandle SET_LIST_ELEMENT = Lookup.PUBLIC.findVirtual(List.class, "set",
@@ -330,7 +353,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         // Convert the key to a number if we're working with a list or array
         final Object typedFixedKey;
         if(!isMap && fixedKey != null) {
-            typedFixedKey = convertKey(fixedKey, linkerServices);
+            typedFixedKey = convertKeyToInteger(fixedKey, linkerServices);
             if(typedFixedKey == null) {
                 // key is not numeric, it can never succeed
                 return nextComponent;
