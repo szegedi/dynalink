@@ -102,7 +102,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
     public void testStringFormat() throws Throwable {
         DynamicLinker linker = new DynamicLinkerFactory().createLinker();
         MonomorphicCallSite callSite = new MonomorphicCallSite(CallSiteDescriptorFactory.create(
-                MethodHandles.publicLookup(), "dyn:callPropWithThis:format", MethodType.methodType(Object.class,
+                MethodHandles.publicLookup(), "dyn:callMethod:format", MethodType.methodType(Object.class,
                         Object.class, Object.class, Object.class, Object.class)));
         linker.link(callSite);
         System.out.println(callSite.dynamicInvoker().invokeWithArguments(StaticClass.forClass(String.class),
@@ -174,7 +174,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
 
         Test1 test1 = new Test1();
         GuardedInvocation inv = linker.getGuardedInvocation(new LinkRequestImpl(
-                CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "dyn:callPropWithThis:add",
+                CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "dyn:callMethod:add",
                         MethodType.methodType(Object.class, Object.class, Object.class, Object.class, Object.class, Object.class)),
                         null, null, null, null, null), ls);
         MethodHandle handle = inv.getInvocation();

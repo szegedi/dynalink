@@ -21,7 +21,7 @@ public class TestPrintLn extends TestCase {
         final LinkerServices linkerServices = LinkerServicesFactory.getLinkerServices(linker);
         final Object out = System.out;
         final CallSiteDescriptor desc = CallSiteDescriptorFactory.create(MethodHandles.publicLookup(),
-                "dyn:callPropWithThis:println", MethodType.methodType(Object.class, Object.class, Object.class));
+                "dyn:callMethod:println", MethodType.methodType(Object.class, Object.class, Object.class));
         final LinkRequest req = new LinkRequestImpl(desc, out, "helloWorld");
         linker.getGuardedInvocation(req, linkerServices).getInvocation().invokeWithArguments(out, "helloWorld");
     }

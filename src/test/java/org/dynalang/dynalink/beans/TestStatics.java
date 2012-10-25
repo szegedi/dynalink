@@ -28,7 +28,7 @@ public class TestStatics extends TestCase {
         setProperty("foo", statics, 31);
         assertTrue(T2.invokedSetFooInt);
         assertEquals("1f", getProperty("foo", statics));
-        getInvoker("dyn:callPropWithThis:setFoo", Void.TYPE, Object.class, Object.class).invoke(statics, "blah");
+        getInvoker("dyn:callMethod:setFoo", Void.TYPE, Object.class, Object.class).invoke(statics, "blah");
         assertEquals("blah", getProperty("foo", statics));
     }
 

@@ -173,8 +173,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         // BeansLinker already checked that the name is at least 2 elements long and the first element is "dyn".
         final CallSiteDescriptor callSiteDescriptor = ncrequest.getCallSiteDescriptor();
         final String op = callSiteDescriptor.getNameToken(CallSiteDescriptor.OPERATOR);
-        // Either dyn:callPropWithThis:name(this[,args]) or dyn:callPropWithThis(this,name[,args]).
-        if("callPropWithThis" == op) {
+        // Either dyn:callMethod:name(this[,args]) or dyn:callMethod(this,name[,args]).
+        if("callMethod" == op) {
             return getCallPropWithThis(callSiteDescriptor, linkerServices);
         }
         if("canCall" == op || "canNew" == op) {

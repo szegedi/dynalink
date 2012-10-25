@@ -33,8 +33,8 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  * <li>expose all public methods of form {@code setXxx()}, {@code getXxx()}, and {@code isXxx()} as property setters and
  * getters for {@code dyn:setProp} and {@code dyn:getProp} operations;</li>
  * <li>expose all property getters and setters declared by the class' {@link BeanInfo};</li>
- * <li>expose all public methods for {@code dyn:callPropWithThis} operation;</li>
- * <li>expose all methods declared by the class' {@link BeanInfo} for {@code dyn:callPropWithThis} operation;</li>
+ * <li>expose all public methods for {@code dyn:callMethod} operation;</li>
+ * <li>expose all methods declared by the class' {@link BeanInfo} for {@code dyn:callMethod} operation;</li>
  * <li>expose all public fields as properties, unless there are getters or setters for the properties of the same name;</li>
  * <li>expose {@code dyn:getLength}, {@code dyn:getElem} and {@code dyn:setElem} on native Java arrays, as well as
  * {@link java.util.List} and {@link java.util.Map} objects; ({@code dyn:getLength} works on any
