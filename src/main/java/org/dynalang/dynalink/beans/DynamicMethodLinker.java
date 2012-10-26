@@ -1,6 +1,5 @@
 package org.dynalang.dynalink.beans;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
@@ -10,7 +9,6 @@ import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.Guards;
-import org.dynalang.dynalink.support.UsefulHandles;
 
 /**
  * Simple linker that implements the "dyn:call" operation for {@link DynamicMethod} objects - the objects returned by
@@ -38,15 +36,7 @@ class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
             return new GuardedInvocation(MethodHandles.dropArguments(((DynamicMethod)receiver).getInvocation(
                     type.dropParameterTypes(0, 1), linkerServices), 0, type.parameterType(0)), Guards.getIdentityGuard(
                             receiver));
-        } else if(operator == "canCall") {
-            return YES.asType(desc);
-        } else if(operator == "canNew") {
-            return NO.asType(desc);
         }
         return null;
     }
-
-    private static final MethodHandle IS_DYNAMIC_METHOD = Guards.getInstanceOfGuard(DynamicMethod.class);
-    private static final GuardedInvocation YES = new GuardedInvocation(UsefulHandles.RETURN_TRUE_DROP_ARG, IS_DYNAMIC_METHOD);
-    private static final GuardedInvocation NO = new GuardedInvocation(UsefulHandles.RETURN_FALSE_DROP_ARG, IS_DYNAMIC_METHOD);
 }

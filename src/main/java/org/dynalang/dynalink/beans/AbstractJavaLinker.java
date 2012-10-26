@@ -43,7 +43,6 @@ import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 import org.dynalang.dynalink.support.Guards;
 import org.dynalang.dynalink.support.Lookup;
-import org.dynalang.dynalink.support.UsefulHandles;
 
 /**
  * A base class for both {@link StaticClassLinker} and {@link BeanLinker}. Deals with common aspects of property
@@ -176,11 +175,6 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         // Either dyn:callMethod:name(this[,args]) or dyn:callMethod(this,name[,args]).
         if("callMethod" == op) {
             return getCallPropWithThis(callSiteDescriptor, linkerServices);
-        }
-        if("canCall" == op || "canNew" == op) {
-            // Generally, beans can't be used as first-class functions or constructors
-            return new GuardedInvocation(UsefulHandles.RETURN_FALSE_DROP_ARG, getClassGuard(
-                    callSiteDescriptor)).asType(callSiteDescriptor);
         }
         List<String> operations = CallSiteDescriptorFactory.tokenizeOperators(callSiteDescriptor);
         while(!operations.isEmpty()) {
