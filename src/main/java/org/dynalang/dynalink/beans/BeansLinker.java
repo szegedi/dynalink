@@ -17,6 +17,7 @@
 package org.dynalang.dynalink.beans;
 
 import java.beans.BeanInfo;
+import java.lang.invoke.MethodHandles;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
@@ -33,23 +34,32 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
  * <li>expose all public methods of form {@code setXxx()}, {@code getXxx()}, and {@code isXxx()} as property setters and
  * getters for {@code dyn:setProp} and {@code dyn:getProp} operations;</li>
  * <li>expose all property getters and setters declared by the class' {@link BeanInfo};</li>
- * <li>expose all public methods for {@code dyn:callMethod} operation;</li>
- * <li>expose all methods declared by the class' {@link BeanInfo} for {@code dyn:callMethod} operation;</li>
+ * <li>expose all public methods and methods declared by the class' {@link BeanInfo} for invocation through
+ * {@code dyn:callMethod} operation;</li>
+ * <li>expose all public methods and methods declared by the class' {@link BeanInfo} for retrieval for
+ * {@code dyn:getMethod} operation; the methods thus retrieved can then be invoked using {@code dyn:call};</li>
  * <li>expose all public fields as properties, unless there are getters or setters for the properties of the same name;</li>
  * <li>expose {@code dyn:getLength}, {@code dyn:getElem} and {@code dyn:setElem} on native Java arrays, as well as
  * {@link java.util.List} and {@link java.util.Map} objects; ({@code dyn:getLength} works on any
  * {@link java.util.Collection});</li>
- * <li>expose property named {@code length} on Java arrays;</li>
+ * <li>expose a virtual property named {@code length} on Java arrays;</li>
  * <li>expose {@code dyn:new} on instances of {@link StaticClass} as calls to constructors, including those static class
- * objects that represent Java arrays (their constructors take a singe {@code int} parameter representing the length of
+ * objects that represent Java arrays (their constructors take a single {@code int} parameter representing the length of
  * the array to create);</li>
  * <li>expose static methods, fields, and properties of classes in a similar manner to how instance method, fields, and
  * properties are exposed, on {@link StaticClass} objects.</li>
  * <li>expose a virtual property named {@code static} on instances of {@link java.lang.Class} to access their
  * {@link StaticClass}.</li>
  * </ul>
- *  Overloaded method resolution is handled for property setters, methods, and constructors. Variable argument
- *  invocation is handled for methods and constructors. Currently, only public fields and methods are supported.
+ * <p><strong>Overloaded method resolution</strong> is performed automatically for property setters, methods, and
+ * constructors. Additionally, manual overloaded method selection is supported by having a call site specify a name for
+ * a method that contains an explicit signature, i.e. {@code dyn:getMethod:parseInt(String,int)}. You can use
+ * non-qualified class names in such signatures regardless of those classes' packages, they will match any class with
+ * the same non-qualified name. You only have to use a fully qualified class name in case non-qualified class names
+ * would cause selection ambiguity (that is extremely rare).</p>
+ * <p><strong>Variable argument invocation</strong> is handled for both methods and constructors.</p>
+ * <p>Currently, only public fields and methods are supported. Any Lookup objects passed in the
+ * {@link LinkRequest}s are ignored and {@link MethodHandles#publicLookup()} is used instead.</p>
  *
  * @author Attila Szegedi
  */

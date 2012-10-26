@@ -94,8 +94,9 @@ public class DynamicLinker {
     }
 
     /**
-     * Links an invokedynamic call site. It will install a relink method handle into the call site that hooks into the
-     * multi-language dispatch and relinking mechanisms.
+     * Links an invokedynamic call site. It will install a method handle into the call site that invokes the relinking
+     * mechanism of this linker. Next time the call site is invoked, it will be linked for the actual arguments it was
+     * invoked with.
      *
      * @param callSite the call site to link.
      * @return the callSite, for easy call chaining.
@@ -106,10 +107,10 @@ public class DynamicLinker {
     }
 
     /**
-     * Returns the object representing the lower level linker services of this class. While as a user of this class you
-     * normally only care about the {@link #link(RelinkableCallSite)} method, in certain circumstances you might want to
-     * use the lower level services directly; either to lookup specific method handles, to access the type converters,
-     * and so on.
+     * Returns the object representing the lower level linker services of this class that are normally exposed to
+     * individual language-specific linkers. While as a user of this class you normally only care about the
+     * {@link #link(RelinkableCallSite)} method, in certain circumstances you might want to use the lower level services
+     * directly; either to lookup specific method handles, to access the type converters, and so on.
      * @return the object representing the linker services of this class.
      */
     public LinkerServices getLinkerServices() {
