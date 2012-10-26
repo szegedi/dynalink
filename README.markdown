@@ -8,8 +8,10 @@ higher-level abstractions than the invokedynamic bytecode instruction.
 See the [Online documentation](https://github.com/szegedi/dynalink/wiki) to 
 get started.
 
-You can also check out the [video](http://medianetwork.oracle.com/video/player/1113272541001)
-of the talk given on Dynalink on the 2011 JVM Language Summit.
+You can also check out the [video of the talk on Dynalink](http://medianetwork.oracle.com/video/player/1113272541001)
+given during the 2011 JVM Language Summit, as well as 
+[slides and video of the talk about integration of Dynalink and Nashorn](https://oracleus.activeevents.com/connect/sessionDetail.ww?SESSION_ID=5251)
+given during JavaOne 2012.
 
 If you just want the binaries, you can get the releases from the 
 [Maven central repository](http://search.maven.org/#browse%7C-362742625). 
