@@ -1,79 +1,118 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset='utf-8'>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Dynalink · Dynamic linking simplified for your language on the JVM</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+  </head>
 
-  <title>szegedi/dynalink @ GitHub</title>
+  <body>
+    <div class="container">
+      <header class="jumbotron masthead">
 
-  <style type="text/css">
-    body {
-      margin-top: 1.0em;
-      background-color: #5d3cc1;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
-      color: #ffffff;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-    h1 { font-size: 3.8em; color: #a2c33e; margin-bottom: 3px; }
-    h1 .small { font-size: 0.4em; }
-    h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #a2c33e; }
-    h3 { text-align: center; color: #a2c33e; }
-    a { color: #a2c33e; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-  </style>
-</head>
+        <div class="inner">
+          <h1>Dynalink</h1>
+          <p>Dynamic linking simplified for your language on the JVM.</p>
+          <p class="download-info">
+            <a href="https://github.com/szegedi/dynalink/" class="btn btn-primary btn-large">View project on GitHub</a>
+            <a href="http://search.maven.org/#browse%7C-1571153415" class="btn btn-large">Download Dynalink <small>(v0.3)</small></a>
+          </p>
+        </div>
 
-<body>
-  <a href="http://github.com/szegedi/dynalink"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+        <div class="bs-links">
+          <ul class="quick-links">
+            <li><a href="https://github.com/szegedi/dynalink/wiki">Read online documentation</a></li>
+            <li><a href="https://github.com/szegedi/dynalink/issues?state=open">Submit issues</a></li>
+            <li><a href="https://github.com/szegedi/dynalink/zipball/master">Download source zip</a></li>
+          </ul>
+          <ul class="quick-links">
+            <li>
+              <iframe class="github-btn" src="http://ghbtns.com/github-btn.html?user=szegedi&repo=dynalink&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="112px" height="20px"></iframe>
+            </li>
+            <li>
+              <iframe class="github-btn" src="http://ghbtns.com/github-btn.html?user=szegedi&repo=dynalink&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="112px" height="20px"></iframe>
+            </li>
+          </ul>
+        </div>
+      </header>
 
-  <div id="container">
+      <hr class="soften">
+      
+      <div class="marketing">
+        <h1>What is Dynalink?</h1>
+        <div class="row">
+          <div class="span3">
+            <p>&nbsp;</p>
+          </div>
+          <div class="span6">
+            <p class="marketing-byline">Dynalink is an invokedynamic-based high-level linking and metaobject protocol library. It enables creation of languages on the JVM that can easily interoperate with plain Java objects and each other.</p>
+          </div>
+        </div>
+      </div>  
 
-    <div class="download">
-      <a href="http://github.com/szegedi/dynalink/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/szegedi/dynalink/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
+      <hr class="soften">
+      
+      <div class="marketing">
+        <h1>Designed for JVM language implementers.</h1>
+        <p class="marketing-byline">Writing a language runtime for the JVM? Here's some reasons you'll want to use this.</p>
+        <div class="row">
+          <div class="span4">
+            <img class="bs-icon" src="img/glyphicons_213_up_arrow.png">
+            <h2>Higher level</h2>
+            <p>Invokedynamic is just the beginning. There's lot of higher level functionality you'll need on top of it that Dynalink provides.</p>
+          </div>
+          <div class="span4">
+            <img class="bs-icon" src="img/glyphicons_023_cogwheels.png">
+            <h2>Interop with Java</h2>
+            <p>Dynamic linking to any plain Java object's property getters, setters, fields, methods, classes' static properties, fields, methods, constructors. Additional container operations for arrays, collections, and maps. Full overloaded method resolution, vararg handling, and type conversions; the whole deal. </p>
+          </div>
+          <div class="span4">
+            <img class="bs-icon" src="img/glyphicons_059_cargo.png">
+            <h2>Prefab everything</h2>
+            <p>Ready to use monomorphic and polymorphic call site classes. Out-of-the-box bootstrap methods. Type guards. A whole lot of wheel reinvention eliminated for you.</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span4">
+            <img class="bs-icon" src="img/glyphicons_083_random.png">
+            <h2>Cross-language interop</h2>
+            <p>Want to pass objects from Ruby to Python to JavaScript to Java and back within the same JVM? Think it's a pipe dream? Think again. Our unified metaobject protocol conventions, linker autodiscovery and composition has this covered for you with practically no extra effort on your part.</p>
+          </div>
+          <div class="span4">
+            <img class="bs-icon" src="img/glyphicons_081_refresh.png">
+            <h2>Type conversions</h2>
+            <p>Automatically provides all Java Language Specification compliant type conversions, and lets you extend them with your language specific ones. Your conversions automatically become first-class citizens when being considered in overloaded method resolutions and parameter passing.</p>
+          </div>
+          <div class="span4">
+            <img class="bs-icon" src="img/glyphicons_381_github.png">
+            <h2>Open Source</h2>
+            <p>Hosted at <a href="https://github.com">GitHub</a>, Apache 2.0 licensed Open Source, for your worry-free adoption.</p>
+          </div>
+        </div>
+      </div>  
+
+      <hr class="soften">
+      
+      <div class="marketing">
+        <h1>Media</h1>
+        <div class="row">
+          <div class="span3">
+            <a class="thumbnail" href="http://medianetwork.oracle.com/video/player/1113272541001" target="_blank">
+              <img src="img/2011jvmlangsummit.png" alt="Watch a talk explaining Dynalink at the 2011 JVM Language Summit in Santa Clara, California.">
+            </a>
+            <p>Watch a talk explaining Dynalink at the 2011 JVM Language Summit in Santa Clara, California.</p>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <p class="pull-right"><a href="#">Back to top</a></p>
+        <p>Dynalink was written by <a href="http://twitter.com/asz" target="_blank">Attila Szegedi</a>.</p>
+        <p>This website would never look any good if it weren't for the fantastic <a href="http://twitter.github.com/bootstrap" target="_blank">Twitter Bootstrap</a>.</p>
+        <p>Code licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License v2.0</a>. Documentation licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
+        <p>Icons from <a href="http://glyphicons.com">Glyphicons Free</a>, licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
+      </footer>
+            
     </div>
-
-    <h1><a href="http://github.com/szegedi/dynalink">dynalink</a>
-      <span class="small">by <a href="http://github.com/szegedi">szegedi</a></span></h1>
-
-    <div class="description">
-      Dynamic Linker Framework for Languages on the JVM
-    </div>
-
-    <h2>License</h2>
-<p>Licensed under the Apache License, Version 2.0</p>
-<h2>Authors</h2>
-<p>Attila Szegedi (szegedia@gmail.com)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>Attila Szegedi (szegedia@gmail.com)<br/>      </p>
-
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/szegedi/dynalink/zipball/master">zip</a> or
-      <a href="http://github.com/szegedi/dynalink/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/szegedi/dynalink</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/szegedi/dynalink">szegedi/dynalink</a>
-    </div>
-
-  </div>
-
-  
-</body>
+  </body>
 </html>
