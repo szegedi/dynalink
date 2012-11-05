@@ -176,7 +176,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
         GuardedInvocation inv = linker.getGuardedInvocation(new LinkRequestImpl(
                 CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "dyn:callMethod:add",
                         MethodType.methodType(Object.class, Object.class, Object.class, Object.class, Object.class, Object.class)),
-                        null, null, null, null, null), ls);
+                        false, null, null, null, null, null), ls);
         MethodHandle handle = inv.getInvocation();
 
         System.out.println(handle.invokeWithArguments(test1, 1, 2, 3, 4));

@@ -37,7 +37,7 @@ public class TestLengthGetter extends TestCase {
 
     private static GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker, CallSiteDescriptor descriptor,
             Object... args) throws Exception {
-        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, args),
+        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, false, args),
                 LinkerServicesFactory.getLinkerServices(linker));
     }
 

@@ -28,15 +28,18 @@ public class LinkRequestImpl implements LinkRequest {
 
     private final CallSiteDescriptor callSiteDescriptor;
     private final Object[] arguments;
+    private final boolean callSiteMegamorphic;
 
     /**
      * Creates a new link request.
      *
      * @param callSiteDescriptor the descriptor for the call site being linked
+     * @param callSiteMegamorphic true if the call site being linked is considered megamorphic
      * @param arguments the arguments for the invocation
      */
-    public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor, Object... arguments) {
+    public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor, boolean callSiteMegamorphic, Object... arguments) {
         this.callSiteDescriptor = callSiteDescriptor;
+        this.callSiteMegamorphic = callSiteMegamorphic;
         this.arguments = arguments;
     }
 
@@ -56,12 +59,17 @@ public class LinkRequestImpl implements LinkRequest {
     }
 
     @Override
+    public boolean isCallSiteMegamorphic() {
+        return callSiteMegamorphic;
+    }
+
+    @Override
     public LinkRequest withoutRuntimeContext() {
         return this;
     }
 
     @Override
     public LinkRequest replaceArguments(CallSiteDescriptor newCallSiteDescriptor, Object[] newArguments) {
-        return new LinkRequestImpl(newCallSiteDescriptor, newArguments);
+        return new LinkRequestImpl(newCallSiteDescriptor, callSiteMegamorphic, newArguments);
     }
 }

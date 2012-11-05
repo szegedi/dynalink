@@ -81,6 +81,7 @@ public class DynamicLinker {
     private final LinkerServices linkerServices;
     private final int runtimeContextArgCount;
     private final boolean syncOnRelink;
+    private final int megamorphicRelinkThreshold;
 
     /**
      * Creates a new dynamic linker.
@@ -88,13 +89,18 @@ public class DynamicLinker {
      * @param linkerServices the linkerServices used by the linker, created by the factory.
      * @param runtimeContextArgCount see {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
-    DynamicLinker(LinkerServices linkerServices, int runtimeContextArgCount, boolean syncOnRelink) {
+    DynamicLinker(LinkerServices linkerServices, int runtimeContextArgCount, boolean syncOnRelink,
+            int megamorphicRelinkThreshold) {
         if(runtimeContextArgCount < 0) {
             throw new IllegalArgumentException("runtimeContextArgCount < 0");
+        }
+        if(megamorphicRelinkThreshold < 0) {
+            throw new IllegalArgumentException("megamorphicRelinkThreshold < 0");
         }
         this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;
         this.syncOnRelink = syncOnRelink;
+        this.megamorphicRelinkThreshold = megamorphicRelinkThreshold;
     }
 
     /**
@@ -106,7 +112,7 @@ public class DynamicLinker {
      * @return the callSite, for easy call chaining.
      */
     public <T extends RelinkableCallSite> T link(final T callSite) {
-        callSite.setRelinkAndInvoke(createRelinkAndInvokeMethod(callSite));
+        callSite.setRelinkAndInvoke(createRelinkAndInvokeMethod(callSite, 0));
         return callSite;
     }
 
@@ -122,11 +128,12 @@ public class DynamicLinker {
     }
 
     private static final MethodHandle RELINK = Lookup.findOwnSpecial(MethodHandles.lookup(), RELINK_METHOD_NAME,
-            MethodHandle.class, RelinkableCallSite.class, Object[].class);
+            MethodHandle.class, RelinkableCallSite.class, int.class, Object[].class);
 
-    private MethodHandle createRelinkAndInvokeMethod(final RelinkableCallSite callSite) {
+    private MethodHandle createRelinkAndInvokeMethod(final RelinkableCallSite callSite, int relinkCount) {
         // Make a bound MH of invoke() for this linker and call site
-        final MethodHandle boundRelinker = MethodHandles.insertArguments(RELINK, 0, this, callSite);
+        final MethodHandle boundRelinker = MethodHandles.insertArguments(RELINK, 0, this, callSite, Integer.valueOf(
+                relinkCount));
         // Make a MH that gathers all arguments to the invocation into an Object[]
         final MethodType type = callSite.getDescriptor().getMethodType();
         final MethodHandle collectingRelinker = boundRelinker.asCollector(Object[].class, type.parameterCount());
@@ -143,11 +150,14 @@ public class DynamicLinker {
      * @throws Exception rethrows any exception thrown by the linkers
      */
     @SuppressWarnings("unused")
-    private MethodHandle relink(RelinkableCallSite callSite, Object... arguments) throws Exception {
+    private MethodHandle relink(RelinkableCallSite callSite, int relinkCount, Object... arguments) throws Exception {
         final CallSiteDescriptor callSiteDescriptor = callSite.getDescriptor();
+        final boolean megamorphicEnabled = megamorphicRelinkThreshold > 0;
+        final boolean callSiteMegamorphic = megamorphicEnabled && relinkCount >= megamorphicRelinkThreshold;
         final LinkRequest linkRequest =
-                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, arguments)
-                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, arguments, runtimeContextArgCount);
+                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, callSiteMegamorphic, arguments)
+                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, callSiteMegamorphic, arguments,
+                                runtimeContextArgCount);
 
         // Find a suitable method handle with a guard
         GuardedInvocation guardedInvocation = linkerServices.getGuardedInvocation(linkRequest);
@@ -170,7 +180,8 @@ public class DynamicLinker {
         }
 
         // Allow the call site to relink and execute its inline caching strategy.
-        callSite.setGuardedInvocation(guardedInvocation, createRelinkAndInvokeMethod(callSite));
+        callSite.setGuardedInvocation(guardedInvocation, createRelinkAndInvokeMethod(callSite,
+                !megamorphicEnabled || callSiteMegamorphic ? relinkCount : relinkCount + 1));
         if(syncOnRelink) {
             MutableCallSite.syncAll(new MutableCallSite[] { (MutableCallSite)callSite });
         }

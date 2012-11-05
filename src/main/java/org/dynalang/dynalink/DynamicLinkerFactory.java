@@ -28,6 +28,7 @@ import java.util.Set;
 import org.dynalang.dynalink.beans.BeansLinker;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
+import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.support.AutoDiscovery;
 import org.dynalang.dynalink.support.BottomGuardingDynamicLinker;
 import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;
@@ -45,11 +46,17 @@ import org.dynalang.dynalink.support.TypeConverterFactory;
  */
 public class DynamicLinkerFactory {
 
+    /**
+     * Default value for {@link #setMegamorphicRelinkThreshold(int) megamorphic relink threshold}.
+     */
+    public static final int DEFAULT_MEGAMORPHIC_RELINK_THRESHOLD = 8;
+
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private List<? extends GuardingDynamicLinker> prioritizedLinkers;
     private List<? extends GuardingDynamicLinker> fallbackLinkers;
     private int runtimeContextArgCount = 0;
     private boolean syncOnRelink = false;
+    private int megamorphicRelinkThreshold = DEFAULT_MEGAMORPHIC_RELINK_THRESHOLD;
 
     /**
      * Sets the class loader for automatic discovery of available linkers. If not set explicitly, then the thread
@@ -153,6 +160,20 @@ public class DynamicLinkerFactory {
     }
 
     /**
+     * Sets the megamorphic relink threshold; the number of times a call site is relinked after which it will be
+     * considered megamorphic, and subsequent link requests for it will indicate this.
+     * @param megamorphicRelinkThreshold the new threshold. Must not be less than zero. The value of zero means that
+     * call sites will never be considered megamorphic.
+     * @see LinkRequest#isCallSiteMegamorphic()
+     */
+    public void setMegamorphicRelinkThreshold(int megamorphicRelinkThreshold) {
+        if(megamorphicRelinkThreshold < 0) {
+            throw new IllegalArgumentException("megamorphicRelinkThreshold < 0");
+        }
+        this.megamorphicRelinkThreshold = megamorphicRelinkThreshold;
+    }
+
+    /**
      * Creates a new dynamic linker consisting of all the prioritized, autodiscovered, and fallback linkers.
      *
      * @return the new dynamic Linker
@@ -213,7 +234,7 @@ public class DynamicLinkerFactory {
         }
 
         return new DynamicLinker(new LinkerServicesImpl(new TypeConverterFactory(typeConverters), composite),
-                runtimeContextArgCount, syncOnRelink);
+                runtimeContextArgCount, syncOnRelink, megamorphicRelinkThreshold);
     }
 
     private static void addClasses(Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses,
