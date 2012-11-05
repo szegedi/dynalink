@@ -74,6 +74,10 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  * @author Attila Szegedi
  */
 public class DynamicLinker {
+
+    private static final String CLASS_NAME = DynamicLinker.class.getName();
+    private static final String RELINK_METHOD_NAME = "relink";
+
     private final LinkerServices linkerServices;
     private final int runtimeContextArgCount;
     private final boolean syncOnRelink;
@@ -117,7 +121,7 @@ public class DynamicLinker {
         return linkerServices;
     }
 
-    private static final MethodHandle RELINK = Lookup.findOwnSpecial(MethodHandles.lookup(), "relink",
+    private static final MethodHandle RELINK = Lookup.findOwnSpecial(MethodHandles.lookup(), RELINK_METHOD_NAME,
             MethodHandle.class, RelinkableCallSite.class, Object[].class);
 
     private MethodHandle createRelinkAndInvokeMethod(final RelinkableCallSite callSite) {
@@ -171,5 +175,23 @@ public class DynamicLinker {
             MutableCallSite.syncAll(new MutableCallSite[] { (MutableCallSite)callSite });
         }
         return guardedInvocation.getInvocation();
+    }
+
+    /**
+     * Returns a stack trace element describing the location of the call site currently being relinked on the current
+     * thread. The operation internally creates a Throwable object and inspects its stack trace, so it's potentially
+     * expensive. The recommended usage for it is in writing diagnostics code.
+     * @return a stack trace element describing the location of the call site currently being relinked, or null if it is
+     * not invoked while a call site is being relinked.
+     */
+    public static StackTraceElement getRelinkedCallSiteLocation() {
+        final StackTraceElement[] trace = new Throwable().getStackTrace();
+        for(int i = 0; i < trace.length - 1; ++i) {
+            final StackTraceElement frame = trace[i];
+            if(RELINK_METHOD_NAME.equals(frame.getMethodName()) && CLASS_NAME.equals(frame.getClassName())) {
+                return trace[i + 1];
+            }
+        }
+        return null;
     }
 }
