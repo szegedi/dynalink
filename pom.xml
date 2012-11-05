@@ -60,12 +60,20 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>2.4</version>
         <configuration>
+          <index/>
           <archive>
-            <manifestEntries>
-              <Implementation-Version>${mvngit.commit.id}</Implementation-Version>
-            </manifestEntries>
+            <manifestSection>
+              <name>org/dynalang/dynalink/</name>
+              <manifestEntries>
+                <Build-Revision>${mvngit.commit.id}</Build-Revision>
+                <Implementation-Title>${project.name}</Implementation-Title>
+                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                <Implementation-Version>${project.version}</Implementation-Version>
+              </manifestEntries>
+            </manifestSection>
           </archive>
         </configuration>
       </plugin>
