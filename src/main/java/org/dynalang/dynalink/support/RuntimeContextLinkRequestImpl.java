@@ -34,14 +34,14 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
      *
      * @param callSiteDescriptor the descriptor for the call site being linked
      * @param arguments the arguments for the invocation
-     * @param callSiteMegamorphic true if the call site being linked is considered megamorphic
+     * @param callSiteUnstable true if the call site being linked is considered unstable
      * @param runtimeContextArgCount the number of the leading arguments on the stack that represent the language
      * runtime specific context arguments.
      * @throws IllegalArgumentException if runtimeContextArgCount is less than 1.
      */
-    public RuntimeContextLinkRequestImpl(CallSiteDescriptor callSiteDescriptor, boolean callSiteMegamorphic,
+    public RuntimeContextLinkRequestImpl(CallSiteDescriptor callSiteDescriptor, boolean callSiteUnstable,
             Object[] arguments, int runtimeContextArgCount) {
-        super(callSiteDescriptor, callSiteMegamorphic, arguments);
+        super(callSiteDescriptor, callSiteUnstable, arguments);
         if(runtimeContextArgCount < 1) {
             throw new IllegalArgumentException("runtimeContextArgCount < 1");
         }
@@ -53,14 +53,14 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
         if(contextStrippedRequest == null) {
             contextStrippedRequest =
                     new LinkRequestImpl(getCallSiteDescriptor().dropParameterTypes(1, runtimeContextArgCount + 1),
-                            isCallSiteMegamorphic(), getTruncatedArguments());
+                            isCallSiteUnstable(), getTruncatedArguments());
         }
         return contextStrippedRequest;
     }
 
     @Override
     public LinkRequest replaceArguments(CallSiteDescriptor callSiteDescriptor, Object[] arguments) {
-        return new RuntimeContextLinkRequestImpl(callSiteDescriptor, isCallSiteMegamorphic(), arguments,
+        return new RuntimeContextLinkRequestImpl(callSiteDescriptor, isCallSiteUnstable(), arguments,
                 runtimeContextArgCount);
     }
 

@@ -47,16 +47,16 @@ import org.dynalang.dynalink.support.TypeConverterFactory;
 public class DynamicLinkerFactory {
 
     /**
-     * Default value for {@link #setMegamorphicRelinkThreshold(int) megamorphic relink threshold}.
+     * Default value for {@link #setUnstableRelinkThreshold(int) unstable relink threshold}.
      */
-    public static final int DEFAULT_MEGAMORPHIC_RELINK_THRESHOLD = 8;
+    public static final int DEFAULT_UNSTABLE_RELINK_THRESHOLD = 8;
 
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private List<? extends GuardingDynamicLinker> prioritizedLinkers;
     private List<? extends GuardingDynamicLinker> fallbackLinkers;
     private int runtimeContextArgCount = 0;
     private boolean syncOnRelink = false;
-    private int megamorphicRelinkThreshold = DEFAULT_MEGAMORPHIC_RELINK_THRESHOLD;
+    private int unstableRelinkThreshold = DEFAULT_UNSTABLE_RELINK_THRESHOLD;
 
     /**
      * Sets the class loader for automatic discovery of available linkers. If not set explicitly, then the thread
@@ -160,17 +160,17 @@ public class DynamicLinkerFactory {
     }
 
     /**
-     * Sets the megamorphic relink threshold; the number of times a call site is relinked after which it will be
-     * considered megamorphic, and subsequent link requests for it will indicate this.
-     * @param megamorphicRelinkThreshold the new threshold. Must not be less than zero. The value of zero means that
-     * call sites will never be considered megamorphic.
-     * @see LinkRequest#isCallSiteMegamorphic()
+     * Sets the unstable relink threshold; the number of times a call site is relinked after which it will be
+     * considered unstable, and subsequent link requests for it will indicate this.
+     * @param unstableRelinkThreshold the new threshold. Must not be less than zero. The value of zero means that
+     * call sites will never be considered unstable.
+     * @see LinkRequest#isCallSiteUnstable()
      */
-    public void setMegamorphicRelinkThreshold(int megamorphicRelinkThreshold) {
-        if(megamorphicRelinkThreshold < 0) {
-            throw new IllegalArgumentException("megamorphicRelinkThreshold < 0");
+    public void setUnstableRelinkThreshold(int unstableRelinkThreshold) {
+        if(unstableRelinkThreshold < 0) {
+            throw new IllegalArgumentException("unstableRelinkThreshold < 0");
         }
-        this.megamorphicRelinkThreshold = megamorphicRelinkThreshold;
+        this.unstableRelinkThreshold = unstableRelinkThreshold;
     }
 
     /**
@@ -234,7 +234,7 @@ public class DynamicLinkerFactory {
         }
 
         return new DynamicLinker(new LinkerServicesImpl(new TypeConverterFactory(typeConverters), composite),
-                runtimeContextArgCount, syncOnRelink, megamorphicRelinkThreshold);
+                runtimeContextArgCount, syncOnRelink, unstableRelinkThreshold);
     }
 
     private static void addClasses(Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses,

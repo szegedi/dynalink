@@ -28,18 +28,18 @@ public class LinkRequestImpl implements LinkRequest {
 
     private final CallSiteDescriptor callSiteDescriptor;
     private final Object[] arguments;
-    private final boolean callSiteMegamorphic;
+    private final boolean callSiteUnstable;
 
     /**
      * Creates a new link request.
      *
      * @param callSiteDescriptor the descriptor for the call site being linked
-     * @param callSiteMegamorphic true if the call site being linked is considered megamorphic
+     * @param callSiteUnstable true if the call site being linked is considered unstable
      * @param arguments the arguments for the invocation
      */
-    public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor, boolean callSiteMegamorphic, Object... arguments) {
+    public LinkRequestImpl(CallSiteDescriptor callSiteDescriptor, boolean callSiteUnstable, Object... arguments) {
         this.callSiteDescriptor = callSiteDescriptor;
-        this.callSiteMegamorphic = callSiteMegamorphic;
+        this.callSiteUnstable = callSiteUnstable;
         this.arguments = arguments;
     }
 
@@ -59,8 +59,8 @@ public class LinkRequestImpl implements LinkRequest {
     }
 
     @Override
-    public boolean isCallSiteMegamorphic() {
-        return callSiteMegamorphic;
+    public boolean isCallSiteUnstable() {
+        return callSiteUnstable;
     }
 
     @Override
@@ -70,6 +70,6 @@ public class LinkRequestImpl implements LinkRequest {
 
     @Override
     public LinkRequest replaceArguments(CallSiteDescriptor newCallSiteDescriptor, Object[] newArguments) {
-        return new LinkRequestImpl(newCallSiteDescriptor, callSiteMegamorphic, newArguments);
+        return new LinkRequestImpl(newCallSiteDescriptor, callSiteUnstable, newArguments);
     }
 }

@@ -81,7 +81,7 @@ public class DynamicLinker {
     private final LinkerServices linkerServices;
     private final int runtimeContextArgCount;
     private final boolean syncOnRelink;
-    private final int megamorphicRelinkThreshold;
+    private final int unstableRelinkThreshold;
 
     /**
      * Creates a new dynamic linker.
@@ -90,17 +90,17 @@ public class DynamicLinker {
      * @param runtimeContextArgCount see {@link DynamicLinkerFactory#setRuntimeContextArgCount(int)}
      */
     DynamicLinker(LinkerServices linkerServices, int runtimeContextArgCount, boolean syncOnRelink,
-            int megamorphicRelinkThreshold) {
+            int unstableRelinkThreshold) {
         if(runtimeContextArgCount < 0) {
             throw new IllegalArgumentException("runtimeContextArgCount < 0");
         }
-        if(megamorphicRelinkThreshold < 0) {
-            throw new IllegalArgumentException("megamorphicRelinkThreshold < 0");
+        if(unstableRelinkThreshold < 0) {
+            throw new IllegalArgumentException("unstableRelinkThreshold < 0");
         }
         this.runtimeContextArgCount = runtimeContextArgCount;
         this.linkerServices = linkerServices;
         this.syncOnRelink = syncOnRelink;
-        this.megamorphicRelinkThreshold = megamorphicRelinkThreshold;
+        this.unstableRelinkThreshold = unstableRelinkThreshold;
     }
 
     /**
@@ -152,11 +152,11 @@ public class DynamicLinker {
     @SuppressWarnings("unused")
     private MethodHandle relink(RelinkableCallSite callSite, int relinkCount, Object... arguments) throws Exception {
         final CallSiteDescriptor callSiteDescriptor = callSite.getDescriptor();
-        final boolean megamorphicEnabled = megamorphicRelinkThreshold > 0;
-        final boolean callSiteMegamorphic = megamorphicEnabled && relinkCount >= megamorphicRelinkThreshold;
+        final boolean unstableDetectionEnabled = unstableRelinkThreshold > 0;
+        final boolean callSiteUnstable = unstableDetectionEnabled && relinkCount >= unstableRelinkThreshold;
         final LinkRequest linkRequest =
-                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, callSiteMegamorphic, arguments)
-                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, callSiteMegamorphic, arguments,
+                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, callSiteUnstable, arguments)
+                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, callSiteUnstable, arguments,
                                 runtimeContextArgCount);
 
         // Find a suitable method handle with a guard
@@ -181,7 +181,7 @@ public class DynamicLinker {
 
         // Allow the call site to relink and execute its inline caching strategy.
         callSite.setGuardedInvocation(guardedInvocation, createRelinkAndInvokeMethod(callSite,
-                !megamorphicEnabled || callSiteMegamorphic ? relinkCount : relinkCount + 1));
+                !unstableDetectionEnabled || callSiteUnstable ? relinkCount : relinkCount + 1));
         if(syncOnRelink) {
             MutableCallSite.syncAll(new MutableCallSite[] { (MutableCallSite)callSite });
         }

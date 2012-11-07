@@ -49,14 +49,14 @@ public interface LinkRequest {
     public Object getReceiver();
 
     /**
-     * Returns true if the call site is considered megamorphic, that is, it has been relinked more times than was
-     * specified in {@link DynamicLinkerFactory#setMegamorphicRelinkThreshold(int)}. Linkers should use this as a
+     * Returns true if the call site is considered unstable, that is, it has been relinked more times than was
+     * specified in {@link DynamicLinkerFactory#setUnstableRelinkThreshold(int)}. Linkers should use this as a
      * hint to prefer producing linkage that is more stable (its guard fails less frequently), even if that assumption
      * causes a less effective version of an operation to be linked. This is just a hint, of course, and linkers are
      * free to ignore this property.
-     * @return true if the call site is considered megamorphic.
+     * @return true if the call site is considered unstable.
      */
-    public boolean isCallSiteMegamorphic();
+    public boolean isCallSiteUnstable();
 
     /**
      * Returns a request stripped from runtime context arguments. Some language runtimes will include runtime-specific
