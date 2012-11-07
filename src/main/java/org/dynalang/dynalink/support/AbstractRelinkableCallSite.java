@@ -29,7 +29,7 @@ public abstract class AbstractRelinkableCallSite extends MutableCallSite impleme
     }
 
     @Override
-    public void setRelinkAndInvoke(MethodHandle relinkAndInvoke) {
+    public void initialize(MethodHandle relinkAndInvoke) {
         setTarget(relinkAndInvoke);
     }
 }

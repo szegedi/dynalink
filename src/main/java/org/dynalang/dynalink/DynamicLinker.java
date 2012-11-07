@@ -112,7 +112,7 @@ public class DynamicLinker {
      * @return the callSite, for easy call chaining.
      */
     public <T extends RelinkableCallSite> T link(final T callSite) {
-        callSite.setRelinkAndInvoke(createRelinkAndInvokeMethod(callSite, 0));
+        callSite.initialize(createRelinkAndInvokeMethod(callSite, 0));
         return callSite;
     }
 
@@ -179,9 +179,15 @@ public class DynamicLinker {
             }
         }
 
-        // Allow the call site to relink and execute its inline caching strategy.
-        callSite.setGuardedInvocation(guardedInvocation, createRelinkAndInvokeMethod(callSite,
-                !unstableDetectionEnabled || callSiteUnstable ? relinkCount : relinkCount + 1));
+        if(unstableDetectionEnabled && relinkCount <= unstableRelinkThreshold && relinkCount++ == unstableRelinkThreshold) {
+            // Note that we'll increase the relinkCount until threshold+1 and not increase it beyond that. Threshold+1
+            // is treated as a special value to signal that resetAndRelink has already executed once for the unstable
+            // call site; we only want the call site to throw away its current linkage once, when it transitions to
+            // unstable.
+            callSite.resetAndRelink(guardedInvocation, createRelinkAndInvokeMethod(callSite, relinkCount));
+        } else {
+            callSite.relink(guardedInvocation, createRelinkAndInvokeMethod(callSite, relinkCount));
+        }
         if(syncOnRelink) {
             MutableCallSite.syncAll(new MutableCallSite[] { (MutableCallSite)callSite });
         }

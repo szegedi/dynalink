@@ -16,8 +16,8 @@ public class RelinkCountingCallSite extends MonomorphicCallSite {
     }
 
     @Override
-    public void setGuardedInvocation(GuardedInvocation guardedInvocation, MethodHandle relink) {
-        super.setGuardedInvocation(guardedInvocation, relink);
+    public void relink(GuardedInvocation guardedInvocation, MethodHandle relink) {
+        super.relink(guardedInvocation, relink);
         ++relinkCount;
     }
 

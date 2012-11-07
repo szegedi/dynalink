@@ -42,15 +42,20 @@ public class ChainedCallSite extends AbstractRelinkableCallSite {
     }
 
     @Override
-    public void setGuardedInvocation(GuardedInvocation invocation, MethodHandle relink) {
-        setGuardedInvocationInternal(invocation, relink);
+    public void relink(GuardedInvocation guardedInvocation, MethodHandle fallback) {
+        relinkInternal(guardedInvocation, fallback, false);
     }
 
-    private MethodHandle setGuardedInvocationInternal(GuardedInvocation invocation, MethodHandle relink) {
+    @Override
+    public void resetAndRelink(GuardedInvocation guardedInvocation, MethodHandle fallback) {
+        relinkInternal(guardedInvocation, fallback, true);
+    }
+
+    private MethodHandle relinkInternal(GuardedInvocation invocation, MethodHandle relink, boolean reset) {
         final LinkedList<GuardedInvocation> currentInvocations = invocations.get();
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final LinkedList<GuardedInvocation> newInvocations =
-            currentInvocations == null ? new LinkedList<>() : (LinkedList)currentInvocations.clone();
+            currentInvocations == null || reset ? new LinkedList<>() : (LinkedList)currentInvocations.clone();
 
         // First, prune the chain of invalidated switchpoints.
         for(Iterator<GuardedInvocation> it = newInvocations.iterator(); it.hasNext();) {
@@ -105,7 +110,7 @@ public class ChainedCallSite extends AbstractRelinkableCallSite {
 
     @SuppressWarnings("unused")
     private MethodHandle prune(MethodHandle relink) {
-        return setGuardedInvocationInternal(null, relink);
+        return relinkInternal(null, relink, false);
     }
 
     private static final MethodHandle PRUNE;
