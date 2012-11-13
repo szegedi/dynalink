@@ -45,20 +45,8 @@ class DefaultCallSiteDescriptor extends AbstractCallSiteDescriptor {
     }
 
     @Override
-    public CallSiteDescriptor dropParameterTypes(int from, int to) {
+    public CallSiteDescriptor changeMethodType(MethodType newMethodType) {
         return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new DefaultCallSiteDescriptor(tokenizedName,
-                methodType.dropParameterTypes(from, to)));
-    }
-
-    @Override
-    public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new DefaultCallSiteDescriptor(tokenizedName,
-                methodType.changeParameterType(num, newType)));
-    }
-
-    @Override
-    public CallSiteDescriptor changeReturnType(Class<?> newType) {
-        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new DefaultCallSiteDescriptor(tokenizedName,
-                methodType.changeReturnType(newType)));
+                newMethodType));
     }
 }

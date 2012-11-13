@@ -29,13 +29,7 @@ class LookupCallSiteDescriptor extends DefaultCallSiteDescriptor {
     }
 
     @Override
-    public CallSiteDescriptor dropParameterTypes(int from, int to) {
-        return new LookupCallSiteDescriptor(getTokenizedName(), getMethodType().dropParameterTypes(from, to), lookup);
-    }
-
-    @Override
-    public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return new LookupCallSiteDescriptor(getTokenizedName(), getMethodType().changeParameterType(num, newType),
-                lookup);
+    public CallSiteDescriptor changeMethodType(MethodType newMethodType) {
+        return new LookupCallSiteDescriptor(getTokenizedName(), newMethodType, lookup);
     }
 }

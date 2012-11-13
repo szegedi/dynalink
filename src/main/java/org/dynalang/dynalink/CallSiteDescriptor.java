@@ -97,33 +97,12 @@ public interface CallSiteDescriptor {
     public Lookup getLookup();
 
     /**
-     * Creates a new call site descriptor from this descriptor, which is identical to this, except it drops few of the
-     * parameters from the method type.
+     * Creates a new call site descriptor from this descriptor, which is identical to this, except it changes the method
+     * type.
      *
-     * @param from the index of the first parameter to drop
-     * @param to the index of the first parameter after "from" not to drop
-     * @return a new call site descriptor with the parameter dropped.
+     * @param newType the new method type
+     * @return a new call site descriptor, with the method type changed.
      */
-    public CallSiteDescriptor dropParameterTypes(int from, int to);
-
-    /**
-     * Creates a new call site descriptor from this descriptor, which is identical to this, except it changes the type
-     * of one of the parameters in the method type.
-     *
-     * @param num the index of the parameter type to change
-     * @param newType the new type for the parameter
-     * @return a new call site descriptor, with the type of the parameter in the method type changed.
-     */
-    public CallSiteDescriptor changeParameterType(int num, Class<?> newType);
-
-
-    /**
-     * Creates a new call site descriptor from this descriptor, which is identical to this, except it changes the return
-     * type in the method type.
-     *
-     * @param newType the new return type
-     * @return a new call site descriptor, with the return type in the method type changed.
-     */
-    public CallSiteDescriptor changeReturnType(Class<?> newType);
+    public CallSiteDescriptor changeMethodType(MethodType newMethodType);
 
 }

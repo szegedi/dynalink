@@ -28,14 +28,8 @@ class NamedDynCallSiteDescriptor extends UnnamedDynCallSiteDescriptor {
     }
 
     @Override
-    public CallSiteDescriptor dropParameterTypes(int from, int to) {
+    public CallSiteDescriptor changeMethodType(MethodType newMethodType) {
         return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new NamedDynCallSiteDescriptor(getOp(), name,
-                getMethodType().dropParameterTypes(from, to)));
-    }
-
-    @Override
-    public CallSiteDescriptor changeParameterType(int num, Class<?> newType) {
-        return CallSiteDescriptorFactory.getCanonicalPublicDescriptor(new NamedDynCallSiteDescriptor(getOp(), name,
-                getMethodType().changeParameterType(num, newType)));
+                newMethodType));
     }
 }

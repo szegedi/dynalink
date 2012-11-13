@@ -120,4 +120,63 @@ public class CallSiteDescriptorFactory {
         }
         return Arrays.asList(tokens);
     }
+
+    /**
+     * Returns a new call site descriptor that is identical to the passed one, except that it has some parameter types
+     * removed from its method type.
+     * @param desc the original call site descriptor
+     * @param start index of the first parameter to remove
+     * @param end index of the first parameter to not remove
+     * @return a new call site descriptor with modified method type
+     */
+    public static CallSiteDescriptor dropParameterTypes(CallSiteDescriptor desc, int start, int end) {
+        return desc.changeMethodType(desc.getMethodType().dropParameterTypes(start, end));
+    }
+
+    /**
+     * Returns a new call site descriptor that is identical to the passed one, except that it has a single parameter
+     * type changed in its method type.
+     * @param desc the original call site descriptor
+     * @param num index of the parameter to change
+     * @param nptype the new parameter type
+     * @return a new call site descriptor with modified method type
+     */
+    public static CallSiteDescriptor changeParameterType(CallSiteDescriptor desc, int num, Class<?> nptype) {
+        return desc.changeMethodType(desc.getMethodType().changeParameterType(num, nptype));
+    }
+
+    /**
+     * Returns a new call site descriptor that is identical to the passed one, except that it has the return type
+     * changed in its method type.
+     * @param desc the original call site descriptor
+     * @param nrtype the new return type
+     * @return a new call site descriptor with modified method type
+     */
+    public static CallSiteDescriptor changeReturnType(CallSiteDescriptor desc, Class<?> nrtype) {
+        return desc.changeMethodType(desc.getMethodType().changeReturnType(nrtype));
+    }
+
+    /**
+     * Returns a new call site descriptor that is identical to the passed one, except that it has additional parameter
+     * types inserted into its method type.
+     * @param desc the original call site descriptor
+     * @param num index at which the new parameters are inserted
+     * @param ptypesToInsert the new types to insert
+     * @return a new call site descriptor with modified method type
+     */
+    public static CallSiteDescriptor insertParameterTypes(CallSiteDescriptor desc, int num, Class<?>... ptypesToInsert) {
+        return desc.changeMethodType(desc.getMethodType().insertParameterTypes(num, ptypesToInsert));
+    }
+
+    /**
+     * Returns a new call site descriptor that is identical to the passed one, except that it has additional parameter
+     * types inserted into its method type.
+     * @param desc the original call site descriptor
+     * @param num index at which the new parameters are inserted
+     * @param ptypesToInsert the new types to insert
+     * @return a new call site descriptor with modified method type
+     */
+    public static CallSiteDescriptor insertParameterTypes(CallSiteDescriptor desc, int num, List<Class<?>> ptypesToInsert) {
+        return desc.changeMethodType(desc.getMethodType().insertParameterTypes(num, ptypesToInsert));
+    }
 }

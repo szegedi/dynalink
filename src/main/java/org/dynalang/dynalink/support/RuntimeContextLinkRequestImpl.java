@@ -52,8 +52,8 @@ public class RuntimeContextLinkRequestImpl extends LinkRequestImpl {
     public LinkRequest withoutRuntimeContext() {
         if(contextStrippedRequest == null) {
             contextStrippedRequest =
-                    new LinkRequestImpl(getCallSiteDescriptor().dropParameterTypes(1, runtimeContextArgCount + 1),
-                            isCallSiteUnstable(), getTruncatedArguments());
+                    new LinkRequestImpl(CallSiteDescriptorFactory.dropParameterTypes(getCallSiteDescriptor(), 1,
+                            runtimeContextArgCount + 1), isCallSiteUnstable(), getTruncatedArguments());
         }
         return contextStrippedRequest;
     }
