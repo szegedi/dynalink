@@ -2,6 +2,7 @@ package org.dynalang.dynalink.support;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.util.Objects;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
 
@@ -44,7 +45,7 @@ public abstract class AbstractCallSiteDescriptor implements CallSiteDescriptor {
             return false;
         }
         for(int i = ntc; i-- > 0;) { // Reverse order as variability is higher at the end
-            if(getNameToken(i) != csd.getNameToken(i)) {
+            if(!Objects.equals(getNameToken(i), csd.getNameToken(i))) {
                 return false;
             }
         }
