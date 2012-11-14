@@ -79,8 +79,8 @@ class GuardedInvocationComponent {
     }
 
     private static class Validator {
-        private final Class<?> validatorClass;
-        private final ValidationType validationType;
+        /*private*/ final Class<?> validatorClass;
+        /*private*/ final ValidationType validationType;
 
         Validator(Class<?> validatorClass, ValidationType validationType) {
             this.validatorClass = validatorClass;

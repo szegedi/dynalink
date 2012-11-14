@@ -213,11 +213,11 @@ public class TypeConverterFactory {
      * @param toType convert to this class
      * @return true if it's safe to let MethodHandles.convertArguments() to handle this conversion.
      */
-    private static boolean canAutoConvert(final Class<?> fromType, final Class<?> toType) {
+    /*private*/ static boolean canAutoConvert(final Class<?> fromType, final Class<?> toType) {
         return TypeUtilities.isMethodInvocationConvertible(fromType, toType);
     }
 
-    private MethodHandle getTypeConverterNull(Class<?> sourceType, Class<?> targetType) {
+    /*private*/ MethodHandle getTypeConverterNull(Class<?> sourceType, Class<?> targetType) {
         final MethodHandle converter = converterMap.get(sourceType).get(targetType);
         return converter == IDENTITY_CONVERSION ? null : converter;
     }
@@ -235,7 +235,7 @@ public class TypeConverterFactory {
         return converterIdentityMap.get(sourceType).get(targetType);
     }
 
-    private MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) throws Exception {
+    /*private*/ MethodHandle createConverter(Class<?> sourceType, Class<?> targetType) throws Exception {
         final MethodType type = MethodType.methodType(targetType, sourceType);
         final MethodHandle identity = IDENTITY_CONVERSION.asType(type);
         MethodHandle last = identity;
@@ -249,5 +249,5 @@ public class TypeConverterFactory {
         return last == identity ? IDENTITY_CONVERSION : last;
     }
 
-    private static final MethodHandle IDENTITY_CONVERSION = MethodHandles.identity(Object.class);
+    /*private*/ static final MethodHandle IDENTITY_CONVERSION = MethodHandles.identity(Object.class);
 }

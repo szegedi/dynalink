@@ -239,11 +239,11 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
             this.fixedKey = fixedKey;
         }
 
-        private MethodHandle bind(MethodHandle handle) {
+        /*private*/ MethodHandle bind(MethodHandle handle) {
             return bindToFixedKey(linkerServices.asType(handle, methodType));
         }
 
-        private MethodHandle bindTest(MethodHandle handle) {
+        /*private*/ MethodHandle bindTest(MethodHandle handle) {
             return bindToFixedKey(Guards.asType(handle, methodType));
         }
 

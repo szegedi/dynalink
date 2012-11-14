@@ -606,7 +606,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     private static final class AnnotatedMethodHandle {
         final MethodHandle handle;
-        private final boolean overloadSafe;
+        /*private*/ final boolean overloadSafe;
 
         AnnotatedMethodHandle(MethodHandle handle, boolean overloadSafe) {
             this.handle = handle;

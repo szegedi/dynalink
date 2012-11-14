@@ -38,7 +38,7 @@ public class StaticClass implements Serializable {
 
     private final Class<?> clazz;
 
-    private StaticClass(Class<?> clazz) {
+    /*private*/ StaticClass(Class<?> clazz) {
         clazz.getClass(); // NPE check
         this.clazz = clazz;
     }
