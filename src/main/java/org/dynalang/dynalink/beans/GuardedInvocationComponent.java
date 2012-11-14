@@ -28,7 +28,7 @@ class GuardedInvocationComponent {
     }
 
     GuardedInvocationComponent(MethodHandle invocation, MethodHandle guard, ValidationType validationType) {
-        this(invocation, guard, null, ValidationType.NONE);
+        this(invocation, guard, null, validationType);
     }
 
     GuardedInvocationComponent(MethodHandle invocation, MethodHandle guard, Class<?> validatorClass,
