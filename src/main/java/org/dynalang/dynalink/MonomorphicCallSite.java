@@ -42,6 +42,7 @@ public class MonomorphicCallSite extends AbstractRelinkableCallSite {
         setTarget(guardedInvocation.compose(relink));
     }
 
+    @Override
     public void resetAndRelink(GuardedInvocation guardedInvocation, MethodHandle relink) {
         relink(guardedInvocation, relink);
     }

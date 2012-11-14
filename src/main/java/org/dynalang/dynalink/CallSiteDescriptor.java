@@ -100,7 +100,7 @@ public interface CallSiteDescriptor {
      * Creates a new call site descriptor from this descriptor, which is identical to this, except it changes the method
      * type.
      *
-     * @param newType the new method type
+     * @param newMethodType the new method type
      * @return a new call site descriptor, with the method type changed.
      */
     public CallSiteDescriptor changeMethodType(MethodType newMethodType);
