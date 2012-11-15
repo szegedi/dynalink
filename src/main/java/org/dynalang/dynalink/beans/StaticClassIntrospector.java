@@ -32,8 +32,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 class StaticClassIntrospector extends FacetIntrospector {
+    private final Method[] methods;
     StaticClassIntrospector(Class<?> clazz) {
         super(clazz);
+        methods = new AccessibleMethodsLookup(clazz, false).getMethods();
     }
 
     @Override
@@ -41,10 +43,9 @@ class StaticClassIntrospector extends FacetIntrospector {
         // Discover getXxx()/isXxx() methods as property getters. Don't deal separately with property setters, as
         // AbstractJavaLinker will construct them directly from the setXxx() methods returned from the getMethods()
         // call.
-        final Method[] methods = clazz.getMethods();
         final Map<String, PropertyDescriptor> descs = new HashMap<String, PropertyDescriptor>();
         for(Method method: methods) {
-            if(!Modifier.isStatic(method.getModifiers()) || method.isBridge() || method.isSynthetic()) {
+            if(method.isBridge() || method.isSynthetic()) {
                 continue;
             }
             if(method.getReturnType() == Void.TYPE) {
@@ -78,10 +79,9 @@ class StaticClassIntrospector extends FacetIntrospector {
 
     @Override
     Collection<Method> getMethods() {
-        final Method[] methods = clazz.getMethods();
         final Collection<Method> cmethods = new ArrayList<Method>(methods.length);
         for(Method method: methods) {
-            if(Modifier.isStatic(method.getModifiers()) && !(method.isBridge() || method.isSynthetic())) {
+            if(!(method.isBridge() || method.isSynthetic())) {
                 cmethods.add(method);
             }
         }

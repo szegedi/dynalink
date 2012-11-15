@@ -19,9 +19,11 @@ package org.dynalang.dynalink.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.dynalang.dynalink.support.Lookup;
 
@@ -32,9 +34,11 @@ import org.dynalang.dynalink.support.Lookup;
  */
 abstract class FacetIntrospector implements AutoCloseable {
     protected final Class<?> clazz;
+    protected final boolean isRestricted;
 
     FacetIntrospector(Class<?> clazz) {
         this.clazz = clazz;
+        isRestricted = CheckRestrictedPackage.isRestrictedClass(clazz);
     }
 
     /**
@@ -48,14 +52,31 @@ abstract class FacetIntrospector implements AutoCloseable {
      * @return the fields for the class facet.
      */
     Collection<Field> getFields() {
+        if(isRestricted) {
+            // Note: we can't do anything here. Unlike with methods in AccessibleMethodsLookup, we can't just return
+            // the fields from a public superclass, because this class might define same-named fields which will shadow
+            // the superclass fields, and we have no way to know if they do, since we're denied invocation of
+            // getFields(). Therefore, the only correct course of action is to not expose any public fields a class
+            // defined in a restricted package.
+            return Collections.emptySet();
+        }
+
         final Field[] fields = clazz.getFields();
-        Collection<Field> cfields = new ArrayList<Field>(fields.length);
+        final Collection<Field> cfields = new ArrayList<Field>(fields.length);
         for(Field field: fields) {
-            if(includeField(field)) {
+            if(isAccessible(field) && includeField(field)) {
                 cfields.add(field);
             }
         }
         return cfields;
+    }
+
+    boolean isAccessible(Member m) {
+        final Class<?> declaring = m.getDeclaringClass();
+        // (declaring == clazz) is just an optimization - we're calling this only from code that operates on a
+        // non-restriced class, so if the declaring class is identical to the class being inspected, then forego
+        // a potentially expensive restricted-package check.
+        return declaring == clazz || !CheckRestrictedPackage.isRestrictedClass(declaring);
     }
 
     /**

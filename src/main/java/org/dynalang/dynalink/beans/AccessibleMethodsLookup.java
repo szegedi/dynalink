@@ -34,14 +34,17 @@ import java.util.Map;
  */
 class AccessibleMethodsLookup {
     private final Map<MethodSignature, Method> map;
+    private boolean instance;
 
     /**
      * Creates a mapping for all accessible methods on a class.
      *
      * @param clazz the inspected class
+     * @param instance true to inspect instance methods, false to inspect static methods
      */
-    AccessibleMethodsLookup(final Class<?> clazz) {
+    AccessibleMethodsLookup(final Class<?> clazz, boolean instance) {
         this.map = new HashMap<MethodSignature, Method>();
+        this.instance = instance;
         lookupAccessibleMethods(clazz);
     }
 
@@ -54,6 +57,10 @@ class AccessibleMethodsLookup {
      */
     Method getAccessibleMethod(final Method m) {
         return m == null ? null : map.get(new MethodSignature(m));
+    }
+
+    Method[] getMethods() {
+        return map.values().toArray(new Method[map.size()]);
     }
 
     /**
@@ -111,31 +118,25 @@ class AccessibleMethodsLookup {
     }
 
     private void lookupAccessibleMethods(final Class<?> clazz) {
-        if(Modifier.isPublic(clazz.getModifiers())) {
-            try {
-                final Method[] methods = clazz.getMethods();
-                for(int i = 0; i < methods.length; i++) {
-                    final Method method = methods[i];
-                    final MethodSignature sig = new MethodSignature(method);
-                    map.put(sig, method);
+        if(!CheckRestrictedPackage.isRestrictedClass(clazz)) {
+            final Method[] methods = clazz.getMethods();
+            for(int i = 0; i < methods.length; i++) {
+                final Method method = methods[i];
+                if(instance != Modifier.isStatic(method.getModifiers())) {
+                    map.put(new MethodSignature(method), method);
                 }
-                return;
-            } catch(final SecurityException e) {
-                System.err.println("Could not discover accessible methods of class " + clazz.getName()
-                        + ", attemping superclasses/interfaces.");
-                e.printStackTrace();
-                // Fall through and attempt to discover superclass/interface
-                // methods
             }
-        }
-
-        final Class<?>[] interfaces = clazz.getInterfaces();
-        for(int i = 0; i < interfaces.length; i++) {
-            lookupAccessibleMethods(interfaces[i]);
-        }
-        final Class<?> superclass = clazz.getSuperclass();
-        if(superclass != null) {
-            lookupAccessibleMethods(superclass);
+        } else {
+            // If we reach here, the class is either not public, or it is in a restricted package. We'll try superclasses
+            // and implemented interfaces then looking for public ones.
+            final Class<?>[] interfaces = clazz.getInterfaces();
+            for(int i = 0; i < interfaces.length; i++) {
+                lookupAccessibleMethods(interfaces[i]);
+            }
+            final Class<?> superclass = clazz.getSuperclass();
+            if(superclass != null) {
+                lookupAccessibleMethods(superclass);
+            }
         }
     }
 }

@@ -68,7 +68,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         this.assignableGuard = assignableGuard;
 
         final FacetIntrospector introspector = createFacetIntrospector();
-        final AccessibleMethodsLookup accessibleLookup = new AccessibleMethodsLookup(clazz);
+        final AccessibleMethodsLookup accessibleLookup = new AccessibleMethodsLookup(clazz, isInstanceLinker());
         try {
             // Add explicit properties
             for(PropertyDescriptor descriptor: introspector.getProperties()) {
@@ -127,6 +127,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     }
 
     abstract FacetIntrospector createFacetIntrospector();
+
+    abstract boolean isInstanceLinker();
 
     void addPropertyGetter(String name, MethodHandle handle, boolean overloadSafe) {
         propertyGetters.put(name, new AnnotatedMethodHandle(handle, overloadSafe));
