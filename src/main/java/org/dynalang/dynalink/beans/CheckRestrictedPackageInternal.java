@@ -135,8 +135,9 @@ class CheckRestrictedPackageInternal {
                     // Define the class with a protection domain that grants no permissions.
                     Class<?> clazz = defineClass(name, bytes, 0, bytes.length, new ProtectionDomain(null,
                             new Permissions()));
-                    assert resolve;
-                    resolveClass(clazz);
+                    if(resolve) {
+                        resolveClass(clazz);
+                    }
                     return clazz;
                 } else {
                     return super.loadClass(name, resolve);
