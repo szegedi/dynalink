@@ -152,10 +152,11 @@ public class GuardedInvocation {
      */
     public GuardedInvocation asType(MethodType newType) {
         final MethodHandle newInvocation = invocation.asType(newType);
-        if(newInvocation == invocation) {
+        final MethodHandle newGuard = guard == null ? null : Guards.asType(guard, newType);
+        if(newInvocation == invocation && newGuard == guard) {
             return this;
         }
-        return replaceMethods(newInvocation, guard == null ? null : Guards.asType(guard, newType));
+        return replaceMethods(newInvocation, newGuard);
     }
 
     /**
