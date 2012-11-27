@@ -143,20 +143,35 @@ public class GuardedInvocation {
         return new GuardedInvocation(newInvocation, newGuard, switchPoint);
     }
 
-    /**
-     * Changes the type of the invocation, as if {@link MethodHandle#asType(MethodType)} was applied to its invocation
-     * and its guard, if it has one (with return type changed to boolean for guard). If the invocation already is of the
-     * required type, returns this object.
-     * @param newType the new type of the invocation.
-     * @return a guarded invocation with the new type applied to it.
-     */
-    public GuardedInvocation asType(MethodType newType) {
-        final MethodHandle newInvocation = invocation.asType(newType);
-        final MethodHandle newGuard = guard == null ? null : Guards.asType(guard, newType);
+    private GuardedInvocation replaceMethodsOrThis(MethodHandle newInvocation, MethodHandle newGuard) {
         if(newInvocation == invocation && newGuard == guard) {
             return this;
         }
         return replaceMethods(newInvocation, newGuard);
+    }
+
+    /**
+     * Changes the type of the invocation, as if {@link MethodHandle#asType(MethodType)} was applied to its invocation
+     * and its guard, if it has one (with return type changed to boolean, and parameter count potentially truncated for
+     * the guard). If the invocation already is of the required type, returns this object.
+     * @param newType the new type of the invocation.
+     * @return a guarded invocation with the new type applied to it.
+     */
+    public GuardedInvocation asType(MethodType newType) {
+        return replaceMethodsOrThis(invocation.asType(newType), guard == null ? null : Guards.asType(guard, newType));
+    }
+
+    /**
+     * Changes the type of the invocation, as if {@link LinkerServices#asType(MethodHandle, MethodType)} was applied to
+     * its invocation and its guard, if it has one (with return type changed to boolean, and parameter count potentially
+     * truncated for the guard). If the invocation already is of the required type, returns this object.
+     * @param linkerServices the linker services to use for the conversion
+     * @param newType the new type of the invocation.
+     * @return a guarded invocation with the new type applied to it.
+     */
+    public GuardedInvocation asType(LinkerServices linkerServices, MethodType newType) {
+        return replaceMethodsOrThis(linkerServices.asType(invocation, newType), guard == null ? null :
+            Guards.asType(linkerServices, guard, newType));
     }
 
     /**

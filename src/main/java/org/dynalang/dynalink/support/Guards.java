@@ -22,6 +22,8 @@ import java.lang.invoke.MethodType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.dynalang.dynalink.linker.LinkerServices;
+
 /**
  * Utility methods for creating typical guards. TODO: introduce reasonable caching of created guards.
  *
@@ -152,15 +154,31 @@ public class Guards {
     }
 
     /**
-     * Takes a guard-test method handle, and adapts it to the requested type, testing the 0th argument and returning a
-     * boolean.
+     * Takes a guard-test method handle, and adapts it to the requested type, returning a boolean. Only applies
+     * conversions as per {@link MethodHandle#asType(MethodType)}.
      * @param test the test method handle
      * @param type the type to adapt the method handle to
      * @return the adapted method handle
      */
     public static MethodHandle asType(MethodHandle test, MethodType type) {
-        return test.asType(type.dropParameterTypes(test.type().parameterCount(),
-                type.parameterCount()).changeReturnType(boolean.class));
+        return test.asType(getTestType(test, type));
+    }
+
+    /**
+     * Takes a guard-test method handle, and adapts it to the requested type, returning a boolean. Applies the passed
+     * {@link LinkerServices} object's {@link LinkerServices#asType(MethodHandle, MethodType)}.
+     * @param linkerServices the linker services to use for type conversions
+     * @param test the test method handle
+     * @param type the type to adapt the method handle to
+     * @return the adapted method handle
+     */
+    public static MethodHandle asType(LinkerServices linkerServices, MethodHandle test, MethodType type) {
+        return linkerServices.asType(test, getTestType(test, type));
+    }
+
+    private static MethodType getTestType(MethodHandle test, MethodType type) {
+        return type.dropParameterTypes(test.type().parameterCount(),
+                type.parameterCount()).changeReturnType(boolean.class);
     }
 
     private static MethodHandle asType(MethodHandle test, int pos, MethodType type) {
