@@ -84,11 +84,6 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
         }
 
         @Override
-        boolean isInstanceLinker() {
-            return false;
-        }
-
-        @Override
         public GuardedInvocation getGuardedInvocation(LinkRequest request, LinkerServices linkerServices)
                 throws Exception {
             final GuardedInvocation gi = super.getGuardedInvocation(request, linkerServices);

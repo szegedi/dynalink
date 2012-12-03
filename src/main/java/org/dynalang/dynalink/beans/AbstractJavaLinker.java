@@ -131,8 +131,6 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     abstract FacetIntrospector createFacetIntrospector();
 
-    abstract boolean isInstanceLinker();
-
     void setPropertyGetter(String name, MethodHandle handle, boolean overloadSafe) {
         propertyGetters.put(name, new AnnotatedMethodHandle(handle, overloadSafe));
     }

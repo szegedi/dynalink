@@ -61,11 +61,6 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
     }
 
     @Override
-    boolean isInstanceLinker() {
-        return true;
-    }
-
-    @Override
     protected GuardedInvocationComponent getGuardedInvocationComponent(CallSiteDescriptor callSiteDescriptor,
             LinkerServices linkerServices, List<String> operations) throws Exception {
         final GuardedInvocationComponent superGic = super.getGuardedInvocationComponent(callSiteDescriptor,
