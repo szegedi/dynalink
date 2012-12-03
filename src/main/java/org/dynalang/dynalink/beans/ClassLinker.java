@@ -33,7 +33,7 @@ class ClassLinker extends BeanLinker {
     ClassLinker() {
         super(Class.class);
         // Map classObject.static to StaticClass.forClass(classObject)
-        addPropertyGetter("static", FOR_CLASS, false);
+        setPropertyGetter("static", FOR_CLASS, false);
     }
 
     private static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(StaticClass.class,

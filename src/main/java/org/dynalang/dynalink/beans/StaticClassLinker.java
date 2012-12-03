@@ -49,7 +49,7 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
 
         SingleClassStaticsLinker(Class<?> clazz) {
             super(clazz, IS_CLASS.bindTo(clazz));
-            addPropertyGetter("class", GET_CLASS, false);
+            setPropertyGetter("class", GET_CLASS, false);
             constructor = createConstructorMethod(clazz);
         }
 
