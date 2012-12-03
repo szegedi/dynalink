@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.dynalang.dynalink.support.Lookup;
 
@@ -35,10 +36,12 @@ import org.dynalang.dynalink.support.Lookup;
 abstract class FacetIntrospector implements AutoCloseable {
     protected final Class<?> clazz;
     protected final boolean isRestricted;
+    protected final AccessibleMembersLookup membersLookup;
 
-    FacetIntrospector(Class<?> clazz) {
+    FacetIntrospector(Class<?> clazz, boolean instance) {
         this.clazz = clazz;
         isRestricted = CheckRestrictedPackage.isRestrictedClass(clazz);
+        this.membersLookup = new AccessibleMembersLookup(clazz, instance);
     }
 
     /**
@@ -48,12 +51,18 @@ abstract class FacetIntrospector implements AutoCloseable {
     abstract Collection<PropertyDescriptor> getProperties();
 
     /**
+     * Returns getters for inner classes.
+     * @return getters for inner classes.
+     */
+    abstract Map<String, MethodHandle> getInnerClassGetters();
+
+    /**
      * Returns the fields for the class facet.
      * @return the fields for the class facet.
      */
     Collection<Field> getFields() {
         if(isRestricted) {
-            // Note: we can't do anything here. Unlike with methods in AccessibleMethodsLookup, we can't just return
+            // NOTE: we can't do anything here. Unlike with methods in AccessibleMethodsLookup, we can't just return
             // the fields from a public superclass, because this class might define same-named fields which will shadow
             // the superclass fields, and we have no way to know if they do, since we're denied invocation of
             // getFields(). Therefore, the only correct course of action is to not expose any public fields a class

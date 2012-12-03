@@ -68,21 +68,20 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         this.assignableGuard = assignableGuard;
 
         final FacetIntrospector introspector = createFacetIntrospector();
-        final AccessibleMethodsLookup accessibleLookup = new AccessibleMethodsLookup(clazz, isInstanceLinker());
         try {
             // Add explicit properties
             for(PropertyDescriptor descriptor: introspector.getProperties()) {
-                final Method accReadMethod = accessibleLookup.getAccessibleMethod(descriptor.getReadMethod());
+                final Method readMethod = descriptor.getReadMethod();
                 final String name = descriptor.getName();
-                if(accReadMethod != null) {
+                if(readMethod != null) {
                     // getMostGenericGetter() will look for the most generic superclass that declares this getter. Since
                     // getters have zero args (aside from the receiver), they can't be overloaded, so we're free to link
                     // with an instanceof guard for the most generic one, creating more stable call sites.
-                    setPropertyGetter(name, introspector.unreflect(getMostGenericGetter(accReadMethod)), true);
+                    setPropertyGetter(name, introspector.unreflect(getMostGenericGetter(readMethod)), true);
                 }
-                final Method accWriteMethod = accessibleLookup.getAccessibleMethod(descriptor.getWriteMethod());
-                if(accWriteMethod != null) {
-                    propertySetters.put(name, new SimpleDynamicMethod(introspector.unreflect(accWriteMethod)));
+                final Method writeMethod = descriptor.getWriteMethod();
+                if(writeMethod != null) {
+                    propertySetters.put(name, new SimpleDynamicMethod(introspector.unreflect(writeMethod)));
                 }
             }
 
@@ -96,17 +95,13 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 }
             }
 
-            // Add instance methods
+            // Add methods
             for(Method method: introspector.getMethods()) {
-                final Method accMethod = accessibleLookup.getAccessibleMethod(method);
-                if(accMethod == null) {
-                    continue;
-                }
                 final String name = method.getName();
-                final MethodHandle methodHandle = introspector.unreflect(accMethod);
+                final MethodHandle methodHandle = introspector.unreflect(method);
                 addMember(name, methodHandle, methods);
                 // Check if this method can be an alternative property setter
-                if(isPropertySetter(accMethod)) {
+                if(isPropertySetter(method)) {
                     addMember(Introspector.decapitalize(name.substring(3)), methodHandle, propertySetters);
                 }
             }
@@ -119,6 +114,14 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 final String name = field.getName();
                 if(!propertySetters.containsKey(name)) {
                     addMember(name, introspector.unreflectSetter(field), propertySetters);
+                }
+            }
+
+            // Add inner classes, but only those for which we don't hide a property with it
+            for(Map.Entry<String, MethodHandle> innerClassSpec: introspector.getInnerClassGetters().entrySet()) {
+                final String name = innerClassSpec.getKey();
+                if(!propertyGetters.containsKey(name)) {
+                    setPropertyGetter(name, innerClassSpec.getValue(), false);
                 }
             }
         } finally {
@@ -596,7 +599,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         if(superGetter != null) {
             return superGetter;
         }
-        if(Modifier.isPublic(declaringClass.getModifiers())) {
+        if(!CheckRestrictedPackage.isRestrictedClass(declaringClass)) {
             try {
                 return declaringClass.getMethod(name);
             } catch(NoSuchMethodException e) {

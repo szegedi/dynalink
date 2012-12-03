@@ -33,8 +33,8 @@ import java.util.Map;
 class StaticClassIntrospector extends FacetIntrospector {
     private final Method[] methods;
     StaticClassIntrospector(Class<?> clazz) {
-        super(clazz);
-        methods = new AccessibleMethodsLookup(clazz, false).getMethods();
+        super(clazz, false);
+        methods = membersLookup.getMethods();
     }
 
     @Override
@@ -69,6 +69,16 @@ class StaticClassIntrospector extends FacetIntrospector {
             }
         }
 
+    }
+
+    @Override
+    Map<String, MethodHandle> getInnerClassGetters() {
+        final Map<String, MethodHandle> map = new HashMap<>();
+        for(Class<?> innerClass: membersLookup.getInnerClasses()) {
+            map.put(innerClass.getSimpleName(), editMethodHandle(MethodHandles.constant(StaticClass.class,
+                    StaticClass.forClass(innerClass))));
+        }
+        return map;
     }
 
     @Override

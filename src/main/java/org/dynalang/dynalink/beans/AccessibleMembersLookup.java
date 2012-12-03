@@ -20,20 +20,22 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Utility class for discovering accessible methods. Normally, a public method declared on a class is accessible (that
- * is, it can be invoked from anywhere). However, this is not the case if the class itself is not public. In that case,
- * it is required to lookup a method with the same signature in a public superclass or implemented interface of the
- * class, and use it instead of the method discovered on the class. This can of course all be avoided by simply using
- * {@link Method#setAccessible(boolean)}, but this solution (which I call "dynamic upcasting") works even in more
- * constrained security environments.
+ * Utility class for discovering accessible methods and inner classes. Normally, a public member declared on a class is
+ * accessible (that is, it can be invoked from anywhere). However, this is not the case if the class itself is not
+ * public, or belongs to a restricted-access package. In that case, it is required to lookup a member in a publicly
+ * accessible superclass or implemented interface of the class, and use it instead of the member discovered on the
+ * class.
  *
  * @author Attila Szegedi
  */
-class AccessibleMethodsLookup {
-    private final Map<MethodSignature, Method> map;
+class AccessibleMembersLookup {
+    private final Map<MethodSignature, Method> methods;
+    private final List<Class<?>> innerClasses;
     private boolean instance;
 
     /**
@@ -42,10 +44,11 @@ class AccessibleMethodsLookup {
      * @param clazz the inspected class
      * @param instance true to inspect instance methods, false to inspect static methods
      */
-    AccessibleMethodsLookup(final Class<?> clazz, boolean instance) {
-        this.map = new HashMap<MethodSignature, Method>();
+    AccessibleMembersLookup(final Class<?> clazz, boolean instance) {
+        this.methods = new HashMap<>();
+        this.innerClasses = new LinkedList<>();
         this.instance = instance;
-        lookupAccessibleMethods(clazz);
+        lookupAccessibleMembers(clazz);
     }
 
     /**
@@ -56,11 +59,15 @@ class AccessibleMethodsLookup {
      * no accessible method equivalent.
      */
     Method getAccessibleMethod(final Method m) {
-        return m == null ? null : map.get(new MethodSignature(m));
+        return m == null ? null : methods.get(new MethodSignature(m));
     }
 
     Method[] getMethods() {
-        return map.values().toArray(new Method[map.size()]);
+        return methods.values().toArray(new Method[methods.size()]);
+    }
+
+    Class<?>[] getInnerClasses() {
+        return innerClasses.toArray(new Class<?>[innerClasses.size()]);
     }
 
     /**
@@ -117,13 +124,16 @@ class AccessibleMethodsLookup {
         }
     }
 
-    private void lookupAccessibleMethods(final Class<?> clazz) {
+    private void lookupAccessibleMembers(final Class<?> clazz) {
         if(!CheckRestrictedPackage.isRestrictedClass(clazz)) {
-            final Method[] methods = clazz.getMethods();
-            for(int i = 0; i < methods.length; i++) {
-                final Method method = methods[i];
+            for(Method method: clazz.getMethods()) {
                 if(instance != Modifier.isStatic(method.getModifiers())) {
-                    map.put(new MethodSignature(method), method);
+                    methods.put(new MethodSignature(method), method);
+                }
+            }
+            for(Class<?> innerClass: clazz.getClasses()) {
+                if(instance != Modifier.isStatic(innerClass.getModifiers())) {
+                    innerClasses.add(innerClass);
                 }
             }
         } else {
@@ -131,11 +141,11 @@ class AccessibleMethodsLookup {
             // and implemented interfaces then looking for public ones.
             final Class<?>[] interfaces = clazz.getInterfaces();
             for(int i = 0; i < interfaces.length; i++) {
-                lookupAccessibleMethods(interfaces[i]);
+                lookupAccessibleMembers(interfaces[i]);
             }
             final Class<?> superclass = clazz.getSuperclass();
             if(superclass != null) {
-                lookupAccessibleMethods(superclass);
+                lookupAccessibleMembers(superclass);
             }
         }
     }
