@@ -54,7 +54,7 @@ class StaticClassIntrospector extends FacetIntrospector {
             if(name.startsWith("get") && name.length() > 3 && method.getParameterTypes().length == 0) {
                 addPropertyDescriptor(descs, method, Introspector.decapitalize(name.substring(3)));
             } else if(name.startsWith("is") && name.length() > 2 && method.getParameterTypes().length == 0) {
-                addPropertyDescriptor(descs, method, Introspector.decapitalize(name.substring(3)));
+                addPropertyDescriptor(descs, method, Introspector.decapitalize(name.substring(2)));
             }
         }
         return descs.values();
