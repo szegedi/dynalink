@@ -132,9 +132,9 @@ class AccessibleMembersLookup {
                 }
             }
             for(Class<?> innerClass: clazz.getClasses()) {
-                if(instance != Modifier.isStatic(innerClass.getModifiers())) {
-                    innerClasses.add(innerClass);
-                }
+                // Add both static and non-static classes, regardless of instance flag. StaticClassLinker will just
+                // expose non-static classes with explicit constructor outer class argument.
+                innerClasses.add(innerClass);
             }
         } else {
             // If we reach here, the class is either not public, or it is in a restricted package. We'll try superclasses
