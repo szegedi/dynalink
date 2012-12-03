@@ -25,7 +25,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,7 +65,7 @@ class StaticClassIntrospector extends FacetIntrospector {
             try {
                 descs.put(name, new PropertyDescriptor(name, method, null));
             } catch(IntrospectionException e) {
-                throw new UndeclaredThrowableException(e);
+                throw new RuntimeException(e);
             }
         }
 
