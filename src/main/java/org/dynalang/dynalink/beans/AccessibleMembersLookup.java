@@ -39,10 +39,10 @@ class AccessibleMembersLookup {
     private boolean instance;
 
     /**
-     * Creates a mapping for all accessible methods on a class.
+     * Creates a mapping for all accessible methods and inner classes on a class.
      *
      * @param clazz the inspected class
-     * @param instance true to inspect instance methods, false to inspect static methods
+     * @param instance true to inspect instance methods, false to inspect static methods.
      */
     AccessibleMembersLookup(final Class<?> clazz, boolean instance) {
         this.methods = new HashMap<>();
@@ -134,6 +134,9 @@ class AccessibleMembersLookup {
             for(Class<?> innerClass: clazz.getClasses()) {
                 // Add both static and non-static classes, regardless of instance flag. StaticClassLinker will just
                 // expose non-static classes with explicit constructor outer class argument.
+                // NOTE: getting inner class objects through getClasses() does not resolve them, so if those classes
+                // were not yet loaded, they'll only get loaded in a non-resolved state; no static initializers for
+                // them will trigger just by doing this.
                 innerClasses.add(innerClass);
             }
         } else {
