@@ -81,7 +81,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 }
                 final Method writeMethod = descriptor.getWriteMethod();
                 if(writeMethod != null) {
-                    propertySetters.put(name, new SimpleDynamicMethod(introspector.unreflect(writeMethod)));
+                    propertySetters.put(name, new SimpleDynamicMethod(introspector.unreflect(writeMethod), clazz, name));
                 }
             }
 
@@ -153,7 +153,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     private static DynamicMethod addMember(MethodHandle mh, DynamicMethod existing, Class<?> clazz, String name) {
         if(existing == null) {
-            return new SimpleDynamicMethod(mh);
+            return new SimpleDynamicMethod(mh, clazz, name);
         } else if(existing.contains(mh)) {
             return existing;
         } else if(existing instanceof SimpleDynamicMethod) {

@@ -32,6 +32,16 @@ import org.dynalang.dynalink.linker.LinkerServices;
  * @author Attila Szegedi
  */
 abstract class DynamicMethod {
+    private final String name;
+
+    DynamicMethod(String name) {
+        this.name = name;
+    }
+
+    String getName() {
+        return name;
+    }
+
     /**
      * Creates an invocation for the dynamic method. If the method is overloaded, it will perform overloaded method
      * resolution based on the specified method type. The resulting resolution can either identify a single method to be
@@ -78,5 +88,15 @@ abstract class DynamicMethod {
         final int lastDot = typeName.lastIndexOf('.');
         final String fullTypeName = type.getCanonicalName();
         return lastDot != -1 && fullTypeName.endsWith(typeName.substring(lastDot)) || typeName.equals(fullTypeName);
+    }
+
+    static String getClassAndMethodName(Class<?> clazz, String name) {
+        final String clazzName = clazz.getCanonicalName();
+        return (clazzName == null ? clazz.getName() : clazzName) + "." + name;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + getClass().getName() + " " + getName() + "]";
     }
 }

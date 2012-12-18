@@ -33,12 +33,42 @@ class SimpleDynamicMethod extends DynamicMethod {
     private final MethodHandle target;
 
     /**
-     * Creates a new simple dynamic method.
-     *
+     * Creates a simple dynamic method with no name.
      * @param target the target method handle
      */
-    public SimpleDynamicMethod(MethodHandle target) {
+    SimpleDynamicMethod(MethodHandle target) {
+        this(target, null);
+    }
+
+    /**
+     * Creates a new simple dynamic method, with a name constructed from the class name, method name, and handle
+     * signature.
+     *
+     * @param target the target method handle
+     * @param clazz the class declaring the method
+     * @param name the simple name of the method
+     */
+    SimpleDynamicMethod(MethodHandle target, Class<?> clazz, String name) {
+        this(target, getName(target, clazz, name));
+    }
+
+    SimpleDynamicMethod(MethodHandle target, String name) {
+        super(name);
         this.target = target;
+    }
+
+    private static String getName(MethodHandle target, Class<?> clazz, String name) {
+        return getMethodNameWithSignature(target, getClassAndMethodName(clazz, name));
+    }
+
+    static String getMethodNameWithSignature(MethodHandle target, String methodName) {
+        final String typeStr = target.type().toString();
+        final int retTypeIndex = typeStr.lastIndexOf(')') + 1;
+        int secondParamIndex = typeStr.indexOf(',') + 1;
+        if(secondParamIndex == 0) {
+            secondParamIndex = retTypeIndex - 1;
+        }
+        return typeStr.substring(retTypeIndex) + " " + methodName + "(" + typeStr.substring(secondParamIndex, retTypeIndex);
     }
 
     /**

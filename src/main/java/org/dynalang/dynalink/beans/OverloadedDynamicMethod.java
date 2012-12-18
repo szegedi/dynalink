@@ -37,7 +37,6 @@ class OverloadedDynamicMethod extends DynamicMethod {
      */
     private final LinkedList<MethodHandle> methods;
     private final ClassLoader classLoader;
-    private final String name;
 
     /**
      * Creates a new overloaded dynamic method.
@@ -45,14 +44,14 @@ class OverloadedDynamicMethod extends DynamicMethod {
      * @param clazz the class this method belongs to
      * @param name the name of the method
      */
-    public OverloadedDynamicMethod(Class<?> clazz, String name) {
-        this(new LinkedList<MethodHandle>(), clazz.getClassLoader(), clazz.getName() + "." + name);
+    OverloadedDynamicMethod(Class<?> clazz, String name) {
+        this(new LinkedList<MethodHandle>(), clazz.getClassLoader(), getClassAndMethodName(clazz, name));
     }
 
     private OverloadedDynamicMethod(LinkedList<MethodHandle> methods, ClassLoader classLoader, String name) {
+        super(name);
         this.methods = methods;
         this.classLoader = classLoader;
-        this.name = name;
     }
 
     @Override
@@ -68,11 +67,12 @@ class OverloadedDynamicMethod extends DynamicMethod {
                 return null;
             }
             case 1: {
-                return new SimpleDynamicMethod(matchingMethods.get(0));
+                final MethodHandle target = matchingMethods.get(0);
+                return new SimpleDynamicMethod(target, SimpleDynamicMethod.getMethodNameWithSignature(target, getName()));
             }
             default: {
                 throw new BootstrapMethodError("Can't choose among " + matchingMethods + " for argument types "
-                        + paramTypes + " for method " + name);
+                        + paramTypes + " for method " + getName());
             }
         }
     }
@@ -175,10 +175,6 @@ class OverloadedDynamicMethod extends DynamicMethod {
         return classLoader;
     }
 
-    public String getName() {
-        return name;
-    }
-
     private static boolean isApplicableDynamically(LinkerServices linkerServices, MethodType callSiteType,
             MethodHandle m) {
         final MethodType methodType = m.type();
@@ -247,5 +243,4 @@ class OverloadedDynamicMethod extends DynamicMethod {
     public void addMethod(MethodHandle method) {
         methods.add(method);
     }
-
 }
