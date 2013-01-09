@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class for discovering accessible methods and inner classes. Normally, a public member declared on a class is
@@ -35,7 +35,7 @@ import java.util.Map;
  */
 class AccessibleMembersLookup {
     private final Map<MethodSignature, Method> methods;
-    private final List<Class<?>> innerClasses;
+    private final Set<Class<?>> innerClasses;
     private boolean instance;
 
     /**
@@ -46,7 +46,7 @@ class AccessibleMembersLookup {
      */
     AccessibleMembersLookup(final Class<?> clazz, boolean instance) {
         this.methods = new HashMap<>();
-        this.innerClasses = new LinkedList<>();
+        this.innerClasses = new LinkedHashSet<>();
         this.instance = instance;
         lookupAccessibleMembers(clazz);
     }
