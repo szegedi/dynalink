@@ -125,10 +125,31 @@ class AccessibleMembersLookup {
     }
 
     private void lookupAccessibleMembers(final Class<?> clazz) {
+        boolean searchSuperTypes;
+
         if(!CheckRestrictedPackage.isRestrictedClass(clazz)) {
+            searchSuperTypes = false;
             for(Method method: clazz.getMethods()) {
                 if(instance != Modifier.isStatic(method.getModifiers())) {
-                    methods.put(new MethodSignature(method), method);
+                    final MethodSignature sig = new MethodSignature(method);
+                    if(!methods.containsKey(sig)) {
+                        final Class<?> declaringClass = method.getDeclaringClass();
+                        if(declaringClass != clazz && CheckRestrictedPackage.isRestrictedClass(declaringClass)) {
+                            //Sometimes, the declaring class of a method (Method.getDeclaringClass())
+                            //retrieved through Class.getMethods() for a public class will be a
+                            //non-public superclass. For such a method, we need to find a method with
+                            //the same name and signature in a public superclass or implemented
+                            //interface.
+                            //This typically doesn't happen with classes emitted by a reasonably modern
+                            //javac, as it'll create synthetic delegator methods in all public
+                            //immediate subclasses of the non-public class. We have, however, observed
+                            //this in the wild with class files compiled with older javac that doesn't
+                            //generate the said synthetic delegators.
+                            searchSuperTypes = true;
+                        } else {
+                            methods.put(sig, method);
+                        }
+                    }
                 }
             }
             for(Class<?> innerClass: clazz.getClasses()) {
@@ -140,7 +161,12 @@ class AccessibleMembersLookup {
                 innerClasses.add(innerClass);
             }
         } else {
-            // If we reach here, the class is either not public, or it is in a restricted package. We'll try superclasses
+            searchSuperTypes = true;
+        }
+
+        if(searchSuperTypes) {
+            // If we reach here, the class is either not public, or it is in a restricted package. Alternatively, it is
+            // public, but some of its methods claim that their declaring class is non-public. We'll try superclasses
             // and implemented interfaces then looking for public ones.
             final Class<?>[] interfaces = clazz.getInterfaces();
             for(int i = 0; i < interfaces.length; i++) {
