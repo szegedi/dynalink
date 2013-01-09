@@ -122,6 +122,19 @@ class AccessibleMembersLookup {
         public int hashCode() {
             return name.hashCode() ^ Arrays.hashCode(args);
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder b = new StringBuilder();
+            b.append("[MethodSignature ").append(name).append('(');
+            if(args.length > 0) {
+                b.append(args[0].getCanonicalName());
+                for(int i = 1; i < args.length; ++i) {
+                    b.append(", ").append(args[i].getCanonicalName());
+                }
+            }
+            return b.append(")]").toString();
+        }
     }
 
     private void lookupAccessibleMembers(final Class<?> clazz) {
