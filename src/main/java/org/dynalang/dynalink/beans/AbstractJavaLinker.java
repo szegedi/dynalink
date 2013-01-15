@@ -77,7 +77,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                     // getMostGenericGetter() will look for the most generic superclass that declares this getter. Since
                     // getters have zero args (aside from the receiver), they can't be overloaded, so we're free to link
                     // with an instanceof guard for the most generic one, creating more stable call sites.
-                    setPropertyGetter(name, introspector.unreflect(getMostGenericGetter(readMethod)), true);
+                    setPropertyGetter(name, introspector.unreflect(getMostGenericGetter(readMethod)),
+                            ValidationType.INSTANCE_OF);
                 }
                 final Method writeMethod = descriptor.getWriteMethod();
                 if(writeMethod != null) {
@@ -91,7 +92,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 final String name = field.getName();
                 if(!propertyGetters.containsKey(name)) {
                     // Only add field getter if we don't have an explicit property getter with the same name
-                    setPropertyGetter(name, introspector.unreflectGetter(field), false);
+                    setPropertyGetter(name, introspector.unreflectGetter(field), ValidationType.EXACT_CLASS);
                 }
             }
 
@@ -121,7 +122,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             for(Map.Entry<String, MethodHandle> innerClassSpec: introspector.getInnerClassGetters().entrySet()) {
                 final String name = innerClassSpec.getKey();
                 if(!propertyGetters.containsKey(name)) {
-                    setPropertyGetter(name, innerClassSpec.getValue(), false);
+                    setPropertyGetter(name, innerClassSpec.getValue(), ValidationType.EXACT_CLASS);
                 }
             }
         } finally {
@@ -131,8 +132,8 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     abstract FacetIntrospector createFacetIntrospector();
 
-    void setPropertyGetter(String name, MethodHandle handle, boolean overloadSafe) {
-        propertyGetters.put(name, new AnnotatedMethodHandle(handle, overloadSafe));
+    void setPropertyGetter(String name, MethodHandle handle, ValidationType validationType) {
+        propertyGetters.put(name, new AnnotatedMethodHandle(handle, validationType));
     }
 
     private void addMember(String name, MethodHandle mh, Map<String, DynamicMethod> methodMap) {
@@ -450,15 +451,33 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // we're linking against a field getter, don't make the assumption.
                 // NOTE: No delegation to the next component operation if we have a property with this name, even if its
                 // value is null.
-                return new GuardedInvocationComponent(linkerServices.asType(getter, type), annGetter.overloadSafe ?
-                        getAssignableGuard(type) : getClassGuard(type), clazz, annGetter.overloadSafe ?
-                                ValidationType.INSTANCE_OF : ValidationType.EXACT_CLASS);
+                final ValidationType validationType = annGetter.validationType;
+                return new GuardedInvocationComponent(linkerServices.asType(getter, type), getGuard(validationType,
+                        type), clazz, validationType);
             }
             default: {
                 // Can't do anything with more than 3 name components
                 return null;
             }
         }
+    }
+
+    private MethodHandle getGuard(ValidationType validationType, MethodType methodType) {
+        switch(validationType) {
+            case EXACT_CLASS: {
+                return getClassGuard(methodType);
+            }
+            case INSTANCE_OF: {
+                return getAssignableGuard(methodType);
+            }
+            case IS_ARRAY: {
+                return Guards.isArray(0, methodType);
+            }
+            case NONE: {
+                return null;
+            }
+        }
+        throw new AssertionError();
     }
 
     private static final MethodHandle IS_DYNAMIC_METHOD_NOT_NULL = Guards.asType(Guards.isNotNull(),
@@ -609,11 +628,11 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
     private static final class AnnotatedMethodHandle {
         final MethodHandle handle;
-        /*private*/ final boolean overloadSafe;
+        /*private*/ final ValidationType validationType;
 
-        AnnotatedMethodHandle(MethodHandle handle, boolean overloadSafe) {
+        AnnotatedMethodHandle(MethodHandle handle, ValidationType validationType) {
             this.handle = handle;
-            this.overloadSafe = overloadSafe;
+            this.validationType = validationType;
         }
     }
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dynalang.dynalink.CallSiteDescriptor;
+import org.dynalang.dynalink.beans.GuardedInvocationComponent.ValidationType;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
@@ -49,7 +50,9 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
 
         SingleClassStaticsLinker(Class<?> clazz) {
             super(clazz, IS_CLASS.bindTo(clazz));
-            setPropertyGetter("class", GET_CLASS, false);
+            // Map "staticClassObject.class" to StaticClass.getRepresentedClass(). Some adventurous soul could subclass
+            // StaticClass, so we use INSTANCE_OF validation instead of EXACT_CLASS.
+            setPropertyGetter("class", GET_CLASS, ValidationType.INSTANCE_OF);
             constructor = createConstructorMethod(clazz);
         }
 

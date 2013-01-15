@@ -20,6 +20,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
+import org.dynalang.dynalink.beans.GuardedInvocationComponent.ValidationType;
 import org.dynalang.dynalink.support.Lookup;
 
 /**
@@ -32,8 +33,8 @@ class ClassLinker extends BeanLinker {
 
     ClassLinker() {
         super(Class.class);
-        // Map classObject.static to StaticClass.forClass(classObject)
-        setPropertyGetter("static", FOR_CLASS, false);
+        // Map "classObject.static" to StaticClass.forClass(classObject). Can use EXACT_CLASS since class Class is final.
+        setPropertyGetter("static", FOR_CLASS, ValidationType.EXACT_CLASS);
     }
 
     private static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(StaticClass.class,
