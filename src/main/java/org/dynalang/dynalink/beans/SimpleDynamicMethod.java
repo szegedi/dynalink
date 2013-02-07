@@ -86,7 +86,7 @@ class SimpleDynamicMethod extends DynamicMethod {
      *
      * @return the target of this dynamic method
      */
-    public MethodHandle getTarget() {
+    MethodHandle getTarget() {
         return target;
     }
 
