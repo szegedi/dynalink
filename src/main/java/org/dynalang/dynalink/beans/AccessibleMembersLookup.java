@@ -29,6 +29,7 @@ package org.dynalang.dynalink.beans;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -72,8 +73,8 @@ class AccessibleMembersLookup {
         return m == null ? null : methods.get(new MethodSignature(m));
     }
 
-    Method[] getMethods() {
-        return methods.values().toArray(new Method[methods.size()]);
+    Collection<Method> getMethods() {
+        return methods.values();
     }
 
     Class<?>[] getInnerClasses() {

@@ -32,14 +32,12 @@ package org.dynalang.dynalink.beans;
  */
 
 import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,51 +77,36 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
         final FacetIntrospector introspector = createFacetIntrospector();
         try {
-            // Add explicit properties
-            for(PropertyDescriptor descriptor: introspector.getProperties()) {
-                final Method readMethod = descriptor.getReadMethod();
-                final String name = descriptor.getName();
-                if(readMethod != null) {
-                    // getMostGenericGetter() will look for the most generic superclass that declares this getter. Since
-                    // getters have zero args (aside from the receiver), they can't be overloaded, so we're free to link
-                    // with an instanceof guard for the most generic one, creating more stable call sites.
-                    setPropertyGetter(name, introspector.unreflect(getMostGenericGetter(readMethod)),
-                            ValidationType.INSTANCE_OF);
-                }
-                final Method writeMethod = descriptor.getWriteMethod();
-                if(writeMethod != null) {
-                    propertySetters.put(name, new SimpleDynamicMethod(introspector.unreflect(writeMethod), clazz, name));
-                }
-            }
-
-            final Collection<Field> fields = introspector.getFields();
-            // Add field getters
-            for(Field field: fields) {
-                final String name = field.getName();
-                if(!propertyGetters.containsKey(name)) {
-                    // Only add field getter if we don't have an explicit property getter with the same name
-                    setPropertyGetter(name, introspector.unreflectGetter(field), ValidationType.EXACT_CLASS);
-                }
-            }
-
-            // Add methods
+            // Add methods and properties
             for(Method method: introspector.getMethods()) {
                 final String name = method.getName();
                 final MethodHandle methodHandle = introspector.unreflect(method);
+                // Add method
                 addMember(name, methodHandle, methods);
-                // Check if this method can be an alternative property setter
-                if(isPropertySetter(method)) {
+                // Add the method as a property getter and/or setter
+                if(name.startsWith("get") && name.length() > 3 && method.getParameterTypes().length == 0) {
+                    // Property getter
+                    setPropertyGetter(Introspector.decapitalize(name.substring(3)), introspector.unreflect(
+                            getMostGenericGetter(method)), ValidationType.INSTANCE_OF);
+                } else if(name.startsWith("is") && name.length() > 2 && method.getParameterTypes().length == 0 &&
+                        method.getReturnType() == boolean.class) {
+                    // Boolean property getter
+                    setPropertyGetter(Introspector.decapitalize(name.substring(2)), introspector.unreflect(
+                            getMostGenericGetter(method)), ValidationType.INSTANCE_OF);
+                } else if(name.startsWith("set") && name.length() > 3 && method.getParameterTypes().length == 1) {
+                    // Property setter
                     addMember(Introspector.decapitalize(name.substring(3)), methodHandle, propertySetters);
                 }
             }
 
-            // Add field setters as property setters, but only for fields that have no property setter defined.
-            for(Field field: fields) {
-                if(Modifier.isFinal(field.getModifiers())) {
-                    continue;
-                }
+            // Add field getter/setters as property getters/setters.
+            for(Field field: introspector.getFields()) {
                 final String name = field.getName();
-                if(!propertySetters.containsKey(name)) {
+                // Only add a property getter when one is not defined already as a getXxx()/isXxx() method.
+                if(!propertyGetters.containsKey(name)) {
+                    setPropertyGetter(name, introspector.unreflectGetter(field), ValidationType.EXACT_CLASS);
+                }
+                if(!(Modifier.isFinal(field.getModifiers()) || propertySetters.containsKey(name))) {
                     addMember(name, introspector.unreflectSetter(field), propertySetters);
                 }
             }
@@ -607,6 +590,13 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
         return getDynamicMethod(name, methods);
     }
 
+    /**
+     * Find the most generic superclass that declares this getter. Since getters have zero args (aside from the
+     * receiver), they can't be overloaded, so we're free to link with an instanceof guard for the most generic one,
+     * creating more stable call sites.
+     * @param getter the getter
+     * @return getter with same name, declared on the most generic superclass/interface of the declaring class
+     */
     private static Method getMostGenericGetter(Method getter) {
         return getMostGenericGetter(getter.getName(), getter.getReturnType(), getter.getDeclaringClass());
     }
@@ -644,18 +634,5 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             this.handle = handle;
             this.validationType = validationType;
         }
-    }
-
-    /**
-     * Determines if the method is a property setter. Only invoked on public instance methods, so we don't check
-     * repeatedly for those. It differs somewhat from the JavaBeans introspector's definition, as we'll happily accept
-     * methods that have non-void return types, to accommodate for the widespread pattern of property setters that allow
-     * chaining.
-     * @param m the method tested for being a property setter
-     * @return true if it is a property setter, false otherwise
-     */
-    private static boolean isPropertySetter(Method m) {
-        final String name = m.getName();
-        return name.startsWith("set") && name.length() > 3 && m.getParameterTypes().length == 1;
     }
 }

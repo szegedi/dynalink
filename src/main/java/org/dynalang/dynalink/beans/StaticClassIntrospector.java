@@ -26,59 +26,15 @@
 
 package org.dynalang.dynalink.beans;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 class StaticClassIntrospector extends FacetIntrospector {
-    private final Method[] methods;
     StaticClassIntrospector(Class<?> clazz) {
         super(clazz, false);
-        methods = membersLookup.getMethods();
-    }
-
-    @Override
-    Collection<PropertyDescriptor> getProperties() {
-        // Discover getXxx()/isXxx() methods as property getters. Don't deal separately with property setters, as
-        // AbstractJavaLinker will construct them directly from the setXxx() methods returned from the getMethods()
-        // call.
-        final Map<String, PropertyDescriptor> descs = new HashMap<String, PropertyDescriptor>();
-        for(Method method: methods) {
-            if(method.isBridge() || method.isSynthetic()) {
-                continue;
-            }
-            if(method.getReturnType() == Void.TYPE) {
-                continue;
-            }
-            final String name = method.getName();
-            if(name.startsWith("get") && name.length() > 3 && method.getParameterTypes().length == 0) {
-                addPropertyDescriptor(descs, method, Introspector.decapitalize(name.substring(3)));
-            } else if(name.startsWith("is") && name.length() > 2 && method.getParameterTypes().length == 0) {
-                addPropertyDescriptor(descs, method, Introspector.decapitalize(name.substring(2)));
-            }
-        }
-        return descs.values();
-    }
-
-    private static void addPropertyDescriptor(Map<String, PropertyDescriptor> descs, Method method, String name) {
-        if(!descs.containsKey(name)) {
-            try {
-                descs.put(name, new PropertyDescriptor(name, method, null));
-            } catch(IntrospectionException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
     }
 
     @Override
@@ -89,22 +45,6 @@ class StaticClassIntrospector extends FacetIntrospector {
                     StaticClass.forClass(innerClass))));
         }
         return map;
-    }
-
-    @Override
-    boolean includeField(Field field) {
-        return Modifier.isStatic(field.getModifiers());
-    }
-
-    @Override
-    Collection<Method> getMethods() {
-        final Collection<Method> cmethods = new ArrayList<Method>(methods.length);
-        for(Method method: methods) {
-            if(!(method.isBridge() || method.isSynthetic())) {
-                cmethods.add(method);
-            }
-        }
-        return cmethods;
     }
 
     @Override

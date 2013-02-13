@@ -26,11 +26,11 @@
 
 package org.dynalang.dynalink.beans;
 
-import java.beans.PropertyDescriptor;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,26 +39,23 @@ import java.util.Map;
 import org.dynalang.dynalink.support.Lookup;
 
 /**
- * Base for classes that expose class property, field, and method information to an {@link AbstractJavaLinker}. There
- * are subclasses for instance (bean) and static facet of a class.
+ * Base for classes that expose class field and method information to an {@link AbstractJavaLinker}. There are
+ * subclasses for instance (bean) and static facet of a class.
  * @author Attila Szegedi
  */
 abstract class FacetIntrospector implements AutoCloseable {
-    protected final Class<?> clazz;
-    protected final boolean isRestricted;
+    private final Class<?> clazz;
+    private final boolean instance;
+    private final boolean isRestricted;
+
     protected final AccessibleMembersLookup membersLookup;
 
     FacetIntrospector(Class<?> clazz, boolean instance) {
         this.clazz = clazz;
+        this.instance = instance;
         isRestricted = CheckRestrictedPackage.isRestrictedClass(clazz);
-        this.membersLookup = new AccessibleMembersLookup(clazz, instance);
+        membersLookup = new AccessibleMembersLookup(clazz, instance);
     }
-
-    /**
-     * Returns bean properties for the facet.
-     * @return bean properties for the facet.
-     */
-    abstract Collection<PropertyDescriptor> getProperties();
 
     /**
      * Returns getters for inner classes.
@@ -75,7 +72,7 @@ abstract class FacetIntrospector implements AutoCloseable {
             // NOTE: we can't do anything here. Unlike with methods in AccessibleMethodsLookup, we can't just return
             // the fields from a public superclass, because this class might define same-named fields which will shadow
             // the superclass fields, and we have no way to know if they do, since we're denied invocation of
-            // getFields(). Therefore, the only correct course of action is to not expose any public fields a class
+            // getFields(). Therefore, the only correct course of action is to not expose any public fields from a class
             // defined in a restricted package.
             return Collections.emptySet();
         }
@@ -83,7 +80,7 @@ abstract class FacetIntrospector implements AutoCloseable {
         final Field[] fields = clazz.getFields();
         final Collection<Field> cfields = new ArrayList<Field>(fields.length);
         for(Field field: fields) {
-            if(isAccessible(field) && includeField(field)) {
+            if(instance != Modifier.isStatic(field.getModifiers()) && isAccessible(field)) {
                 cfields.add(field);
             }
         }
@@ -99,17 +96,13 @@ abstract class FacetIntrospector implements AutoCloseable {
     }
 
     /**
-     * A filter predicate to determine whether to include a field in the facet or not.
-     * @param field the field to test
-     * @return true to include the field in the facet, false otherwise.
-     */
-    abstract boolean includeField(Field field);
-
-    /**
      * Returns all the methods in the facet.
      * @return all the methods in the facet.
      */
-    abstract Collection<Method> getMethods();
+    Collection<Method> getMethods() {
+        return membersLookup.getMethods();
+    }
+
 
     MethodHandle unreflectGetter(Field field) {
         return editMethodHandle(Lookup.PUBLIC.unreflectGetter(field));
@@ -130,10 +123,7 @@ abstract class FacetIntrospector implements AutoCloseable {
      * @param mh the method handle to edit.
      * @return the edited method handle.
      */
-    @SuppressWarnings("static-method") // Meant to be overridden in a subclass
-    MethodHandle editMethodHandle(MethodHandle mh) {
-        return mh;
-    }
+    abstract MethodHandle editMethodHandle(MethodHandle mh);
 
     @Override
     public void close() {
