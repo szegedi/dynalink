@@ -103,7 +103,7 @@ abstract class FacetIntrospector implements AutoCloseable {
         }
 
         final Field[] fields = clazz.getFields();
-        final Collection<Field> cfields = new ArrayList<Field>(fields.length);
+        final Collection<Field> cfields = new ArrayList<>(fields.length);
         for(Field field: fields) {
             if(instance != Modifier.isStatic(field.getModifiers()) && isAccessible(field)) {
                 cfields.add(field);

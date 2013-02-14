@@ -111,7 +111,7 @@ public class CallSiteDescriptorFactory {
                     return canonical;
                 }
             }
-            publicDescs.put(desc, new WeakReference<CallSiteDescriptor>(desc));
+            publicDescs.put(desc, new WeakReference<>(desc));
         }
         return desc;
     }

@@ -66,8 +66,8 @@ import java.util.concurrent.ConcurrentMap;
  * @param <T> the type of the values in the map
  */
 public abstract class ClassMap<T> {
-    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<Class<?>, T>();
-    private final Map<Class<?>, Reference<T>> weakMap = new WeakHashMap<Class<?>, Reference<T>>();
+    private final ConcurrentMap<Class<?>, T> map = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Reference<T>> weakMap = new WeakHashMap<>();
     private final ClassLoader classLoader;
 
     /**
@@ -138,7 +138,7 @@ public abstract class ClassMap<T> {
                     return oldV;
                 }
             }
-            weakMap.put(clazz, new SoftReference<T>(newV));
+            weakMap.put(clazz, new SoftReference<>(newV));
             return newV;
         }
     }

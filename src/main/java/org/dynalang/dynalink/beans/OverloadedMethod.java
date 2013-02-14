@@ -72,7 +72,7 @@ import org.dynalang.dynalink.support.Lookup;
  * @author Attila Szegedi
  */
 class OverloadedMethod {
-    private final Map<ClassString, MethodHandle> argTypesToMethods = new ConcurrentHashMap<ClassString, MethodHandle>();
+    private final Map<ClassString, MethodHandle> argTypesToMethods = new ConcurrentHashMap<>();
     private final OverloadedDynamicMethod parent;
     private final MethodType callSiteType;
     private final MethodHandle invoker;

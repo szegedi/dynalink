@@ -93,7 +93,7 @@ public class AutoDiscovery {
      * I can't believe there's no Collections API for making a List given an Iterator...
      */
     private static <T> List<T> getLinkers(ServiceLoader<T> loader) {
-        final List<T> list = new LinkedList<T>();
+        final List<T> list = new LinkedList<>();
         for(final T linker: loader) {
             list.add(linker);
         }

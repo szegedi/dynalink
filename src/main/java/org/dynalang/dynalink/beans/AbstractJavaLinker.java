@@ -87,9 +87,9 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
     final Class<?> clazz;
     private final MethodHandle classGuard;
     private final MethodHandle assignableGuard;
-    private final Map<String, AnnotatedMethodHandle> propertyGetters = new HashMap<String, AnnotatedMethodHandle>();
-    private final Map<String, DynamicMethod> propertySetters = new HashMap<String, DynamicMethod>();
-    private final Map<String, DynamicMethod> methods = new HashMap<String, DynamicMethod>();
+    private final Map<String, AnnotatedMethodHandle> propertyGetters = new HashMap<>();
+    private final Map<String, DynamicMethod> propertySetters = new HashMap<>();
+    private final Map<String, DynamicMethod> methods = new HashMap<>();
 
     AbstractJavaLinker(Class<?> clazz, MethodHandle classGuard) {
         this(clazz, classGuard, classGuard);

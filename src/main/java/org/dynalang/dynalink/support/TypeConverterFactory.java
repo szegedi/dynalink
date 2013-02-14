@@ -118,8 +118,8 @@ public class TypeConverterFactory {
      * @param factories the {@link GuardingTypeConverterFactory} instances to compose.
      */
     public TypeConverterFactory(Iterable<? extends GuardingTypeConverterFactory> factories) {
-        final List<GuardingTypeConverterFactory> l = new LinkedList<GuardingTypeConverterFactory>();
-        final List<ConversionComparator> c = new LinkedList<ConversionComparator>();
+        final List<GuardingTypeConverterFactory> l = new LinkedList<>();
+        final List<ConversionComparator> c = new LinkedList<>();
         for(GuardingTypeConverterFactory factory: factories) {
             l.add(factory);
             if(factory instanceof ConversionComparator) {
@@ -153,7 +153,7 @@ public class TypeConverterFactory {
             throw new WrongMethodTypeException("Parameter counts differ: " + handle.type() + " vs. " + fromType);
         }
         int pos = 0;
-        final List<MethodHandle> converters = new LinkedList<MethodHandle>();
+        final List<MethodHandle> converters = new LinkedList<>();
         for(int i = 0; i < l; ++i) {
             final Class<?> fromParamType = fromType.parameterType(i);
             final Class<?> toParamType = toType.parameterType(i);

@@ -77,7 +77,7 @@ class ApplicableOverloadedMethods {
      */
     ApplicableOverloadedMethods(final List<MethodHandle> methods, final MethodType callSiteType,
             final ApplicabilityTest test) {
-        this.methods = new LinkedList<MethodHandle>();
+        this.methods = new LinkedList<>();
         for(MethodHandle m: methods) {
             if(test.isApplicable(callSiteType, m)) {
                 this.methods.add(m);

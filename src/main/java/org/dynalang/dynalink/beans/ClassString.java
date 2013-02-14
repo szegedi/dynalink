@@ -127,7 +127,7 @@ final class ClassString {
      * Returns all methods that are applicable to actual parameter classes represented by this ClassString object.
      */
     LinkedList<MethodHandle> getApplicables(List<MethodHandle> methods, LinkerServices linkerServices, boolean varArg) {
-        final LinkedList<MethodHandle> list = new LinkedList<MethodHandle>();
+        final LinkedList<MethodHandle> list = new LinkedList<>();
         for(final MethodHandle member: methods) {
             if(isApplicable(member, linkerServices, varArg)) {
                 list.add(member);

@@ -122,7 +122,7 @@ public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardin
      * @param linkers the component linkers
      */
     public CompositeTypeBasedGuardingDynamicLinker(Iterable<? extends TypeBasedGuardingDynamicLinker> linkers) {
-        final List<TypeBasedGuardingDynamicLinker> l = new LinkedList<TypeBasedGuardingDynamicLinker>();
+        final List<TypeBasedGuardingDynamicLinker> l = new LinkedList<>();
         for(TypeBasedGuardingDynamicLinker linker: linkers) {
             l.add(linker);
         }
@@ -159,8 +159,8 @@ public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardin
      * @return the optimized list
      */
     public static List<GuardingDynamicLinker> optimize(Iterable<? extends GuardingDynamicLinker> linkers) {
-        final List<GuardingDynamicLinker> llinkers = new LinkedList<GuardingDynamicLinker>();
-        final List<TypeBasedGuardingDynamicLinker> tblinkers = new LinkedList<TypeBasedGuardingDynamicLinker>();
+        final List<GuardingDynamicLinker> llinkers = new LinkedList<>();
+        final List<TypeBasedGuardingDynamicLinker> tblinkers = new LinkedList<>();
         for(GuardingDynamicLinker linker: linkers) {
             if(linker instanceof TypeBasedGuardingDynamicLinker) {
                 tblinkers.add((TypeBasedGuardingDynamicLinker)linker);

@@ -116,7 +116,7 @@ public class TypeUtilities {
         // thank to interfaces. I.e., if you call this method for String.class
         // and Number.class, you'll have Comparable, Serializable, and Object
         // as maximal elements.
-        List<Class<?>> max = new ArrayList<Class<?>>();
+        List<Class<?>> max = new ArrayList<>();
         outer: for(Class<?> clazz: a1) {
             for(Iterator<Class<?>> maxiter = max.iterator(); maxiter.hasNext();) {
                 Class<?> maxClazz = maxiter.next();
@@ -142,7 +142,7 @@ public class TypeUtilities {
     }
 
     private static Set<Class<?>> getAssignables(Class<?> c1, Class<?> c2) {
-        Set<Class<?>> s = new HashSet<Class<?>>();
+        Set<Class<?>> s = new HashSet<>();
         collectAssignables(c1, c2, s);
         return s;
     }
@@ -166,7 +166,7 @@ public class TypeUtilities {
     private static final Map<String, Class<?>> PRIMITIVE_TYPES_BY_NAME = createClassNameMapping(WRAPPER_TYPES.keySet());
 
     private static Map<Class<?>, Class<?>> createWrapperTypes() {
-        final Map<Class<?>, Class<?>> wrapperTypes = new IdentityHashMap<Class<?>, Class<?>>(8);
+        final Map<Class<?>, Class<?>> wrapperTypes = new IdentityHashMap<>(8);
         wrapperTypes.put(Boolean.TYPE, Boolean.class);
         wrapperTypes.put(Byte.TYPE, Byte.class);
         wrapperTypes.put(Character.TYPE, Character.class);
@@ -187,7 +187,7 @@ public class TypeUtilities {
     }
 
     private static <K, V> Map<V, K> invertMap(Map<K, V> map) {
-        final Map<V, K> inverted = new IdentityHashMap<V, K>(map.size());
+        final Map<V, K> inverted = new IdentityHashMap<>(map.size());
         for(Map.Entry<K, V> entry: map.entrySet()) {
             inverted.put(entry.getValue(), entry.getKey());
         }
@@ -324,7 +324,7 @@ public class TypeUtilities {
     private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE_TYPES = createWrapperToPrimitiveTypes();
 
     private static Map<Class<?>, Class<?>> createWrapperToPrimitiveTypes() {
-        final Map<Class<?>, Class<?>> classes = new IdentityHashMap<Class<?>, Class<?>>();
+        final Map<Class<?>, Class<?>> classes = new IdentityHashMap<>();
         classes.put(Void.class, Void.TYPE);
         classes.put(Boolean.class, Boolean.TYPE);
         classes.put(Byte.class, Byte.TYPE);
@@ -340,7 +340,7 @@ public class TypeUtilities {
     private static final Set<Class<?>> PRIMITIVE_WRAPPER_TYPES = createPrimitiveWrapperTypes();
 
     private static Set<Class<?>> createPrimitiveWrapperTypes() {
-        final Map<Class<?>, Class<?>> classes = new IdentityHashMap<Class<?>, Class<?>>();
+        final Map<Class<?>, Class<?>> classes = new IdentityHashMap<>();
         addClassHierarchy(classes, Boolean.class);
         addClassHierarchy(classes, Byte.class);
         addClassHierarchy(classes, Character.class);

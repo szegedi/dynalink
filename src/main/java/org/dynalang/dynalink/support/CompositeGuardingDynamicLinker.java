@@ -79,7 +79,7 @@ public class CompositeGuardingDynamicLinker implements GuardingDynamicLinker, Se
      * @param linkers a list of component linkers.
      */
     public CompositeGuardingDynamicLinker(Iterable<? extends GuardingDynamicLinker> linkers) {
-        final List<GuardingDynamicLinker> l = new LinkedList<GuardingDynamicLinker>();
+        final List<GuardingDynamicLinker> l = new LinkedList<>();
         for(GuardingDynamicLinker linker: linkers) {
             l.add(linker);
         }
