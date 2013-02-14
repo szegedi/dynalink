@@ -172,14 +172,16 @@ class OverloadedDynamicMethod extends DynamicMethod {
                 final MethodHandle mh = invokables.iterator().next();
                 return new SimpleDynamicMethod(mh).getInvocation(callSiteType, linkerServices);
             }
+            default: {
+                // We have more than one candidate. We have no choice but to link to a method that resolves overloads on
+                // every invocation (alternatively, we could opportunistically link the one method that resolves for the
+                // current arguments, but we'd need to install a fairly complex guard for that and when it'd fail, we'd
+                // go back all the way to candidate selection.
+                // TODO: cache per call site type
+                return new OverloadedMethod(invokables, this, callSiteType, linkerServices).getInvoker();
+            }
         }
 
-        // We have more than one candidate. We have no choice but to link to a method that resolves overloads on every
-        // invocation (alternatively, we could opportunistically link the one method that resolves for the current
-        // arguments, but we'd need to install a fairly complex guard for that and when it'd fail, we'd go back all the
-        // way to candidate selection.
-        // TODO: cache per call site type
-        return new OverloadedMethod(invokables, this, callSiteType, linkerServices).getInvoker();
     }
 
     @Override

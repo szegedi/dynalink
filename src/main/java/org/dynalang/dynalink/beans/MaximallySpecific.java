@@ -109,6 +109,10 @@ class MaximallySpecific {
                     }
                     case INDETERMINATE: {
                         // do nothing
+                        break;
+                    }
+                    default: {
+                        throw new AssertionError();
                     }
                 }
             }

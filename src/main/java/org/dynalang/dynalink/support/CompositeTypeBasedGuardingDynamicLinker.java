@@ -102,8 +102,8 @@ public class CompositeTypeBasedGuardingDynamicLinker implements TypeBasedGuardin
                         }
                         case 1: {
                             list = new LinkedList<>(list);
-                            // intentional fallthrough
                         }
+                        //$FALL-THROUGH$
                         default: {
                             list.add(linker);
                         }

@@ -494,8 +494,10 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
             case NONE: {
                 return null;
             }
+            default: {
+                throw new AssertionError();
+            }
         }
-        throw new AssertionError();
     }
 
     private static final MethodHandle IS_DYNAMIC_METHOD_NOT_NULL = Guards.asType(Guards.isNotNull(),
