@@ -144,7 +144,7 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
         // dealing with an array, or a list or map, but hey...
         // Note that for arrays and lists, using LinkerServices.asType() will ensure that any language specific linkers
         // in use will get a chance to perform any (if there's any) implicit conversion to integer for the indices.
-        final GuardedInvocationComponent gic;;
+        final GuardedInvocationComponent gic;
         final boolean isMap;
         if(declaredType.isArray()) {
             gic = new GuardedInvocationComponent(MethodHandles.arrayElementGetter(declaredType));

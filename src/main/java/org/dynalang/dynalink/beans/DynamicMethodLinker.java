@@ -70,7 +70,7 @@ class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
     @Override
     public boolean canLinkType(Class<?> type) {
         return DynamicMethod.class.isAssignableFrom(type);
-    };
+    }
 
     @Override
     public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, LinkerServices linkerServices) {
