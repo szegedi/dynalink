@@ -218,6 +218,8 @@ class OverloadedDynamicMethod extends DynamicMethod {
         final boolean varArgs = m.isVarargsCollector();
         final int fixedArgLen = methodType.parameterCount() - (varArgs ? 1 : 0);
         final int callSiteArgLen = callSiteType.parameterCount();
+
+        // Arity checks
         if(varArgs) {
             if(callSiteArgLen < fixedArgLen) {
                 return false;
@@ -225,32 +227,36 @@ class OverloadedDynamicMethod extends DynamicMethod {
         } else if(callSiteArgLen != fixedArgLen) {
             return false;
         }
-        // Starting from 1, as receiver type doesn't participate
+
+        // Fixed arguments type checks, starting from 1, as receiver type doesn't participate
         for(int i = 1; i < fixedArgLen; ++i) {
             if(!isApplicableDynamically(linkerServices, callSiteType.parameterType(i), methodType.parameterType(i))) {
                 return false;
             }
         }
-        if(varArgs) {
-            final Class<?> varArgArrayType = methodType.parameterType(fixedArgLen);
-            final Class<?> varArgType = varArgArrayType.getComponentType();
-            if(fixedArgLen == callSiteArgLen - 1) {
-                final Class<?> callSiteArgType = callSiteType.parameterType(fixedArgLen);
-                // Exactly one vararg; check both exact matching and component
-                // matching.
-                return isApplicableDynamically(linkerServices, callSiteArgType, varArgArrayType)
-                        || isApplicableDynamically(linkerServices, callSiteArgType, varArgType);
-            } else {
-                for(int i = fixedArgLen; i < callSiteArgLen; ++i) {
-                    if(!isApplicableDynamically(linkerServices, callSiteType.parameterType(i), varArgType)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        } else {
+        if(!varArgs) {
+            // Not vararg; both arity and types matched.
             return true;
         }
+
+        final Class<?> varArgArrayType = methodType.parameterType(fixedArgLen);
+        final Class<?> varArgType = varArgArrayType.getComponentType();
+
+        if(fixedArgLen == callSiteArgLen - 1) {
+            // Exactly one vararg; check both array type matching and array component type matching.
+            final Class<?> callSiteArgType = callSiteType.parameterType(fixedArgLen);
+            return isApplicableDynamically(linkerServices, callSiteArgType, varArgArrayType)
+                    || isApplicableDynamically(linkerServices, callSiteArgType, varArgType);
+        }
+
+        // Either zero, or more than one vararg; check if all actual vararg types match the vararg array component type.
+        for(int i = fixedArgLen; i < callSiteArgLen; ++i) {
+            if(!isApplicableDynamically(linkerServices, callSiteType.parameterType(i), varArgType)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static boolean isApplicableDynamically(LinkerServices linkerServices, Class<?> callSiteType,

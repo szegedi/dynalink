@@ -97,9 +97,8 @@ public class CallSiteDescriptorFactory {
         final String[] tokenizedName = tokenizeName(name);
         if(isPublicLookup(lookup)) {
             return getCanonicalPublicDescriptor(createPublicCallSiteDescriptor(tokenizedName, methodType));
-        } else {
-            return new LookupCallSiteDescriptor(tokenizedName, methodType, lookup);
         }
+        return new LookupCallSiteDescriptor(tokenizedName, methodType, lookup);
     }
 
     static CallSiteDescriptor getCanonicalPublicDescriptor(final CallSiteDescriptor desc) {

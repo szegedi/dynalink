@@ -191,22 +191,22 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
 
         if(nextComponent == null) {
             return gic.replaceInvocation(binder.bind(invocation));
-        } else {
-            final MethodHandle checkGuard;
-            if(invocation == GET_LIST_ELEMENT) {
-                checkGuard = convertArgToInt(RANGE_CHECK_LIST, linkerServices, callSiteDescriptor);
-            } else if(invocation == GET_MAP_ELEMENT) {
-                // TODO: A more complex solution could be devised for maps, one where we do a get() first, and fold it
-                // into a GWT that tests if it returned null, and if it did, do another GWT with containsKey()
-                // that returns constant null (on true), or falls back to next component (on false)
-                checkGuard = CONTAINS_MAP;
-            } else {
-                checkGuard = convertArgToInt(RANGE_CHECK_ARRAY, linkerServices, callSiteDescriptor);
-            }
-            return nextComponent.compose(MethodHandles.guardWithTest(binder.bindTest(checkGuard),
-                    binder.bind(invocation), nextComponent.getGuardedInvocation().getInvocation()), gi.getGuard(),
-                    gic.getValidatorClass(), gic.getValidationType());
         }
+
+        final MethodHandle checkGuard;
+        if(invocation == GET_LIST_ELEMENT) {
+            checkGuard = convertArgToInt(RANGE_CHECK_LIST, linkerServices, callSiteDescriptor);
+        } else if(invocation == GET_MAP_ELEMENT) {
+            // TODO: A more complex solution could be devised for maps, one where we do a get() first, and fold it
+            // into a GWT that tests if it returned null, and if it did, do another GWT with containsKey()
+            // that returns constant null (on true), or falls back to next component (on false)
+            checkGuard = CONTAINS_MAP;
+        } else {
+            checkGuard = convertArgToInt(RANGE_CHECK_ARRAY, linkerServices, callSiteDescriptor);
+        }
+        return nextComponent.compose(MethodHandles.guardWithTest(binder.bindTest(checkGuard),
+                binder.bind(invocation), nextComponent.getGuardedInvocation().getInvocation()), gi.getGuard(),
+                gic.getValidatorClass(), gic.getValidationType());
     }
 
     private static String getFixedKey(final CallSiteDescriptor callSiteDescriptor) {
@@ -403,13 +403,13 @@ class BeanLinker extends AbstractJavaLinker implements TypeBasedGuardingDynamicL
 
         if(nextComponent == null) {
             return gic.replaceInvocation(binder.bind(invocation));
-        } else {
-            final MethodHandle checkGuard = convertArgToInt(invocation == SET_LIST_ELEMENT ? RANGE_CHECK_LIST :
-                RANGE_CHECK_ARRAY, linkerServices, callSiteDescriptor);
-            return nextComponent.compose(MethodHandles.guardWithTest(binder.bindTest(checkGuard),
-                    binder.bind(invocation), nextComponent.getGuardedInvocation().getInvocation()), gi.getGuard(),
-                    gic.getValidatorClass(), gic.getValidationType());
         }
+
+        final MethodHandle checkGuard = convertArgToInt(invocation == SET_LIST_ELEMENT ? RANGE_CHECK_LIST :
+            RANGE_CHECK_ARRAY, linkerServices, callSiteDescriptor);
+        return nextComponent.compose(MethodHandles.guardWithTest(binder.bindTest(checkGuard),
+                binder.bind(invocation), nextComponent.getGuardedInvocation().getInvocation()), gi.getGuard(),
+                gic.getValidatorClass(), gic.getValidationType());
     }
 
     private static MethodHandle GET_ARRAY_LENGTH = Lookup.PUBLIC.findStatic(Array.class, "getLength",

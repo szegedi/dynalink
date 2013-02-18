@@ -190,9 +190,9 @@ class CheckRestrictedPackageInternal {
                         resolveClass(clazz);
                     }
                     return clazz;
-                } else {
-                    return super.loadClass(name, resolve);
                 }
+
+                return super.loadClass(name, resolve);
             }
         };
     }
