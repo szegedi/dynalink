@@ -51,11 +51,6 @@
 
 package org.dynalang.dynalink.beans;
 
-/**
- * Base class for linkers that can take a bunch of fields and
- * @author Attila Szegedi
- */
-
 import java.beans.Introspector;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
