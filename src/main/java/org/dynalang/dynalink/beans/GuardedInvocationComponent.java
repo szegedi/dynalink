@@ -164,8 +164,8 @@ class GuardedInvocationComponent {
                                 return this;
                             }
                             break;
-                        case NONE:
-                            throw new AssertionError(); // Not possible
+                        default:
+                            throw new AssertionError();
                     }
                     break;
                 case EXACT_CLASS:
@@ -185,8 +185,8 @@ class GuardedInvocationComponent {
                                 return this;
                             }
                             break;
-                        case NONE:
-                            throw new AssertionError(); // Not possible
+                        default:
+                            throw new AssertionError();
                     }
                     break;
                 case IS_ARRAY:
@@ -199,10 +199,12 @@ class GuardedInvocationComponent {
                             break;
                         case IS_ARRAY:
                             return this;
-                        case NONE:
-                            throw new AssertionError(); // Not possible
+                        default:
+                            throw new AssertionError();
                     }
                     break;
+                default:
+                    throw new AssertionError();
             }
             throw new AssertionError("Incompatible composition " + this + " vs " + other);
         }
