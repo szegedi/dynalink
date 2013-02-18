@@ -197,7 +197,7 @@ class CheckRestrictedPackageInternal {
         };
     }
 
-    private static byte[] getTesterClassBytes() {
+    static byte[] getTesterClassBytes() {
         try {
             final InputStream in = CheckRestrictedPackage.class.getResourceAsStream("RestrictedPackageTester.class");
             try {
