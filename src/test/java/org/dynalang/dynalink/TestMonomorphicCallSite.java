@@ -54,11 +54,9 @@ package org.dynalang.dynalink;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-
+import junit.framework.TestCase;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for the {@link MonomorphicCallSite}.

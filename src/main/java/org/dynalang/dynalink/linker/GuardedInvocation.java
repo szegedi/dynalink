@@ -57,7 +57,6 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
 import java.lang.invoke.WrongMethodTypeException;
 import java.util.List;
-
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.support.Guards;
 

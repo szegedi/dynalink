@@ -57,7 +57,6 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.WrongMethodTypeException;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.dynalang.dynalink.linker.ConversionComparator;
 import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;

@@ -59,14 +59,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
+import junit.framework.TestCase;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.NoSuchDynamicMethodException;
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
-
-import junit.framework.TestCase;
 
 public class TestCompositeOperations extends TestCase {
 

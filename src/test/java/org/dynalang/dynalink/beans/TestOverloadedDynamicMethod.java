@@ -58,7 +58,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
+import junit.framework.TestCase;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.LinkerServicesFactory;
@@ -73,8 +73,6 @@ import org.dynalang.dynalink.support.LinkRequestImpl;
 import org.dynalang.dynalink.support.LinkerServicesImpl;
 import org.dynalang.dynalink.support.Lookup;
 import org.dynalang.dynalink.support.TypeConverterFactory;
-
-import junit.framework.TestCase;
 
 /**
  *

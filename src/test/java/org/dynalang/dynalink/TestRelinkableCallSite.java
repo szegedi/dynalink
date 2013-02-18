@@ -53,10 +53,8 @@ package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-
-import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
-
 import junit.framework.TestCase;
+import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 /**
  * Tests for the {@link RelinkableCallSite}.

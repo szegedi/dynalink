@@ -60,10 +60,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.dynalang.dynalink.DynamicLinkerFactory;
-
 import junit.framework.TestCase;
+import org.dynalang.dynalink.DynamicLinkerFactory;
 
 public class TestElementGetter extends TestCase {
     public void testEarlyBoundPrimitiveArrayElementGetter() throws Throwable {

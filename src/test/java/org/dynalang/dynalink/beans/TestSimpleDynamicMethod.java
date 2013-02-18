@@ -53,14 +53,12 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-
+import junit.framework.TestCase;
 import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for the {@link SimpleDynamicMethod}.

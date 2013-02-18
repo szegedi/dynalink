@@ -66,7 +66,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.beans.GuardedInvocationComponent.ValidationType;
 import org.dynalang.dynalink.linker.GuardedInvocation;

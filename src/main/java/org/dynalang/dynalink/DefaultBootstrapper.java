@@ -54,7 +54,6 @@ package org.dynalang.dynalink;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 
 /**

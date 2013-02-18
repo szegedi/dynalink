@@ -52,7 +52,6 @@
 package org.dynalang.dynalink;
 
 import java.lang.invoke.MethodHandle;
-
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.support.AbstractRelinkableCallSite;
 

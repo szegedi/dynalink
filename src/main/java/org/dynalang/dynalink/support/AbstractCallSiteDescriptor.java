@@ -54,7 +54,6 @@ package org.dynalang.dynalink.support;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.util.Objects;
-
 import org.dynalang.dynalink.CallSiteDescriptor;
 
 /**

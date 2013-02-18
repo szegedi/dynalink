@@ -52,7 +52,6 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
-
 import org.dynalang.dynalink.linker.GuardedInvocation;
 
 /**

@@ -54,7 +54,6 @@ package org.dynalang.dynalink.support;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
-
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 

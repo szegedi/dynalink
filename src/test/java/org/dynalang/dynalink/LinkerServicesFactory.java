@@ -52,7 +52,6 @@
 package org.dynalang.dynalink;
 
 import java.util.LinkedList;
-
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;

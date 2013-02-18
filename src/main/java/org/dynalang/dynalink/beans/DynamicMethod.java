@@ -54,7 +54,6 @@ package org.dynalang.dynalink.beans;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.StringTokenizer;
-
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**

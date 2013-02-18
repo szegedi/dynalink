@@ -53,7 +53,6 @@ package org.dynalang.dynalink.support;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MutableCallSite;
-
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.RelinkableCallSite;
 

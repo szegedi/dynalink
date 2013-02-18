@@ -56,7 +56,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**

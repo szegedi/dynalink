@@ -60,7 +60,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
-
 import org.dynalang.dynalink.CallSiteDescriptor;
 
 /**

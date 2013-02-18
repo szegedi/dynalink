@@ -62,7 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
+import junit.framework.TestCase;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinker;
 import org.dynalang.dynalink.DynamicLinkerFactory;
@@ -70,8 +70,6 @@ import org.dynalang.dynalink.LinkerServicesFactory;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkRequestImpl;
-
-import junit.framework.TestCase;
 
 public class TestLengthGetter extends TestCase {
     public void testEarlyBoundArrayLengthGetter() throws Throwable {

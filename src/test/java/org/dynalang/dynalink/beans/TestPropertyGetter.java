@@ -53,10 +53,8 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-
-import org.dynalang.dynalink.DynamicLinkerFactory;
-
 import junit.framework.TestCase;
+import org.dynalang.dynalink.DynamicLinkerFactory;
 
 /**
  * @author Attila Szegedi

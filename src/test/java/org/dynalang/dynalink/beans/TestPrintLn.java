@@ -53,15 +53,13 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-
+import junit.framework.TestCase;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.LinkerServicesFactory;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.CallSiteDescriptorFactory;
 import org.dynalang.dynalink.support.LinkRequestImpl;
-
-import junit.framework.TestCase;
 
 public class TestPrintLn extends TestCase {
     /**

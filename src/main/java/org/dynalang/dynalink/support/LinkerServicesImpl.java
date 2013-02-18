@@ -53,7 +53,6 @@ package org.dynalang.dynalink.support;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-
 import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.GuardingDynamicLinker;

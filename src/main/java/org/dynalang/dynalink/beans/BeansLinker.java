@@ -53,7 +53,6 @@ package org.dynalang.dynalink.beans;
 
 import java.beans.BeanInfo;
 import java.lang.invoke.MethodHandles;
-
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.linker.GuardedInvocation;
