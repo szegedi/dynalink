@@ -273,7 +273,7 @@ class OverloadedDynamicMethod extends DynamicMethod {
      *
      * @param method the method to add.
      */
-    public void addMethod(SimpleDynamicMethod method) {
+    void addMethod(SimpleDynamicMethod method) {
         addMethod(method.getTarget());
     }
 

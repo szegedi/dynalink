@@ -597,7 +597,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
      * @return the dynamic method (either {@link SimpleDynamicMethod} or {@link OverloadedDynamicMethod}, or null if the
      * method with the specified name does not exist.
      */
-    public DynamicMethod getDynamicMethod(String name) {
+    DynamicMethod getDynamicMethod(String name) {
         return getDynamicMethod(name, methods);
     }
 
