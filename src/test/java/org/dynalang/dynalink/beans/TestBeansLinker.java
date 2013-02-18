@@ -144,5 +144,4 @@ public class TestBeansLinker extends TestCase {
     public static CallSiteDescriptor createCallSiteDescriptor(String name, MethodType methodType) {
         return CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), name, methodType);
     }
-
 }
