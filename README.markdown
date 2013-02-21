@@ -14,7 +14,7 @@ given during the 2011 JVM Language Summit, as well as
 given during JavaOne 2012.
 
 If you just want the binaries, you can get the releases from the 
-[Maven central repository](http://search.maven.org/#browse%7C-362742625). 
+[Maven central repository](https://oss.sonatype.org/content/repositories/releases/org/dynalang/dynalink/). 
 Frequent snapshots of the version under development are available in the [
 Maven snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/org/dynalang/dynalink).
 
