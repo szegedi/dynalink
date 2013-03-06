@@ -60,21 +60,38 @@ class ZeroPermissionsClassLoader {
             protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
                 if(name.equals(lclassName)) {
                     final byte[] bytes = getClassBytes();
-                    // Define the class with a protection domain that grants no permissions.
-                    Class<?> clazz = defineClass(name, bytes, 0, bytes.length, new ProtectionDomain(null,
-                            new Permissions()));
+                    // Define the class with a protection domain that grants (almost) no permissions.
+                    Class<?> clazz = defineClass(name, bytes, 0, bytes.length, createMinimalPermissionsDomain());
                     if(resolve) {
                         resolveClass(clazz);
                     }
                     return clazz;
                 }
 
+                final int i = name.lastIndexOf('.');
+                if (i != -1) {
+                    final SecurityManager sm = System.getSecurityManager();
+                    if (sm != null) {
+                        sm.checkPackageAccess(name.substring(0, i));
+                    }
+                }
                 return super.loadClass(name, resolve);
             }
         };
     }
 
-    byte[] getClassBytes() {
+    /**
+     * Create a no-permissions protection domain. Except, it's not really a no-permissions protection domain, since we
+     * need to give the protection domain the permission to access the package of the class being loaded.
+     * @return a new (almost) no-permission protection domain.
+     */
+    private ProtectionDomain createMinimalPermissionsDomain() {
+        final Permissions p = new Permissions();
+        p.add(new RuntimePermission("accessClassInPackage." + className.substring(0, className.lastIndexOf('.'))));
+        return new ProtectionDomain(null, p);
+    }
+
+    private byte[] getClassBytes() {
         try {
             final InputStream in = getClass().getResourceAsStream("/" + className.replace('.', '/') + ".class");
             try {

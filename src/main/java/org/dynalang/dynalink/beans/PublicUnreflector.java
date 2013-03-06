@@ -4,6 +4,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * Provides lookup of unreflected method handles through delegation to an instance of {@link PublicUnreflectorImpl}. If
@@ -53,9 +55,17 @@ class PublicUnreflector {
 
     private static Unreflector createImpl() {
         try {
-            return (Unreflector)ZeroPermissionsClassLoader.loadClass(UNREFLECTOR_IMPL_CLASS_NAME).newInstance();
-        } catch(InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            final Class<?> unreflectorImplClass = AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
+                @Override
+                public Class<?> run() {
+                    return ZeroPermissionsClassLoader.loadClass(UNREFLECTOR_IMPL_CLASS_NAME);
+                }
+            });
+            try {
+                return (Unreflector)unreflectorImplClass.newInstance();
+            } catch(InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
         } catch(SecurityException e) {
             // We don't have sufficient privileges to load the PublicUnreflectorImpl class into a separate protection
             // domain, so just create a new instance directly - in this scenario, Dynalink is not trusted code anyway.
