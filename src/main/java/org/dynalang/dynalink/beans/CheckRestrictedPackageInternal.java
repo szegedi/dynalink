@@ -51,17 +51,11 @@
 
 package org.dynalang.dynalink.beans;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.security.AccessController;
-import java.security.Permissions;
 import java.security.PrivilegedAction;
-import java.security.ProtectionDomain;
-import java.security.SecureClassLoader;
 
 /**
  * A utility class to check whether a given class is in a package with restricted access e.g. "sun.*". These packages
@@ -160,61 +154,6 @@ class CheckRestrictedPackageInternal {
     }
 
     private static Class<?> getTesterClass() {
-        final ClassLoader loader = getTesterClassLoader();
-        try {
-            final Class<?> checkerClass = Class.forName(TESTER_CLASS_NAME, true, loader);
-            // Sanity check to ensure we didn't accidentally pick up the class from elsewhere
-            if(checkerClass.getClassLoader() != loader) {
-                throw new AssertionError(TESTER_CLASS_NAME + " was loaded from a different class loader");
-            }
-            return checkerClass;
-        } catch(ClassNotFoundException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    private static ClassLoader getTesterClassLoader() {
-        // We deliberately override loadClass instead of findClass so that we don't give a chance to finding this
-        // class already loaded anywhere else. Not that there's a big possibility for this, especially since the parent
-        // class loader is the bootstrap class loader, but still...
-        return new SecureClassLoader(null) {
-
-            @Override
-            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-                if(name.equals(TESTER_CLASS_NAME)) {
-                    final byte[] bytes = getTesterClassBytes();
-                    // Define the class with a protection domain that grants no permissions.
-                    Class<?> clazz = defineClass(name, bytes, 0, bytes.length, new ProtectionDomain(null,
-                            new Permissions()));
-                    if(resolve) {
-                        resolveClass(clazz);
-                    }
-                    return clazz;
-                }
-
-                return super.loadClass(name, resolve);
-            }
-        };
-    }
-
-    static byte[] getTesterClassBytes() {
-        try {
-            final InputStream in = CheckRestrictedPackage.class.getResourceAsStream("RestrictedPackageTester.class");
-            try {
-                final ByteArrayOutputStream out = new ByteArrayOutputStream(2048);
-                for(;;) {
-                    final int b = in.read();
-                    if(b == -1) {
-                        break;
-                    }
-                    out.write(b);
-                }
-                return out.toByteArray();
-            } finally {
-                in.close();
-            }
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
+        return ZeroPermissionsClassLoader.loadClass(TESTER_CLASS_NAME);
     }
 }
