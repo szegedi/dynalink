@@ -64,6 +64,11 @@ import org.dynalang.dynalink.support.TypeUtilities;
  * @author Attila Szegedi
  */
 final class ClassString {
+    /**
+     * An anonymous inner class used solely to represent the "type" of null values for method applicability checking.
+     */
+    static final Class<?> NULL_CLASS = (new Object() { /* Intentionally empty */ }).getClass();
+
     private final Class<?>[] classes;
     private int hashCode;
 
@@ -171,6 +176,9 @@ final class ClassString {
     }
 
     private static boolean canConvert(LinkerServices ls, Class<?> from, Class<?> to) {
+        if(from == NULL_CLASS && !to.isPrimitive()) {
+            return true;
+        }
         return ls == null ? TypeUtilities.isMethodInvocationConvertible(from, to) : ls.canConvert(from, to);
     }
 }
