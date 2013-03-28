@@ -128,15 +128,15 @@ abstract class FacetIntrospector {
 
 
     MethodHandle unreflectGetter(Field field) {
-        return editMethodHandle(PublicUnreflector.unreflectGetter(field));
+        return editMethodHandle(SafeUnreflector.unreflectGetter(field));
     }
 
     MethodHandle unreflectSetter(Field field) {
-        return editMethodHandle(PublicUnreflector.unreflectSetter(field));
+        return editMethodHandle(SafeUnreflector.unreflectSetter(field));
     }
 
     MethodHandle unreflect(Method method) {
-        return editMethodHandle(PublicUnreflector.unreflect(method));
+        return editMethodHandle(SafeUnreflector.unreflect(method));
     }
 
     /**
