@@ -176,8 +176,8 @@ final class ClassString {
     }
 
     private static boolean canConvert(LinkerServices ls, Class<?> from, Class<?> to) {
-        if(from == NULL_CLASS && !to.isPrimitive()) {
-            return true;
+        if(from == NULL_CLASS) {
+            return !to.isPrimitive();
         }
         return ls == null ? TypeUtilities.isMethodInvocationConvertible(from, to) : ls.canConvert(from, to);
     }
