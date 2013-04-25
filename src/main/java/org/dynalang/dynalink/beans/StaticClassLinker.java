@@ -112,7 +112,7 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
         }
 
         private static MethodHandle drop(MethodHandle mh) {
-            return MethodHandles.dropArguments(mh, 0, StaticClass.class);
+            return StaticClassIntrospector.dropReceiver(mh, StaticClass.class);
         }
 
         @Override
