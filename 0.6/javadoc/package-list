@@ -1,0 +1,5 @@
+org.dynalang.dynalink
+org.dynalang.dynalink.beans
+org.dynalang.dynalink.beans.sandbox
+org.dynalang.dynalink.linker
+org.dynalang.dynalink.support
