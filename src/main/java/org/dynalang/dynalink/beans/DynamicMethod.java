@@ -119,9 +119,7 @@ abstract class DynamicMethod {
     }
 
     private static boolean typeNameMatches(String typeName, Class<?> type) {
-        final int lastDot = typeName.lastIndexOf('.');
-        final String fullTypeName = type.getCanonicalName();
-        return lastDot != -1 && fullTypeName.endsWith(typeName.substring(lastDot)) || typeName.equals(fullTypeName);
+        return  typeName.equals(typeName.indexOf('.') == -1 ? type.getSimpleName() : type.getCanonicalName());
     }
 
     static String getClassAndMethodName(Class<?> clazz, String name) {
