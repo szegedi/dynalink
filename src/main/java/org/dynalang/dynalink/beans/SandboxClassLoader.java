@@ -51,9 +51,6 @@
 
 package org.dynalang.dynalink.beans;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ASM4;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Permissions;
@@ -64,6 +61,8 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ASM4;
 
 /**
  * A utility class that can load a class with specified name into an isolated zero-permissions protection domain. It can

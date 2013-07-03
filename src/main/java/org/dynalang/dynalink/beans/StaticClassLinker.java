@@ -55,9 +55,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import org.dynalang.dynalink.CallSiteDescriptor;
 import org.dynalang.dynalink.beans.GuardedInvocationComponent.ValidationType;
 import org.dynalang.dynalink.linker.GuardedInvocation;
@@ -99,20 +97,11 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
         private static DynamicMethod createConstructorMethod(Class<?> clazz) {
             if(clazz.isArray()) {
                 final MethodHandle boundArrayCtor = ARRAY_CTOR.bindTo(clazz.getComponentType());
-                return new SimpleDynamicMethod(drop(boundArrayCtor.asType(boundArrayCtor.type().changeReturnType(
-                        clazz))), clazz, "<init>");
+                return new SimpleDynamicMethod(StaticClassIntrospector.editConstructorMethodHandle(
+                        boundArrayCtor.asType(boundArrayCtor.type().changeReturnType(clazz))), clazz, "<init>");
             }
 
-            final Constructor<?>[] ctrs = clazz.getConstructors();
-            final List<MethodHandle> mhs = new ArrayList<>(ctrs.length);
-            for(int i = 0; i < ctrs.length; ++i) {
-                mhs.add(drop(SafeUnreflector.unreflectConstructor(ctrs[i])));
-            }
-            return createDynamicMethod(mhs, clazz, "<init>");
-        }
-
-        private static MethodHandle drop(MethodHandle mh) {
-            return StaticClassIntrospector.dropReceiver(mh, StaticClass.class);
+            return createDynamicMethod(Arrays.asList(clazz.getConstructors()), clazz, "<init>");
         }
 
         @Override
@@ -129,11 +118,10 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
             }
             final CallSiteDescriptor desc = request.getCallSiteDescriptor();
             final String op = desc.getNameToken(CallSiteDescriptor.OPERATOR);
-            final MethodType methodType = desc.getMethodType();
             if("new" == op && constructor != null) {
-                final MethodHandle ctorInvocation = constructor.getInvocation(methodType, linkerServices);
+                final MethodHandle ctorInvocation = constructor.getInvocation(desc, linkerServices);
                 if(ctorInvocation != null) {
-                    return new GuardedInvocation(ctorInvocation, getClassGuard(methodType));
+                    return new GuardedInvocation(ctorInvocation, getClassGuard(desc.getMethodType()));
                 }
             }
             return null;

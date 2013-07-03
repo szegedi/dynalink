@@ -94,18 +94,22 @@ public class TestOverloadedDynamicMethod extends TestCase {
         assertTrue(dm instanceof OverloadedDynamicMethod);
 
         // No zero-arg adds
-        assertNull(dm.getInvocation(MethodType.methodType(int.class, Object.class), null));
+        assertNull(getInvocation(dm, MethodType.methodType(int.class, Object.class), null));
 
         // No single-arg String add
         MethodHandle inv =
-                dm.getInvocation(MethodType.methodType(String.class, Object.class, String.class), linkerServices);
+                getInvocation(dm, MethodType.methodType(String.class, Object.class, String.class), linkerServices);
         assertNull(String.valueOf(inv), inv);
+    }
+
+    public static MethodHandle getInvocation(DynamicMethod dm, MethodType methodType, LinkerServices linkerServices) {
+        return dm.getInvocation(CallSiteDescriptorFactory.create(MethodHandles.publicLookup(), "", methodType), linkerServices);
     }
 
     public void testExactMatchSignature() throws Throwable {
         final DynamicMethod dm = linker.getDynamicMethod("add");
         // Two-arg String add should make a match
-        final MethodHandle mh = dm.getInvocation(MethodType.methodType(String.class, Object.class, String.class,
+        final MethodHandle mh = getInvocation(dm, MethodType.methodType(String.class, Object.class, String.class,
                 String.class), linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two strings
@@ -121,7 +125,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
     public void testVeryGenericSignature() throws Throwable {
         final DynamicMethod dm = linker.getDynamicMethod("add");
         // Two-arg String add should make a match
-        final MethodHandle mh = dm.getInvocation(MethodType.methodType(Object.class, Object.class, Object.class,
+        final MethodHandle mh = getInvocation(dm, MethodType.methodType(Object.class, Object.class, Object.class,
                 Object.class), linkerServices);
         assertNotNull(mh);
         // Must be able to invoke it with two Strings
@@ -144,7 +148,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
 
     public void testIntOrDouble() throws Throwable {
         final DynamicMethod dm = linker.getDynamicMethod("intOrDouble");
-        final MethodHandle mh = dm.getInvocation(MethodType.methodType(Object.class, Object.class, Object.class),
+        final MethodHandle mh = getInvocation(dm, MethodType.methodType(Object.class, Object.class, Object.class),
                 linkerServices);
         assertNotNull(mh);
         assertEquals("int", mh.invokeWithArguments(new Test1(), 1));
@@ -153,7 +157,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
 
     public void testStringOrDouble() throws Throwable {
         final DynamicMethod dm = linker.getDynamicMethod("stringOrDouble");
-        final MethodHandle mh = dm.getInvocation(MethodType.methodType(Object.class, Object.class, Object.class),
+        final MethodHandle mh = getInvocation(dm, MethodType.methodType(Object.class, Object.class, Object.class),
                 linkerServices);
         assertNotNull(mh);
         assertEquals("double", mh.invokeWithArguments(new Test1(), 1));
@@ -195,7 +199,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
         argList.add(String.class);
         argList.addAll(Arrays.asList(args));
 
-        assertEquals(retval, linker.getDynamicMethod("boo").getInvocation(MethodType.methodType(Object.class,
+        assertEquals(retval, getInvocation(linker.getDynamicMethod("boo"), MethodType.methodType(Object.class,
                 Collections.nCopies(args.length + 2, Object.class).toArray(new Class[0])), ls).invokeWithArguments(
                         argList));
     }
