@@ -53,7 +53,6 @@ package org.dynalang.dynalink.beans;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
-import sun.reflect.CallerSensitive;
 
 /**
  * Utility class that determines if a method or constructor is caller sensitive. It actually encapsulates two different
@@ -72,7 +71,7 @@ import sun.reflect.CallerSensitive;
  * functionality or performance.
  */
 public class CallerSensitiveDetector {
-
+    private static final String CALLER_SENSITIVE_CLASS_NAME = "sun.reflect.CallerSensitive";
     private static final DetectionStrategy DETECTION_STRATEGY = getDetectionStrategy();
 
     static boolean isCallerSensitive(AccessibleObject ao) {
@@ -87,12 +86,21 @@ public class CallerSensitiveDetector {
         }
     }
 
-    private abstract static class DetectionStrategy {
+    abstract static class DetectionStrategy {
         abstract boolean isCallerSensitive(AccessibleObject ao);
     }
 
-    private static class PrivilegedDetectionStrategy extends DetectionStrategy {
-        private static final Class<? extends Annotation> CALLER_SENSITIVE_ANNOTATION_CLASS = CallerSensitive.class;
+    static class PrivilegedDetectionStrategy extends DetectionStrategy {
+        private static final Class<? extends Annotation> CALLER_SENSITIVE_ANNOTATION_CLASS = getCallerSensitiveClass();
+
+        @SuppressWarnings("unchecked")
+        private static Class<? extends Annotation> getCallerSensitiveClass() {
+            try {
+                return (Class<? extends Annotation>)Class.forName(CALLER_SENSITIVE_CLASS_NAME);
+            } catch(ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         @Override
         boolean isCallerSensitive(AccessibleObject ao) {
@@ -100,8 +108,8 @@ public class CallerSensitiveDetector {
         }
     }
 
-    private static class UnprivilegedDetectionStrategy extends DetectionStrategy {
-        private static final String CALLER_SENSITIVE_ANNOTATION_STRING = "@sun.reflect.CallerSensitive()";
+    static class UnprivilegedDetectionStrategy extends DetectionStrategy {
+        private static final String CALLER_SENSITIVE_ANNOTATION_STRING = "@" + CALLER_SENSITIVE_CLASS_NAME + "()";
 
         @Override
         boolean isCallerSensitive(AccessibleObject o) {
