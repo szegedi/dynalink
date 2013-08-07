@@ -52,7 +52,6 @@
 package org.dynalang.dynalink.beans;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import org.dynalang.dynalink.beans.GuardedInvocationComponent.ValidationType;
 import org.dynalang.dynalink.support.Lookup;
@@ -71,7 +70,7 @@ class ClassLinker extends BeanLinker {
         setPropertyGetter("static", FOR_CLASS, ValidationType.EXACT_CLASS);
     }
 
-    private static final MethodHandle FOR_CLASS = new Lookup(MethodHandles.lookup()).findStatic(StaticClass.class,
-            "forClass", MethodType.methodType(StaticClass.class, Class.class));
+    private static final MethodHandle FOR_CLASS = Lookup.PUBLIC.findStatic(StaticClass.class, "forClass",
+            MethodType.methodType(StaticClass.class, Class.class));
 
 }
