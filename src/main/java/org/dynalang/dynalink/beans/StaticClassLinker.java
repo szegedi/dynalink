@@ -157,14 +157,16 @@ class StaticClassLinker implements TypeBasedGuardingDynamicLinker {
         return type == StaticClass.class;
     }
 
-    /*private*/ static final MethodHandle GET_CLASS = Lookup.PUBLIC.findVirtual(StaticClass.class,
-            "getRepresentedClass", MethodType.methodType(Class.class));
-
-    /*private*/ static final MethodHandle IS_CLASS = Lookup.findOwnStatic(MethodHandles.lookup(), "isClass",
-            Boolean.TYPE, Class.class, Object.class);
-
+    /*private*/ static final MethodHandle GET_CLASS;
+    /*private*/ static final MethodHandle IS_CLASS;
     /*private*/ static final MethodHandle ARRAY_CTOR = Lookup.PUBLIC.findStatic(Array.class, "newInstance",
             MethodType.methodType(Object.class, Class.class, int.class));
+
+    static {
+        final Lookup lookup = new Lookup(MethodHandles.lookup());
+        GET_CLASS = lookup.findVirtual(StaticClass.class, "getRepresentedClass", MethodType.methodType(Class.class));
+        IS_CLASS = lookup.findOwnStatic("isClass", Boolean.TYPE, Class.class, Object.class);
+    }
 
     @SuppressWarnings("unused")
     private static boolean isClass(Class<?> clazz, Object obj) {
