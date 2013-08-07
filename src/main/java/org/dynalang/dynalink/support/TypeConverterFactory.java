@@ -55,6 +55,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.WrongMethodTypeException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.LinkedList;
 import java.util.List;
 import org.dynalang.dynalink.linker.ConversionComparator;
@@ -78,7 +80,7 @@ public class TypeConverterFactory {
     private final ClassValue<ClassMap<MethodHandle>> converterMap = new ClassValue<ClassMap<MethodHandle>>() {
         @Override
         protected ClassMap<MethodHandle> computeValue(final Class<?> sourceType) {
-            return new ClassMap<MethodHandle>(sourceType.getClassLoader()) {
+            return new ClassMap<MethodHandle>(getClassLoader(sourceType)) {
                 @Override
                 protected MethodHandle computeValue(Class<?> targetType) {
                     try {
@@ -96,7 +98,7 @@ public class TypeConverterFactory {
     private final ClassValue<ClassMap<MethodHandle>> converterIdentityMap = new ClassValue<ClassMap<MethodHandle>>() {
         @Override
         protected ClassMap<MethodHandle> computeValue(final Class<?> sourceType) {
-            return new ClassMap<MethodHandle>(sourceType.getClassLoader()) {
+            return new ClassMap<MethodHandle>(getClassLoader(sourceType)) {
                 @Override
                 protected MethodHandle computeValue(Class<?> targetType) {
                     if(!canAutoConvert(sourceType, targetType)) {
@@ -110,6 +112,15 @@ public class TypeConverterFactory {
             };
         }
     };
+
+    private static final ClassLoader getClassLoader(final Class<?> clazz) {
+        return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            @Override
+            public ClassLoader run() {
+                return clazz.getClassLoader();
+            }
+        });
+    }
 
     /**
      * Creates a new type converter factory from the available {@link GuardingTypeConverterFactory} instances.
