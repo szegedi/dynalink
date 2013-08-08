@@ -3,7 +3,7 @@
   <groupId>org.dynalang</groupId>
   <artifactId>dynalink</artifactId>
   <name>Dynalink</name>
-  <version>0.6</version>
+  <version>0.7</version>
   <packaging>jar</packaging>
   <description>Dynalink is an invokedynamic-based high-level linking and metaobject protocol library. It enables creation of languages on the JVM that can easily interoperate with plain Java objects and each other.</description>
   <url>http://szegedi.github.com/dynalink</url>
