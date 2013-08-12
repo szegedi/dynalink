@@ -123,7 +123,7 @@ public abstract class ClassMap<T> {
             public ClassLoader run() {
                 return clazz.getClassLoader();
             }
-        });
+        }, ClassLoaderGetterContextProvider.GET_CLASS_LOADER_CONTEXT);
 
         // If allowed to strongly reference, put it in the fast map
         if(Guards.canReferenceDirectly(classLoader, clazzLoader)) {

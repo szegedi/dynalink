@@ -67,6 +67,7 @@ import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.support.AutoDiscovery;
 import org.dynalang.dynalink.support.BottomGuardingDynamicLinker;
+import org.dynalang.dynalink.support.ClassLoaderGetterContextProvider;
 import org.dynalang.dynalink.support.CompositeGuardingDynamicLinker;
 import org.dynalang.dynalink.support.CompositeTypeBasedGuardingDynamicLinker;
 import org.dynalang.dynalink.support.LinkerServicesImpl;
@@ -283,7 +284,7 @@ public class DynamicLinkerFactory {
             public ClassLoader run() {
                 return Thread.currentThread().getContextClassLoader();
             }
-        });
+        }, ClassLoaderGetterContextProvider.GET_CLASS_LOADER_CONTEXT);
     }
 
     private static void addClasses(Set<Class<? extends GuardingDynamicLinker>> knownLinkerClasses,
