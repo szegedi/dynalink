@@ -59,6 +59,7 @@ import org.dynalang.dynalink.linker.GuardedInvocation;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.support.Lookup;
+import org.dynalang.dynalink.support.TypeUtilities;
 
 /**
  * Tests for the {@link SimpleDynamicMethod}.
@@ -125,7 +126,6 @@ public class TestSimpleDynamicMethod extends TestCase {
 
         @Override
         public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
-            fail(); // Not supposed to be called
             return null;
         }
     }
@@ -319,41 +319,19 @@ public class TestSimpleDynamicMethod extends TestCase {
         final MethodHandle mh = getTest1XvMethod();
         final MethodType callSiteType = MethodType.methodType(int.class, Object.class, Object.class, Object.class);
 
-        final int[] converterInvoked = new int[1];
-
         LinkerServices ls = new MockLinkerServices() {
             @Override
             public boolean canConvert(Class<?> from, Class<?> to) {
-                assertSame(Object.class, from);
-                assertSame(int[].class, to);
-                return true;
+                return TypeUtilities.isMethodInvocationConvertible(from, to);
             }
 
             @Override
             public MethodHandle asType(MethodHandle handle, MethodType fromType) {
-                assertEquals(callSiteType, fromType);
-                int c = ++converterInvoked[0];
-                switch(c) {
-                    case 1: {
-                        assertEqualHandle(handle, mh.asFixedArity());
-                        break;
-                    }
-                    case 2: {
-                        assertNotSame(handle, mh);
-                        assertEquals(MethodType.methodType(int.class, Test1.class, int.class, int.class), handle.type());
-                        break;
-                    }
-                    default: {
-                        fail();
-                        break;
-                    }
-                }
                 return handle.asType(fromType);
             }
         };
         MethodHandle newHandle = SingleDynamicMethod.getInvocation(mh, callSiteType, ls);
         assertNotSame(newHandle, mh);
-        assertEquals(2, converterInvoked[0]);
         assertEquals(3, newHandle.invokeWithArguments(new Test1(), 1, 2));
         assertEquals(6, newHandle.invokeWithArguments(new Test1(), 1, new int[] { 2, 3 }));
     }
@@ -362,42 +340,19 @@ public class TestSimpleDynamicMethod extends TestCase {
         final MethodHandle mh = getTest1SvMethod();
         final MethodType callSiteType = MethodType.methodType(String.class, Object.class, Object.class, Object.class);
 
-        final int[] converterInvoked = new int[1];
-
         LinkerServices ls = new MockLinkerServices() {
             @Override
             public boolean canConvert(Class<?> from, Class<?> to) {
-                assertSame(Object.class, from);
-                assertSame(String[].class, to);
-                return true;
+                return TypeUtilities.isMethodInvocationConvertible(from, to);
             }
 
             @Override
             public MethodHandle asType(MethodHandle handle, MethodType fromType) {
-                assertEquals(callSiteType, fromType);
-                int c = ++converterInvoked[0];
-                switch(c) {
-                    case 1: {
-                        assertEqualHandle(handle, mh.asFixedArity());
-                        break;
-                    }
-                    case 2: {
-                        assertNotSame(handle, mh);
-                        assertEquals(MethodType.methodType(String.class, Test1.class, String.class, String.class),
-                                handle.type());
-                        break;
-                    }
-                    default: {
-                        fail();
-                        break;
-                    }
-                }
                 return handle.asType(fromType);
             }
         };
         MethodHandle newHandle = SingleDynamicMethod.getInvocation(mh, callSiteType, ls);
         assertNotSame(newHandle, mh);
-        assertEquals(2, converterInvoked[0]);
         assertEquals("ab", newHandle.invokeWithArguments(new Test1(), "a", "b"));
         assertEquals("abc", newHandle.invokeWithArguments(new Test1(), "a", new String[] { "b", "c" }));
     }
