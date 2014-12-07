@@ -131,7 +131,7 @@ public class TestBeansLinker extends TestCase {
 
     private static GuardedInvocation getGuardedInvocation(GuardingDynamicLinker linker, CallSiteDescriptor descriptor,
             LinkerServices linkerServices, Object... args) throws Exception {
-        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, false, args), linkerServices);
+        return linker.getGuardedInvocation(new LinkRequestImpl(descriptor, null, false, args), linkerServices);
     }
 
     public void testInvalidName() throws Exception {

@@ -86,7 +86,7 @@ public class TestMonomorphicCallSite extends TestCase {
     public static void testSetGuardless() {
         final MethodHandle mh = MethodHandles.identity(Object.class);
         final MonomorphicCallSite mcs = createCallSite(mh.type());
-        mcs.relink(new GuardedInvocation(mh, null), null);
+        mcs.relink(new GuardedInvocation(mh, null, null), null);
         assertSame(mh, mcs.getTarget());
     }
 

@@ -108,7 +108,6 @@ import org.dynalang.dynalink.support.RuntimeContextLinkRequestImpl;
  * @author Attila Szegedi
  */
 public class DynamicLinker {
-
     private static final String CLASS_NAME = DynamicLinker.class.getName();
     private static final String RELINK_METHOD_NAME = "relink";
 
@@ -192,11 +191,10 @@ public class DynamicLinker {
         final boolean unstableDetectionEnabled = unstableRelinkThreshold > 0;
         final boolean callSiteUnstable = unstableDetectionEnabled && relinkCount >= unstableRelinkThreshold;
         final LinkRequest linkRequest =
-                runtimeContextArgCount == 0 ? new LinkRequestImpl(callSiteDescriptor, callSiteUnstable, arguments)
-                        : new RuntimeContextLinkRequestImpl(callSiteDescriptor, callSiteUnstable, arguments,
-                                runtimeContextArgCount);
+                runtimeContextArgCount == 0 ?
+                        new LinkRequestImpl(callSiteDescriptor, callSite, callSiteUnstable, arguments) :
+                        new RuntimeContextLinkRequestImpl(callSiteDescriptor, callSite, callSiteUnstable, arguments, runtimeContextArgCount);
 
-        // Find a suitable method handle with a guard
         GuardedInvocation guardedInvocation = linkerServices.getGuardedInvocation(linkRequest);
 
         // None found - throw an exception
