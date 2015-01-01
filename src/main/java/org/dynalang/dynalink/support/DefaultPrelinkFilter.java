@@ -51,63 +51,21 @@
 
 package org.dynalang.dynalink.support;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
-import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
+import org.dynalang.dynalink.GuardedInvocationFilter;
 import org.dynalang.dynalink.linker.GuardedInvocation;
-import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 
+
 /**
- * Default implementation of the {@link LinkerServices} interface.
- *
+ * Default implementation of a pre-link filter that does nothing except forward to
+ * {@link GuardedInvocation#asType(LinkerServices, java.lang.invoke.MethodType)}.
  * @author Attila Szegedi
+ * @version $Id: $
  */
-public class LinkerServicesImpl implements LinkerServices {
-
-    private final TypeConverterFactory typeConverterFactory;
-    private final GuardingDynamicLinker topLevelLinker;
-
-    /**
-     * Creates a new linker services object.
-     *
-     * @param typeConverterFactory the type converter factory exposed by the services.
-     * @param topLevelLinker the top level linker used by the services.
-     */
-    public LinkerServicesImpl(final TypeConverterFactory typeConverterFactory,
-            final GuardingDynamicLinker topLevelLinker) {
-        this.typeConverterFactory = typeConverterFactory;
-        this.topLevelLinker = topLevelLinker;
-    }
-
+public class DefaultPrelinkFilter implements GuardedInvocationFilter {
     @Override
-    public boolean canConvert(Class<?> from, Class<?> to) {
-        return typeConverterFactory.canConvert(from, to);
-    }
-
-    @Override
-    public MethodHandle asType(MethodHandle handle, MethodType fromType) {
-        return typeConverterFactory.asType(handle, fromType);
-    }
-
-    @Override
-    public MethodHandle asTypeLosslessReturn(MethodHandle handle, MethodType fromType) {
-        return Implementation.asTypeLosslessReturn(this, handle, fromType);
-    }
-
-    @Override
-    public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
-        return typeConverterFactory.getTypeConverter(sourceType, targetType);
-    }
-
-    @Override
-    public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
-        return typeConverterFactory.compareConversion(sourceType, targetType1, targetType2);
-    }
-
-    @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest) throws Exception {
-        return topLevelLinker.getGuardedInvocation(linkRequest, this);
+    public GuardedInvocation filter(GuardedInvocation inv, LinkRequest request, LinkerServices linkerServices) {
+        return inv.asType(linkerServices, request.getCallSiteDescriptor().getMethodType());
     }
 }

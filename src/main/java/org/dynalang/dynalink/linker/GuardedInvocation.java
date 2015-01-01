@@ -244,6 +244,20 @@ public class GuardedInvocation {
     }
 
     /**
+     * Changes the type of the invocation, as if {@link LinkerServices#asTypeLosslessReturn(MethodHandle, MethodType)} was
+     * applied to its invocation and {@link LinkerServices#asType(MethodHandle, MethodType)} applied to its guard, if it
+     * has one (with return type changed to boolean, and parameter count potentially truncated for the guard). If the
+     * invocation doesn't change its type, returns this object.
+     * @param linkerServices the linker services to use for the conversion
+     * @param newType the new type of the invocation.
+     * @return a guarded invocation with the new type applied to it.
+     */
+    public GuardedInvocation asTypeSafeReturn(LinkerServices linkerServices, MethodType newType) {
+        return replaceMethodsOrThis(linkerServices.asTypeLosslessReturn(invocation, newType), guard == null ? null :
+            Guards.asType(linkerServices, guard, newType));
+    }
+
+    /**
      * Changes the type of the invocation, as if {@link MethodHandle#asType(MethodType)} was applied to its invocation
      * and its guard, if it has one (with return type changed to boolean for guard). If the invocation already is of the
      * required type, returns this object.

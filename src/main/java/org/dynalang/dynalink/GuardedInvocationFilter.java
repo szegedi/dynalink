@@ -49,65 +49,25 @@
        ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package org.dynalang.dynalink.support;
+package org.dynalang.dynalink;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
-import org.dynalang.dynalink.linker.ConversionComparator.Comparison;
 import org.dynalang.dynalink.linker.GuardedInvocation;
-import org.dynalang.dynalink.linker.GuardingDynamicLinker;
 import org.dynalang.dynalink.linker.LinkRequest;
 import org.dynalang.dynalink.linker.LinkerServices;
 
 /**
- * Default implementation of the {@link LinkerServices} interface.
- *
- * @author Attila Szegedi
+ * Interface for objects that are used to transform one guarded invocation into another one. Typical usage is for
+ * implementing {@link DynamicLinkerFactory#setPrelinkFilter(GuardedInvocationFilter) pre-link filters}.
  */
-public class LinkerServicesImpl implements LinkerServices {
-
-    private final TypeConverterFactory typeConverterFactory;
-    private final GuardingDynamicLinker topLevelLinker;
-
+public interface GuardedInvocationFilter {
     /**
-     * Creates a new linker services object.
-     *
-     * @param typeConverterFactory the type converter factory exposed by the services.
-     * @param topLevelLinker the top level linker used by the services.
+     * Given a guarded invocation, return a potentially different guarded invocation.
+     * @param inv the original guarded invocation. Null is never passed.
+     * @param linkRequest the link request for which the invocation was generated (usually by some linker).
+     * @param linkerServices the linker services that can be used during creation of a new invocation.
+     * @return either the passed guarded invocation or a different one, with the difference usually determined based on
+     * information in the link request and the differing invocation created with the assistance of the linker services.
+     * Whether or not {@code null} is an accepted return value is dependent on the user of the filter.
      */
-    public LinkerServicesImpl(final TypeConverterFactory typeConverterFactory,
-            final GuardingDynamicLinker topLevelLinker) {
-        this.typeConverterFactory = typeConverterFactory;
-        this.topLevelLinker = topLevelLinker;
-    }
-
-    @Override
-    public boolean canConvert(Class<?> from, Class<?> to) {
-        return typeConverterFactory.canConvert(from, to);
-    }
-
-    @Override
-    public MethodHandle asType(MethodHandle handle, MethodType fromType) {
-        return typeConverterFactory.asType(handle, fromType);
-    }
-
-    @Override
-    public MethodHandle asTypeLosslessReturn(MethodHandle handle, MethodType fromType) {
-        return Implementation.asTypeLosslessReturn(this, handle, fromType);
-    }
-
-    @Override
-    public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
-        return typeConverterFactory.getTypeConverter(sourceType, targetType);
-    }
-
-    @Override
-    public Comparison compareConversion(Class<?> sourceType, Class<?> targetType1, Class<?> targetType2) {
-        return typeConverterFactory.compareConversion(sourceType, targetType1, targetType2);
-    }
-
-    @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest) throws Exception {
-        return topLevelLinker.getGuardedInvocation(linkRequest, this);
-    }
+    public GuardedInvocation filter(GuardedInvocation inv, LinkRequest linkRequest, LinkerServices linkerServices);
 }

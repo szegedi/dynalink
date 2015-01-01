@@ -90,6 +90,11 @@ public class TestBeansLinker extends TestCase {
             }
 
             @Override
+            public MethodHandle asTypeLosslessReturn(MethodHandle handle, MethodType fromType) {
+                throw new AssertionFailedError();
+            }
+
+            @Override
             public GuardedInvocation getGuardedInvocation(LinkRequest lreq) throws Exception {
                 throw new AssertionFailedError();
             }

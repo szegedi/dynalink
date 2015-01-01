@@ -128,6 +128,11 @@ public class TestSimpleDynamicMethod extends TestCase {
         public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
             return null;
         }
+
+        @Override
+        public MethodHandle asTypeLosslessReturn(MethodHandle handle, MethodType fromType) {
+            return Implementation.asTypeLosslessReturn(this, handle, fromType);
+        }
     }
 
     public void testExactArgsOnFixArgs() {
