@@ -64,6 +64,7 @@ import org.dynalang.dynalink.DynamicLinkerFactory;
 import org.dynalang.dynalink.LinkerServicesFactory;
 import org.dynalang.dynalink.MonomorphicCallSite;
 import org.dynalang.dynalink.linker.GuardedInvocation;
+import org.dynalang.dynalink.linker.GuardedTypeConversion;
 import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
 import org.dynalang.dynalink.linker.LinkerServices;
 import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
@@ -180,12 +181,12 @@ public class TestOverloadedDynamicMethod extends TestCase {
         final LinkerServices ls = new LinkerServicesImpl(new TypeConverterFactory(Collections.singleton(
                 new GuardingTypeConverterFactory() {
                     @Override
-                    public GuardedInvocation convertToType(Class<?> sourceType, Class<?> targetType) {
+                    public GuardedTypeConversion convertToType(Class<?> sourceType, Class<?> targetType) {
                         if(targetType == int.class) {
-                            return new GuardedInvocation(new Lookup(MethodHandles.publicLookup()).findVirtual(
+                            return new GuardedTypeConversion(new GuardedInvocation(new Lookup(MethodHandles.publicLookup()).findVirtual(
                                     Double.class, "intValue", MethodType.methodType(int.class)).asType(
                                             MethodType.methodType(int.class, sourceType)), Guards.isOfClass(
-                                                    Double.class, MethodType.methodType(boolean.class, sourceType)));
+                                                    Double.class, MethodType.methodType(boolean.class, sourceType))), true);
                         }
                         return null;
                     }

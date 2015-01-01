@@ -51,32 +51,46 @@
 
 package org.dynalang.dynalink.linker;
 
-import org.dynalang.dynalink.support.TypeUtilities;
-
 /**
- * Optional interface that can be implemented by {@link GuardingDynamicLinker} implementations to provide
- * language-runtime specific implicit type conversion capabilities. Note that if you implement this interface, you will
- * very likely want to implement {@link ConversionComparator} interface too, as your additional language-specific
- * conversions, in absence of a strategy for prioritizing these conversions, will cause more ambiguity in selecting the
- * correct overload when trying to link to an overloaded POJO method.
- *
- * @author Attila Szegedi
+ * Represents a tuple of a {@link GuardedInvocation} used for a type conversion, and a boolean flag
+ * representing whether the conversion is cacheable. Normally, guarded invocation objects representing type
+ * conversion method handles are cacheable (that is, they can be reused across different call sites). However,
+ * type conversions that involve generating code (e.g. type conversions from dynamic language's callable
+ * objects to Java Single Abstract Method (SAM) classes through on-the-fly creation of proxy classes) might
+ * need to be bound to the protection domain of the call site, and as such can't be cached and reused. The
+ * expectation is that most conversions (all the ones that don't involve generating code) are cacheable, though.
  */
-public interface GuardingTypeConverterFactory {
+public class GuardedTypeConversion {
+    private final GuardedInvocation conversionInvocation;
+    private final boolean cacheable;
+
     /**
-     * Returns a guarded type conversion that receives an Object of the specified source type and returns an Object
-     * converted to the specified target type. The type of the invocation is targetType(sourceType), while the type of
-     * the guard is boolean(sourceType). Note that this will never be invoked for type conversions allowed by the JLS
-     * 5.3 "Method Invocation Conversion", see {@link TypeUtilities#isMethodInvocationConvertible(Class, Class)} for
-     * details. An implementation can assume it is never requested to produce a converter for these conversions.
-     *
-     * @param sourceType source type
-     * @param targetType the target type.
-     * @return a guarded type conversion that contains a guarded invocation that can take an object (if it passes guard)
-     * and return another object that is its representation coerced into the target type. In case the factory is certain
-     * it is unable to handle a conversion, it can return null. In case the factory is certain that it can always handle
-     * the conversion, it can return an unconditional invocation (one whose guard is null).
-     * @throws Exception if there was an error during creation of the converter
+     * Creates a new guarded type conversion.
+     * @param conversionInvocation the guarded invocation representing the conditional type conversion.
+     * @param cacheable if true, this type conversion invocation is cacheable. The framework is allowed to
+     * keep it around for subsequent linking of type conversions. If false, this type conversion is not
+     * cacheable. It can be used to satisfy exactly one linking of a type conversion.
      */
-    public GuardedTypeConversion convertToType(Class<?> sourceType, Class<?> targetType) throws Exception;
+    public GuardedTypeConversion(final GuardedInvocation conversionInvocation, final boolean cacheable) {
+        this.conversionInvocation = conversionInvocation;
+        this.cacheable = cacheable;
+    }
+
+    /**
+     * Returns the guarded invocation representing the conditional type conversion.
+     * @return the guarded invocation representing the conditional type conversion.
+     */
+    public GuardedInvocation getConversionInvocation() {
+        return conversionInvocation;
+    }
+
+    /**
+     * Returns whether this type conversion invocation is cacheable. The framework is allowed to keep it
+     * around for subsequent linking of type conversions. If false, this type conversion is not cacheable. It
+     * can be used to satisfy exactly one linking of a type conversion.
+     * @return true if the conversion is cacheable, false otherwise.
+     */
+    public boolean isCacheable() {
+        return cacheable;
+    }
 }
