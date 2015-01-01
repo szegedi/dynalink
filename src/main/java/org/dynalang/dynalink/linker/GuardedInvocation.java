@@ -308,20 +308,21 @@ public class GuardedInvocation {
      * @return a composite method handle.
      */
     public MethodHandle compose(MethodHandle fallback) {
-        return compose(fallback, fallback);
+        return compose(fallback, fallback, fallback);
     }
 
     /**
      * Composes the invocation, switchpoint, and the guard into a composite method handle that knows how to fall back.
      * @param switchpointFallback the fallback method handle in case switchpoint is invalidated.
      * @param guardFallback the fallback method handle in case guard returns false.
+     * @param catchFallback the fallback method in case the exception handler triggers
      * @return a composite method handle.
      */
-    public MethodHandle compose(MethodHandle switchpointFallback, MethodHandle guardFallback) {
+    public MethodHandle compose(MethodHandle guardFallback, MethodHandle switchpointFallback, MethodHandle catchFallback) {
         final MethodHandle guarded =
                 guard == null ? invocation : MethodHandles.guardWithTest(guard, invocation, guardFallback);
         final MethodHandle catchGuarded = exception == null ? guarded : MethodHandles.catchException(guarded, exception,
-                MethodHandles.dropArguments(switchpointFallback, 0, exception));
+                MethodHandles.dropArguments(catchFallback, 0, exception));
         return switchPoint == null ? catchGuarded : switchPoint.guardWithTest(catchGuarded, switchpointFallback);
     }
 
