@@ -235,6 +235,14 @@ public class TypeUtilities {
         return false;
     }
 
+    /**
+     * Determines whether a type can be converted to another without losing any
+     * precision.
+     *
+     * @param sourceType the source type
+     * @param targetType the target type
+     * @return true if lossless conversion is possible
+     */
     public static boolean isConvertibleWithoutLoss(final Class<?> sourceType, final Class<?> targetType) {
         if(targetType.isAssignableFrom(sourceType)) {
             return true;
@@ -250,14 +258,8 @@ public class TypeUtilities {
             assert WRAPPER_TYPES.get(sourceType) != null : sourceType.getName();
             return targetType.isAssignableFrom(WRAPPER_TYPES.get(sourceType));
         }
-        if(targetType.isPrimitive()) {
-            if(targetType == void.class) {
-                return false; // Void can't represent anything losslessly
-            }
-            final Class<?> unboxedCallSiteType = PRIMITIVE_TYPES.get(sourceType);
-            return unboxedCallSiteType != null
-                    && (unboxedCallSiteType == targetType || isProperPrimitiveLosslessSubtype(unboxedCallSiteType, targetType));
-        }
+        // Can't convert from any non-primitive type to any primitive type without data loss because of null.
+        // Also, can't convert non-assignable reference types.
         return false;
     }
     /**
