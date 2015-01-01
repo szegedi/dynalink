@@ -1,5 +1,12 @@
 /*
-   Copyright 2009-2013 Attila Szegedi
+ * This file is available under and governed by the GNU General Public
+ * License version 2 only, as published by the Free Software Foundation.
+ * However, the following notice accompanied the original version of this
+ * file, and Oracle licenses the original version of this file under the BSD
+ * license:
+ */
+/*
+   Copyright 2014 Attila Szegedi
 
    Licensed under both the Apache License, Version 2.0 (the "Apache License")
    and the BSD License (the "BSD License"), with licensee being free to
@@ -49,17 +56,20 @@
        ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
-import java.util.LinkedList;
-import org.dynalang.dynalink.linker.GuardingDynamicLinker;
-import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
-import org.dynalang.dynalink.linker.LinkerServices;
-import org.dynalang.dynalink.support.LinkerServicesImpl;
-import org.dynalang.dynalink.support.TypeConverterFactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 
-public class LinkerServicesFactory {
-    public static LinkerServices getLinkerServices(GuardingDynamicLinker linker) {
-        return new LinkerServicesImpl(new TypeConverterFactory(new LinkedList<GuardingTypeConverterFactory>(), null), linker);
-    }
+/**
+ * Interface for objects representing a strategy for converting a method handle to a new type.
+ */
+public interface MethodTypeConversionStrategy {
+    /**
+     * Converts a method handle to a new type.
+     * @param target target method handle
+     * @param newType new type
+     * @return target converted to the new type.
+     */
+    public MethodHandle asType(final MethodHandle target, final MethodType newType);
 }
