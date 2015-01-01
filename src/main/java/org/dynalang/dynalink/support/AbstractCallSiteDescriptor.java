@@ -74,7 +74,7 @@ public abstract class AbstractCallSiteDescriptor implements CallSiteDescriptor {
    }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof CallSiteDescriptor && equals((CallSiteDescriptor)obj);
     }
 
@@ -83,7 +83,7 @@ public abstract class AbstractCallSiteDescriptor implements CallSiteDescriptor {
      * @param csd the other call site descriptor.
      * @return true if they are equal.
      */
-    public boolean equals(CallSiteDescriptor csd) {
+    public boolean equals(final CallSiteDescriptor csd) {
         if(csd == null) {
             return false;
         }
@@ -133,7 +133,7 @@ public abstract class AbstractCallSiteDescriptor implements CallSiteDescriptor {
         return l +  c - 1;
     }
 
-    private StringBuilder appendName(StringBuilder b) {
+    private StringBuilder appendName(final StringBuilder b) {
         b.append(getNameToken(0));
         final int c = getNameTokenCount();
         for(int i = 1; i < c; ++i) {
@@ -142,7 +142,7 @@ public abstract class AbstractCallSiteDescriptor implements CallSiteDescriptor {
         return b;
     }
 
-    private static boolean lookupsEqual(Lookup l1, Lookup l2) {
+    private static boolean lookupsEqual(final Lookup l1, final Lookup l2) {
         if(l1 == l2) {
             return true;
         }

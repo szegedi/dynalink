@@ -78,7 +78,7 @@ public abstract class ClassMap<T> {
      *
      * @param classLoader the classloader that determines strong referenceability.
      */
-    protected ClassMap(ClassLoader classLoader) {
+    protected ClassMap(final ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 

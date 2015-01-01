@@ -67,7 +67,7 @@ import org.dynalang.dynalink.linker.LinkerServices;
 abstract class DynamicMethod {
     private final String name;
 
-    DynamicMethod(String name) {
+    DynamicMethod(final String name) {
         this.name = name;
     }
 
@@ -106,7 +106,7 @@ abstract class DynamicMethod {
      */
     abstract boolean contains(SingleDynamicMethod method);
 
-    static String getClassAndMethodName(Class<?> clazz, String name) {
+    static String getClassAndMethodName(final Class<?> clazz, final String name) {
         final String clazzName = clazz.getCanonicalName();
         return (clazzName == null ? clazz.getName() : clazzName) + "." + name;
     }

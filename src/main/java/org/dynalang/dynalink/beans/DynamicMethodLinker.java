@@ -67,12 +67,12 @@ import org.dynalang.dynalink.support.Guards;
  */
 class DynamicMethodLinker implements TypeBasedGuardingDynamicLinker {
     @Override
-    public boolean canLinkType(Class<?> type) {
+    public boolean canLinkType(final Class<?> type) {
         return DynamicMethod.class.isAssignableFrom(type);
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest linkRequest, LinkerServices linkerServices) {
+    public GuardedInvocation getGuardedInvocation(final LinkRequest linkRequest, final LinkerServices linkerServices) {
         final Object receiver = linkRequest.getReceiver();
         if(!(receiver instanceof DynamicMethod)) {
             return null;

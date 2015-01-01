@@ -73,7 +73,7 @@ class MaximallySpecific {
      * @param varArgs whether to assume the methods are varargs
      * @return the list of maximally specific methods.
      */
-    static List<SingleDynamicMethod> getMaximallySpecificMethods(List<SingleDynamicMethod> methods, boolean varArgs) {
+    static List<SingleDynamicMethod> getMaximallySpecificMethods(final List<SingleDynamicMethod> methods, final boolean varArgs) {
         return getMaximallySpecificSingleDynamicMethods(methods, varArgs, null, null);
     }
 
@@ -84,7 +84,7 @@ class MaximallySpecific {
     private static final MethodTypeGetter<MethodHandle> METHOD_HANDLE_TYPE_GETTER =
             new MethodTypeGetter<MethodHandle>() {
         @Override
-        MethodType getMethodType(MethodHandle t) {
+        MethodType getMethodType(final MethodHandle t) {
             return t.type();
         }
     };
@@ -92,7 +92,7 @@ class MaximallySpecific {
     private static final MethodTypeGetter<SingleDynamicMethod> DYNAMIC_METHOD_TYPE_GETTER =
             new MethodTypeGetter<SingleDynamicMethod>() {
         @Override
-        MethodType getMethodType(SingleDynamicMethod t) {
+        MethodType getMethodType(final SingleDynamicMethod t) {
             return t.getMethodType();
         }
     };
@@ -106,8 +106,8 @@ class MaximallySpecific {
       * @param argTypes concrete argument types for the invocation
       * @return the list of maximally specific method handles.
       */
-     static List<MethodHandle> getMaximallySpecificMethodHandles(List<MethodHandle> methods, boolean varArgs,
-             Class<?>[] argTypes, LinkerServices ls) {
+     static List<MethodHandle> getMaximallySpecificMethodHandles(final List<MethodHandle> methods, final boolean varArgs,
+             final Class<?>[] argTypes, final LinkerServices ls) {
          return getMaximallySpecificMethods(methods, varArgs, argTypes, ls, METHOD_HANDLE_TYPE_GETTER);
      }
 
@@ -120,8 +120,8 @@ class MaximallySpecific {
       * @param argTypes concrete argument types for the invocation
       * @return the list of maximally specific methods.
       */
-     static List<SingleDynamicMethod> getMaximallySpecificSingleDynamicMethods(List<SingleDynamicMethod> methods,
-             boolean varArgs, Class<?>[] argTypes, LinkerServices ls) {
+     static List<SingleDynamicMethod> getMaximallySpecificSingleDynamicMethods(final List<SingleDynamicMethod> methods,
+             final boolean varArgs, final Class<?>[] argTypes, final LinkerServices ls) {
          return getMaximallySpecificMethods(methods, varArgs, argTypes, ls, DYNAMIC_METHOD_TYPE_GETTER);
      }
 
@@ -134,16 +134,16 @@ class MaximallySpecific {
      * @param argTypes concrete argument types for the invocation
      * @return the list of maximally specific methods.
      */
-    private static <T> List<T> getMaximallySpecificMethods(List<T> methods, boolean varArgs,
-            Class<?>[] argTypes, LinkerServices ls, MethodTypeGetter<T> methodTypeGetter) {
+    private static <T> List<T> getMaximallySpecificMethods(final List<T> methods, final boolean varArgs,
+            final Class<?>[] argTypes, final LinkerServices ls, final MethodTypeGetter<T> methodTypeGetter) {
         if(methods.size() < 2) {
             return methods;
         }
         final LinkedList<T> maximals = new LinkedList<>();
-        for(T m: methods) {
+        for(final T m: methods) {
             final MethodType methodType = methodTypeGetter.getMethodType(m);
             boolean lessSpecific = false;
-            for(Iterator<T> maximal = maximals.iterator(); maximal.hasNext();) {
+            for(final Iterator<T> maximal = maximals.iterator(); maximal.hasNext();) {
                 final T max = maximal.next();
                 switch(isMoreSpecific(methodType, methodTypeGetter.getMethodType(max), varArgs, argTypes, ls)) {
                     case TYPE_1_BETTER: {
@@ -170,8 +170,8 @@ class MaximallySpecific {
         return maximals;
     }
 
-    private static Comparison isMoreSpecific(MethodType t1, MethodType t2, boolean varArgs, Class<?>[] argTypes,
-            LinkerServices ls) {
+    private static Comparison isMoreSpecific(final MethodType t1, final MethodType t2, final boolean varArgs, final Class<?>[] argTypes,
+            final LinkerServices ls) {
         final int pc1 = t1.parameterCount();
         final int pc2 = t2.parameterCount();
         assert varArgs || (pc1 == pc2) && (argTypes == null || argTypes.length == pc1);
@@ -209,7 +209,7 @@ class MaximallySpecific {
         return Comparison.INDETERMINATE;
     }
 
-    private static Comparison compare(Class<?> c1, Class<?> c2, Class<?>[] argTypes, int i, LinkerServices cmp) {
+    private static Comparison compare(final Class<?> c1, final Class<?> c2, final Class<?>[] argTypes, final int i, final LinkerServices cmp) {
         if(cmp != null) {
             final Comparison c = cmp.compareConversion(argTypes[i], c1, c2);
             if(c != Comparison.INDETERMINATE) {
@@ -224,7 +224,7 @@ class MaximallySpecific {
         return Comparison.INDETERMINATE;
     }
 
-    private static Class<?> getParameterClass(MethodType t, int l, int i, boolean varArgs) {
+    private static Class<?> getParameterClass(final MethodType t, final int l, final int i, final boolean varArgs) {
         return varArgs && i >= l - 1 ? t.parameterType(l - 1).getComponentType() : t.parameterType(i);
     }
 }

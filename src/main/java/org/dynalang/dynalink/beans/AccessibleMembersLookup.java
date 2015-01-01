@@ -72,7 +72,7 @@ import java.util.Set;
 class AccessibleMembersLookup {
     private final Map<MethodSignature, Method> methods;
     private final Set<Class<?>> innerClasses;
-    private boolean instance;
+    private final boolean instance;
 
     /**
      * Creates a mapping for all accessible methods and inner classes on a class.
@@ -80,7 +80,7 @@ class AccessibleMembersLookup {
      * @param clazz the inspected class
      * @param instance true to inspect instance methods, false to inspect static methods.
      */
-    AccessibleMembersLookup(final Class<?> clazz, boolean instance) {
+    AccessibleMembersLookup(final Class<?> clazz, final boolean instance) {
         this.methods = new HashMap<>();
         this.innerClasses = new LinkedHashSet<>();
         this.instance = instance;
@@ -121,7 +121,7 @@ class AccessibleMembersLookup {
          * @param name the name of the method this signature represents.
          * @param args the argument types of the method.
          */
-        MethodSignature(String name, Class<?>[] args) {
+        MethodSignature(final String name, final Class<?>[] args) {
             this.name = name;
             this.args = args;
         }
@@ -178,7 +178,7 @@ class AccessibleMembersLookup {
 
         if(!CheckRestrictedPackage.isRestrictedClass(clazz)) {
             searchSuperTypes = false;
-            for(Method method: clazz.getMethods()) {
+            for(final Method method: clazz.getMethods()) {
                 if(instance != Modifier.isStatic(method.getModifiers())) {
                     final MethodSignature sig = new MethodSignature(method);
                     if(!methods.containsKey(sig)) {
@@ -201,7 +201,7 @@ class AccessibleMembersLookup {
                     }
                 }
             }
-            for(Class<?> innerClass: clazz.getClasses()) {
+            for(final Class<?> innerClass: clazz.getClasses()) {
                 // Add both static and non-static classes, regardless of instance flag. StaticClassLinker will just
                 // expose non-static classes with explicit constructor outer class argument.
                 // NOTE: getting inner class objects through getClasses() does not resolve them, so if those classes

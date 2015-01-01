@@ -65,7 +65,7 @@ public class NoSuchDynamicMethodException extends RuntimeException {
      * Creates a new NoSuchDynamicMethodException
      * @param message the message of the exception.
      */
-    public NoSuchDynamicMethodException(String message) {
+    public NoSuchDynamicMethodException(final String message) {
         super(message);
     }
 }

@@ -99,7 +99,7 @@ import org.dynalang.dynalink.linker.TypeBasedGuardingDynamicLinker;
 public class BeansLinker implements GuardingDynamicLinker {
     private static final ClassValue<TypeBasedGuardingDynamicLinker> linkers = new ClassValue<TypeBasedGuardingDynamicLinker>() {
         @Override
-        protected TypeBasedGuardingDynamicLinker computeValue(Class<?> clazz) {
+        protected TypeBasedGuardingDynamicLinker computeValue(final Class<?> clazz) {
             // If ClassValue.put() were public, we could just pre-populate with these known mappings...
             return
                 clazz == Class.class ? new ClassLinker() :
@@ -122,7 +122,7 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a bean linker for that class
      */
-    public static TypeBasedGuardingDynamicLinker getLinkerForClass(Class<?> clazz) {
+    public static TypeBasedGuardingDynamicLinker getLinkerForClass(final Class<?> clazz) {
         return linkers.get(clazz);
     }
 
@@ -131,8 +131,8 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a collection of names of all readable instance properties of a class.
      */
-    public static Collection<String> getReadableInstancePropertyNames(Class<?> clazz) {
-        TypeBasedGuardingDynamicLinker linker = getLinkerForClass(clazz);
+    public static Collection<String> getReadableInstancePropertyNames(final Class<?> clazz) {
+        final TypeBasedGuardingDynamicLinker linker = getLinkerForClass(clazz);
         if(linker instanceof BeanLinker) {
             return ((BeanLinker)linker).getReadablePropertyNames();
         }
@@ -144,8 +144,8 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a collection of names of all writable instance properties of a class.
      */
-    public static Collection<String> getWritableInstancePropertyNames(Class<?> clazz) {
-        TypeBasedGuardingDynamicLinker linker = getLinkerForClass(clazz);
+    public static Collection<String> getWritableInstancePropertyNames(final Class<?> clazz) {
+        final TypeBasedGuardingDynamicLinker linker = getLinkerForClass(clazz);
         if(linker instanceof BeanLinker) {
             return ((BeanLinker)linker).getWritablePropertyNames();
         }
@@ -157,8 +157,8 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a collection of names of all instance methods of a class.
      */
-    public static Collection<String> getInstanceMethodNames(Class<?> clazz) {
-        TypeBasedGuardingDynamicLinker linker = getLinkerForClass(clazz);
+    public static Collection<String> getInstanceMethodNames(final Class<?> clazz) {
+        final TypeBasedGuardingDynamicLinker linker = getLinkerForClass(clazz);
         if(linker instanceof BeanLinker) {
             return ((BeanLinker)linker).getMethodNames();
         }
@@ -170,7 +170,7 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a collection of names of all readable static properties of a class.
      */
-    public static Collection<String> getReadableStaticPropertyNames(Class<?> clazz) {
+    public static Collection<String> getReadableStaticPropertyNames(final Class<?> clazz) {
         return StaticClassLinker.getReadableStaticPropertyNames(clazz);
     }
 
@@ -179,7 +179,7 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a collection of names of all writable static properties of a class.
      */
-    public static Collection<String> getWritableStaticPropertyNames(Class<?> clazz) {
+    public static Collection<String> getWritableStaticPropertyNames(final Class<?> clazz) {
         return StaticClassLinker.getWritableStaticPropertyNames(clazz);
     }
 
@@ -188,12 +188,12 @@ public class BeansLinker implements GuardingDynamicLinker {
      * @param clazz the class
      * @return a collection of names of all static methods of a class.
      */
-    public static Collection<String> getStaticMethodNames(Class<?> clazz) {
+    public static Collection<String> getStaticMethodNames(final Class<?> clazz) {
         return StaticClassLinker.getStaticMethodNames(clazz);
     }
 
     @Override
-    public GuardedInvocation getGuardedInvocation(LinkRequest request, final LinkerServices linkerServices)
+    public GuardedInvocation getGuardedInvocation(final LinkRequest request, final LinkerServices linkerServices)
             throws Exception {
         final CallSiteDescriptor callSiteDescriptor = request.getCallSiteDescriptor();
         final int l = callSiteDescriptor.getNameTokenCount();
