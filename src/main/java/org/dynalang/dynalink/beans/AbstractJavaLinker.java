@@ -463,7 +463,7 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
                 // Bind property setter handle to the expected setter type and linker services. Type is
                 // MethodHandle(Object, String, Object)
                 final MethodHandle boundGetter = MethodHandles.insertArguments(getPropertySetterHandle, 0,
-                        callSiteDescriptor.changeMethodType(type.dropParameterTypes(1, 2)), linkerServices);
+                        callSiteDescriptor.changeMethodType(setterType), linkerServices);
 
                 // Cast getter to MethodHandle(O, N, V)
                 final MethodHandle typedGetter = linkerServices.asType(boundGetter, type.changeReturnType(
