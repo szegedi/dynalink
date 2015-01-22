@@ -85,8 +85,8 @@ public class TestCompositeOperations extends TestCase {
     public static class HashMapWithProperty extends HashMap<Object, Object> {
         private Object color;
 
-        public void setColor(Object color) {
-            this.color = color;
+        public Object setColor(Object color) {
+            return this.color = color;
         }
 
         public Object getColor() {
@@ -127,8 +127,8 @@ public class TestCompositeOperations extends TestCase {
     public static class ArrayListWithProperty extends ArrayList<Object> {
         private Object color;
 
-        public void setColor(Object color) {
-            this.color = color;
+        public Object setColor(Object color) {
+            return this.color = color;
         }
 
         public Object getColor() {

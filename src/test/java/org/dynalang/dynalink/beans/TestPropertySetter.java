@@ -104,8 +104,8 @@ public class TestPropertySetter extends TestCase {
     public static class T1 {
         private Object foo;
 
-        public void setFoo(String foo) {
-            this.foo = foo;
+        public Object setFoo(String foo) {
+            return this.foo = foo;
         }
     }
 
@@ -113,12 +113,12 @@ public class TestPropertySetter extends TestCase {
         private Object foo;
         private Object bar;
 
-        public void setFoo(Object foo) {
-            this.foo = foo;
+        public Object setFoo(Object foo) {
+            return this.foo = foo;
         }
 
-        public void setBar(Object... args) {
-            this.bar = args[0];
+        public Object setBar(Object... args) {
+            return this.bar = args[0];
         }
 
         public void setBar(int x) {
