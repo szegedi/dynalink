@@ -446,8 +446,9 @@ abstract class AbstractJavaLinker implements GuardingDynamicLinker {
 
                 // We want setters that conform to "Object(O, V)". Note, we aren't doing "R(O, V)" as it might not be
                 // valid for us to convert return values proactively. Also, since we don't know what setters will be
-                // invoked, we'll conservatively presume Object return type.
-                final MethodType type = callSiteDescriptor.getMethodType().changeReturnType(Object.class);
+                // invoked, we'll conservatively presume Object return type. The one exception is void return.
+                final MethodType origType = callSiteDescriptor.getMethodType();
+                final MethodType type = origType.returnType() == void.class ? origType : origType.changeReturnType(Object.class);
 
                 // What's below is basically:
                 //   foldArguments(guardWithTest(isNotNull, invoke, null|nextComponent.invocation),
