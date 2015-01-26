@@ -1,6 +1,8 @@
 language: java
 jdk:
- - openjdk8
+ # openjdk8 is not available on travis-ci.org yet
  - oraclejdk8
  - openjdk7
  - oraclejdk7
+
+sudo: false
