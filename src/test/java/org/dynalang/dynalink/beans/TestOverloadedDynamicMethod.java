@@ -190,7 +190,7 @@ public class TestOverloadedDynamicMethod extends TestCase {
                         }
                         return null;
                     }
-                }), null), linker);
+                }), null), linker, null);
         assertBooReturns(1, ls, 1.0);
     }
 

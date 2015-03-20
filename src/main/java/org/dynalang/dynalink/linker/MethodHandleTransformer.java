@@ -1,5 +1,5 @@
 /*
-   Copyright 2009-2013 Attila Szegedi
+   Copyright 2009-2015 Attila Szegedi
 
    Licensed under both the Apache License, Version 2.0 (the "Apache License")
    and the BSD License (the "BSD License"), with licensee being free to
@@ -49,17 +49,18 @@
        ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package org.dynalang.dynalink;
+package org.dynalang.dynalink.linker;
 
-import java.util.LinkedList;
-import org.dynalang.dynalink.linker.GuardingDynamicLinker;
-import org.dynalang.dynalink.linker.GuardingTypeConverterFactory;
-import org.dynalang.dynalink.linker.LinkerServices;
-import org.dynalang.dynalink.support.LinkerServicesImpl;
-import org.dynalang.dynalink.support.TypeConverterFactory;
+import java.lang.invoke.MethodHandle;
 
-public class LinkerServicesFactory {
-    public static LinkerServices getLinkerServices(GuardingDynamicLinker linker) {
-        return new LinkerServicesImpl(new TypeConverterFactory(new LinkedList<GuardingTypeConverterFactory>(), null), linker, null);
-    }
+/**
+ * A generic interface describing operations that transform method handles.
+ */
+public interface MethodHandleTransformer {
+    /**
+     * Transforms a method handle.
+     * @param target the method handle being transformed.
+     * @return transformed method handle.
+     */
+    public MethodHandle transform(final MethodHandle target);
 }

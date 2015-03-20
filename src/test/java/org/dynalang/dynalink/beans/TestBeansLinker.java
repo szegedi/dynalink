@@ -108,6 +108,11 @@ public class TestBeansLinker extends TestCase {
             public MethodHandle getTypeConverter(Class<?> sourceType, Class<?> targetType) {
                 throw new AssertionFailedError();
             }
+
+            @Override
+            public MethodHandle filterInternalObjects(MethodHandle target) {
+                return target;
+            }
         };
 
         // Can't link with null arguments

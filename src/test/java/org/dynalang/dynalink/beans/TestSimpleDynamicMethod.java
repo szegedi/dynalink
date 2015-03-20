@@ -73,12 +73,12 @@ public class TestSimpleDynamicMethod extends TestCase {
      */
     public void testLessArgsOnFixArgs() {
         assertNull(SingleDynamicMethod.getInvocation(getTest1XMethod(), MethodType.methodType(Void.TYPE,
-                Object.class, int.class), null));
+                Object.class, int.class), new DefaultMockLinkerServices()));
     }
 
     public void testMoreArgsOnFixArgs() {
         assertNull(SingleDynamicMethod.getInvocation(getTest1XMethod(), MethodType.methodType(Void.TYPE,
-                Object.class, int.class, int.class, int.class), null));
+                Object.class, int.class, int.class, int.class), new DefaultMockLinkerServices()));
     }
 
     private static MethodHandle getTest1XMethod() {
@@ -132,6 +132,18 @@ public class TestSimpleDynamicMethod extends TestCase {
         @Override
         public MethodHandle asTypeLosslessReturn(MethodHandle handle, MethodType fromType) {
             return Implementation.asTypeLosslessReturn(this, handle, fromType);
+        }
+
+        @Override
+        public MethodHandle filterInternalObjects(MethodHandle target) {
+            return target;
+        }
+    }
+
+    private static class DefaultMockLinkerServices extends MockLinkerServices {
+        @Override
+        public MethodHandle asType(MethodHandle handle, MethodType fromType) {
+            return handle.asType(fromType);
         }
     }
 
